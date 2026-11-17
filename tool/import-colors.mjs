@@ -64,6 +64,19 @@ ${roles.map((r) => `    Color? ${camel(r)},`).join('\n')}
   }) => KakaoColors(
 ${roles.map((r) => `    ${camel(r)}: ${camel(r)} ?? this.${camel(r)},`).join('\n')}
   );
+
+  /// Blends two themes' colours (the theme pickers' cross-fade).
+  static KakaoColors lerp(KakaoColors a, KakaoColors b, double t) => KakaoColors(
+${roles.map((r) => `    ${camel(r)}: Color.lerp(a.${camel(r)}, b.${camel(r)}, t)!,`).join('\n')}
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is KakaoColors &&
+${roles.map((r) => `      other.${camel(r)} == ${camel(r)}`).join(' &&\n')};
+
+  @override
+  int get hashCode => Object.hashAll([${roles.map(camel).join(', ')}]);
 }
 
 /// One kakao theme: its colours, and the stronger colours used when the

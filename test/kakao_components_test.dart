@@ -146,4 +146,76 @@ void main() {
       expect(label.opacity, 1);
     });
   });
+
+  group('styleguide rules', () {
+    testWidgets('toggle: off is 0.45 and weight 400, pressed is full and 600', (tester) async {
+      Future<(double, List<FontVariation>?)> read(bool pressed) async {
+        await tester.pumpWidget(_host(KakaoButton(label: 'T', toggle: true, pressed: pressed, onPressed: () {})));
+        await tester.pumpAndSettle();
+        final op = tester.widget<AnimatedOpacity>(find.byType(AnimatedOpacity).last).opacity;
+        final style = tester
+            .widget<RichText>(find.descendant(of: find.text('T'), matching: find.byType(RichText)))
+            .text
+            .style!;
+        return (op, style.fontVariations);
+      }
+
+      final off = await read(false);
+      expect(off.$1, .45);
+      expect(off.$2, [const FontVariation.weight(400)]);
+      final on = await read(true);
+      expect(on.$1, 1);
+      expect(on.$2, [const FontVariation.weight(600)]);
+    });
+
+    testWidgets('icon-only button names itself in a tooltip on long-press, and the tap is swallowed', (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: [
+              OverlayEntry(
+                builder: (_) => KakaoTheme(
+                  data: KakaoThemeData.light,
+                  child: Center(
+                    child: KakaoButton(icon: const SizedBox(width: 10), semanticLabel: 'Edit', onPressed: () => taps++),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.text('Edit'), findsNothing);
+      await tester.longPress(find.byType(KakaoButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Edit'), findsOneWidget);
+      expect(taps, 0);
+      await tester.pump(KakaoTooltip.touchHide);
+      await tester.pumpAndSettle();
+      expect(find.text('Edit'), findsNothing);
+    });
+
+    testWidgets('changing the theme cross-fades the colours', (tester) async {
+      late KakaoThemeValues seen;
+      Widget probe(KakaoThemeData t) => _host(
+        Builder(
+          builder: (c) {
+            seen = KakaoTheme.of(c);
+            return const SizedBox();
+          },
+        ),
+        theme: t,
+      );
+      await tester.pumpWidget(probe(KakaoThemeData.light));
+      await tester.pumpWidget(probe(KakaoThemeData.dark));
+      await tester.pump(const Duration(milliseconds: 140));
+      final mid = seen.colors.page;
+      expect(mid, isNot(KakaoThemeData.light.colors.page));
+      expect(mid, isNot(KakaoThemeData.dark.colors.page));
+      await tester.pumpAndSettle();
+      expect(seen.colors.page, KakaoThemeData.dark.colors.page);
+    });
+  });
 }

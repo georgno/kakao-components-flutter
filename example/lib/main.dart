@@ -76,9 +76,9 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
           children: [
-            Text('Kakao showcase', style: theme.text(size: 24, weight: 650)),
+            Text('Kakao showcase', style: theme.step(theme.tokens.text2xl)),
             const SizedBox(height: 4),
-            Text('Flutter twins of kakao-components', style: theme.text(color: c.muted)),
+            Text('Flutter twins of kakao-components', style: theme.step(theme.tokens.textLg, color: c.muted)),
             const SizedBox(height: 20),
             _Section(
               title: 'Theme',
@@ -86,17 +86,23 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  // Toggle buttons: the chosen theme shows by weight and
+                  // opacity, not by an ink fill (ink is for actions).
                   KakaoButton(
                     label: 'System',
                     size: KakaoButtonSize.sm,
-                    variant: choice.chosen == null ? KakaoButtonVariant.primary : KakaoButtonVariant.secondary,
+                    variant: KakaoButtonVariant.secondary,
+                    toggle: true,
+                    pressed: choice.chosen == null,
                     onPressed: () => choice.onChoose(null),
                   ),
                   for (final t in KakaoThemeData.all)
                     KakaoButton(
                       label: t.name[0].toUpperCase() + t.name.substring(1),
                       size: KakaoButtonSize.sm,
-                      variant: choice.chosen == t ? KakaoButtonVariant.primary : KakaoButtonVariant.secondary,
+                      variant: KakaoButtonVariant.secondary,
+                      toggle: true,
+                      pressed: choice.chosen == t,
                       onPressed: () => choice.onChoose(t),
                     ),
                 ],
@@ -178,7 +184,8 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
   }
 }
 
-/// Interim stand-in for a `<kakao-card>` with a header, as on the demo pages.
+/// Interim stand-in for a `<kakao-card>` with a header, as on the demo pages
+/// (card settings: padding 1.25rem, gap 0.75rem, radius lg, line border).
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});
 
@@ -190,7 +197,7 @@ class _Section extends StatelessWidget {
     final theme = KakaoTheme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20), // --kakao-card-padding
       decoration: BoxDecoration(
         color: theme.colors.bg,
         borderRadius: BorderRadius.circular(theme.tokens.radiusLg),
@@ -199,8 +206,8 @@ class _Section extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: theme.text(weight: 600)),
-          const SizedBox(height: 12),
+          Text(title, style: theme.step(theme.tokens.textXl)),
+          const SizedBox(height: 12), // --kakao-card-gap
           child,
         ],
       ),

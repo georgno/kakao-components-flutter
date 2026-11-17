@@ -216,7 +216,7 @@ class _UpdateDialogState extends State<_UpdateDialog> with WidgetsBindingObserve
         ],
       ),
       _Stage.downloading => (
-        'Downloading build ${r.build}… ${(_progress * 100).round()} %',
+        'The new build is on its way. Android\'s installer opens when it is in.',
         [const KakaoButton(label: 'Update', loading: true, onPressed: null)],
       ),
       _Stage.permission => (
@@ -260,7 +260,10 @@ class _UpdateDialogState extends State<_UpdateDialog> with WidgetsBindingObserve
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(body, style: soft),
-          if (_stage == _Stage.downloading) ...[const SizedBox(height: 12), _Bar(value: _progress)],
+          if (_stage == _Stage.downloading) ...[
+            const SizedBox(height: 12),
+            _Progress(label: 'Downloading build ${r.build}', value: _progress),
+          ],
         ],
       ),
       actions: actions,
@@ -281,6 +284,13 @@ class ShowcaseDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
     final c = theme.colors;
+    // Nesting rule: the corner holding a filled footer button rounds to that
+    // button's radius + the dialog padding (md: 14 + 20 = 34); a ghost
+    // button has no shape at rest, so its corner keeps the dialog radius.
+    final last = actions.isEmpty ? null : actions.last;
+    final filledCorner = last is KakaoButton && last.variant != KakaoButtonVariant.ghost;
+    final buttonRadius = last is KakaoButton && last.size == KakaoButtonSize.sm ? 10.0 : 14.0;
+    final radius = Radius.circular(theme.tokens.radiusLg);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -290,7 +300,12 @@ class ShowcaseDialog extends StatelessWidget {
             padding: const EdgeInsets.all(20), // --_padding: 1.25rem
             decoration: BoxDecoration(
               color: c.raised,
-              borderRadius: BorderRadius.circular(theme.tokens.radiusLg),
+              borderRadius: BorderRadius.only(
+                topLeft: radius,
+                topRight: radius,
+                bottomLeft: radius,
+                bottomRight: filledCorner ? Radius.circular(buttonRadius + 20) : radius,
+              ),
               boxShadow: [
                 const BoxShadow(offset: Offset(0, 8), blurRadius: 24, color: Color(0x14000000)),
                 BoxShadow(spreadRadius: 1, color: c.text.withValues(alpha: .10)),
@@ -300,7 +315,7 @@ class ShowcaseDialog extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(title, style: theme.text(size: 18, weight: 600)), // --_title-size / -weight
+                Text(title, style: theme.step(theme.tokens.textXl)), // --_title-size / -weight
                 const SizedBox(height: 12), // --_gap: 0.75rem
                 body,
                 const SizedBox(height: 20), // --_footer-spacing: 1.25rem
@@ -319,26 +334,52 @@ class ShowcaseDialog extends StatelessWidget {
   }
 }
 
-class _Bar extends StatelessWidget {
-  const _Bar({required this.value});
+/// Interim stand-in for `<kakao-progress>` with a label (its settings
+/// block's values): label 550 at 0.875rem, value muted with tabular figures,
+/// an 8px pill track that fills in 320 ms on the standard curve.
+class _Progress extends StatelessWidget {
+  const _Progress({required this.label, required this.value});
+  final String label;
   final double value;
 
   @override
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(theme.tokens.radiusPill),
-      child: SizedBox(
-        height: 6,
-        child: Stack(
-          children: [
-            Positioned.fill(child: ColoredBox(color: theme.colors.subtle)),
-            FractionallySizedBox(
-              widthFactor: value.clamp(0, 1),
-              child: ColoredBox(color: theme.colors.primary),
+    final c = theme.colors;
+    final v = value.clamp(0.0, 1.0);
+    return Semantics(
+      label: label,
+      value: '${(v * 100).round()} %',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(label, style: theme.text(size: 14, weight: 550))),
+              Text('${(v * 100).round()} %', style: theme.text(size: 14, color: c.muted, tabular: true)),
+            ],
+          ),
+          const SizedBox(height: 6.4), // --kakao-progress-label-gap: 0.4rem
+          ClipRRect(
+            borderRadius: BorderRadius.circular(theme.tokens.radiusPill),
+            child: SizedBox(
+              height: 8, // --kakao-progress-height
+              child: ColoredBox(
+                color: c.subtleStrong, // --kakao-progress-track
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(end: v),
+                  duration: theme.tokens.motionDuration, // --kakao-progress-fill-duration
+                  curve: theme.tokens.easeStandard,
+                  builder: (context, w, _) => FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: w,
+                    child: ColoredBox(color: c.primary),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../theme/kakao_theme.dart';
+import 'kakao_tooltip.dart';
 
 /// `<kakao-button variant>`.
 enum KakaoButtonVariant { primary, secondary, ghost, danger }
@@ -28,6 +29,7 @@ const _focusRingWidth = 4.0; // --kakao-button-focus-ring-width
 const _disabledOpacity = 0.2; // --kakao-button-disabled-opacity
 const _spinnerSize = 18.0; // --kakao-button-spinner-size
 const _transition = Duration(milliseconds: 200); // --kakao-button-transition
+const _toggleOffOpacity = 0.45; // --kakao-button-toggle-off-opacity
 
 // button.js easings.
 const _bounce = Cubic(0.34, 1.3, 0.64, 1); // BOUNCE
@@ -42,8 +44,15 @@ const _soft = Cubic(0.25, 1.0, 0.5, 1); // SOFT
 /// - [onPressedAsync]: loading while the future runs, then the success check
 ///   for 900 ms (or straight back to the label when it fails), like `run()`.
 ///
+/// [toggle] makes it a toggle button (`toggle` / `pressed` on the web): off
+/// it is dimmed to 0.45 at weight 400, [pressed] it is full at weight 600,
+/// so the state never depends on colour alone. Tapping calls [onPressed];
+/// the owner flips [pressed].
+///
 /// Pass neither callback for the disabled state. An [icon] without a [label]
-/// gives the round icon-only button; give it a [semanticLabel].
+/// gives the round icon-only button; give it a [semanticLabel], which also
+/// shows as its tooltip. [tooltip] is the web's `title`: a themed tooltip
+/// on any button.
 class KakaoButton extends StatefulWidget {
   const KakaoButton({
     super.key,
@@ -56,6 +65,9 @@ class KakaoButton extends StatefulWidget {
     this.loading = false,
     this.successHold = const Duration(milliseconds: 900),
     this.semanticLabel,
+    this.tooltip,
+    this.toggle = false,
+    this.pressed = false,
   }) : assert(label != null || icon != null, 'A button needs a label or an icon'),
        assert(onPressed == null || onPressedAsync == null, 'Pass onPressed or onPressedAsync, not both');
 
@@ -74,6 +86,14 @@ class KakaoButton extends StatefulWidget {
   /// How long the success check stays (`run(…, { successHold })`).
   final Duration successHold;
   final String? semanticLabel;
+
+  /// The web's `title`: shown as a [KakaoTooltip]. Empty turns off the
+  /// icon-only button's automatic one (`title=""`).
+  final String? tooltip;
+
+  /// Toggle button (`toggle`), currently [pressed] or not.
+  final bool toggle;
+  final bool pressed;
 
   @override
   State<KakaoButton> createState() => _KakaoButtonState();
@@ -243,8 +263,10 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
     }
     final shadows = _focusVisible ? [BoxShadow(color: ring, spreadRadius: _focusRingWidth)] : shadow;
 
+    // Toggles show their state with weight as well: 400 off, 600 pressed.
+    final weight = widget.toggle ? (widget.pressed ? 600.0 : 400.0) : _labelWeight;
     final textStyle = theme
-        .text(size: s.fontSize, weight: _labelWeight, color: fg)
+        .text(size: s.fontSize, weight: weight, color: fg)
         .copyWith(letterSpacing: -0.01 * s.fontSize, height: 1);
 
     final content = Row(
@@ -256,7 +278,13 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
             child: widget.icon!,
           ),
         if (widget.icon != null && !iconOnly) SizedBox(width: s.gap),
-        if (!iconOnly) Text(widget.label!, style: textStyle, maxLines: 1, softWrap: false),
+        if (!iconOnly)
+          AnimatedDefaultTextStyle(
+            style: textStyle,
+            duration: _transition,
+            curve: Curves.ease,
+            child: Text(widget.label!, maxLines: 1, softWrap: false),
+          ),
       ],
     );
 
@@ -298,15 +326,21 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
     box = ScaleTransition(scale: _press, child: box);
 
     box = AnimatedOpacity(
-      opacity: _hasAction ? 1 : _disabledOpacity,
+      opacity: !_hasAction
+          ? _disabledOpacity
+          : (widget.toggle && !widget.pressed)
+          ? _toggleOffOpacity
+          : 1,
       duration: _transition,
       curve: Curves.ease,
       child: box,
     );
 
-    return Semantics(
+    final tip = widget.tooltip ?? (iconOnly ? widget.semanticLabel : null);
+    final button = Semantics(
       button: true,
       enabled: _enabled,
+      toggled: widget.toggle ? widget.pressed : null,
       label: widget.semanticLabel ?? widget.label,
       excludeSemantics: true,
       child: FocusableActionDetector(
@@ -327,6 +361,7 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
         ),
       ),
     );
+    return tip == null || tip.isEmpty ? button : KakaoTooltip(message: tip, child: button);
   }
 }
 

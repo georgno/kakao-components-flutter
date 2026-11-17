@@ -139,6 +139,81 @@ class KakaoColors {
     focus: focus ?? this.focus,
     warning: warning ?? this.warning,
   );
+
+  /// Blends two themes' colours (the theme pickers' cross-fade).
+  static KakaoColors lerp(KakaoColors a, KakaoColors b, double t) => KakaoColors(
+    primary: Color.lerp(a.primary, b.primary, t)!,
+    text: Color.lerp(a.text, b.text, t)!,
+    textSoft: Color.lerp(a.textSoft, b.textSoft, t)!,
+    muted: Color.lerp(a.muted, b.muted, t)!,
+    page: Color.lerp(a.page, b.page, t)!,
+    bg: Color.lerp(a.bg, b.bg, t)!,
+    raised: Color.lerp(a.raised, b.raised, t)!,
+    fieldBorder: Color.lerp(a.fieldBorder, b.fieldBorder, t)!,
+    subtle: Color.lerp(a.subtle, b.subtle, t)!,
+    subtleStrong: Color.lerp(a.subtleStrong, b.subtleStrong, t)!,
+    line: Color.lerp(a.line, b.line, t)!,
+    border: Color.lerp(a.border, b.border, t)!,
+    ink: Color.lerp(a.ink, b.ink, t)!,
+    inkHover: Color.lerp(a.inkHover, b.inkHover, t)!,
+    onInk: Color.lerp(a.onInk, b.onInk, t)!,
+    danger: Color.lerp(a.danger, b.danger, t)!,
+    dangerHover: Color.lerp(a.dangerHover, b.dangerHover, t)!,
+    onDanger: Color.lerp(a.onDanger, b.onDanger, t)!,
+    success: Color.lerp(a.success, b.success, t)!,
+    focus: Color.lerp(a.focus, b.focus, t)!,
+    warning: Color.lerp(a.warning, b.warning, t)!,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is KakaoColors &&
+      other.primary == primary &&
+      other.text == text &&
+      other.textSoft == textSoft &&
+      other.muted == muted &&
+      other.page == page &&
+      other.bg == bg &&
+      other.raised == raised &&
+      other.fieldBorder == fieldBorder &&
+      other.subtle == subtle &&
+      other.subtleStrong == subtleStrong &&
+      other.line == line &&
+      other.border == border &&
+      other.ink == ink &&
+      other.inkHover == inkHover &&
+      other.onInk == onInk &&
+      other.danger == danger &&
+      other.dangerHover == dangerHover &&
+      other.onDanger == onDanger &&
+      other.success == success &&
+      other.focus == focus &&
+      other.warning == warning;
+
+  @override
+  int get hashCode => Object.hashAll([
+    primary,
+    text,
+    textSoft,
+    muted,
+    page,
+    bg,
+    raised,
+    fieldBorder,
+    subtle,
+    subtleStrong,
+    line,
+    border,
+    ink,
+    inkHover,
+    onInk,
+    danger,
+    dangerHover,
+    onDanger,
+    success,
+    focus,
+    warning,
+  ]);
 }
 
 /// One kakao theme: its colours, and the stronger colours used when the
