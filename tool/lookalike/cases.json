@@ -3,6 +3,9 @@
   "cases": [
     { "id": "button-variants", "page": "components/button/demo.html", "selector": "main > kakao-card .row[data-demo-wrap]" },
     { "id": "button-sizes", "page": "components/button/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) .row" },
+    { "id": "button-menu", "page": "components/button/demo.html", "selector": "kakao-button#sort" },
+    { "id": "button-menu-open", "page": "components/button/demo.html", "open": "#sort .kakao-button-inner", "selector": "kakao-button#sort .kakao-button-menu" },
+    { "id": "button-segment", "page": "components/button/demo.html", "selector": "#segment" },
     { "id": "card-primary", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 0, "margin": 14 },
     { "id": "card-danger", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 1, "margin": 14 },
     { "id": "card-single-button", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 2, "margin": 14 },

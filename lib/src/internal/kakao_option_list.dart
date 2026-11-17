@@ -176,7 +176,7 @@ class KakaoOptionListStyle {
 ///   highlight, forward starts at the first and backward at the last;
 /// - [first] / [last];
 /// - [typeAhead] with a letter goes to the next row starting with it; letters
-///   typed within [kakaoTypeAheadReset] add up to a word, which may stay on
+///   typed within [typeAheadReset] add up to a word, which may stay on
 ///   the current row (menu.js `_typeAhead`);
 /// - [handleKey] maps Up / Down, Home / End (and Page Up / Down), letters and
 ///   Enter / Space to the above and to [activate].
@@ -184,6 +184,11 @@ class KakaoOptionListStyle {
 /// [keyboard] is true when the last change came from keys (the focus ring
 /// shows), false when it came from the pointer.
 class KakaoOptionListController extends ChangeNotifier {
+  /// [typeAheadReset]: how long typed letters add up to one word (menu.js
+  /// 600 ms, button.js 700 ms).
+  KakaoOptionListController({this.typeAheadReset = kakaoTypeAheadReset});
+
+  final Duration typeAheadReset;
   int? _highlighted;
   bool _keyboard = false;
   List<KakaoOption> _rows = const [];
@@ -194,7 +199,7 @@ class KakaoOptionListController extends ChangeNotifier {
   int? get highlighted => _highlighted;
   bool get keyboard => _keyboard;
 
-  /// True within [kakaoTypeAheadReset] of a typed letter: Space then types.
+  /// True within [typeAheadReset] of a typed letter: Space then types.
   bool get typing => _typed.isNotEmpty;
 
   /// The rows of the list attached to this controller.
@@ -239,7 +244,7 @@ class KakaoOptionListController extends ChangeNotifier {
   /// Goes to the row matching the letters typed so far; true when one did.
   bool typeAhead(String char) {
     _typedTimer?.cancel();
-    _typedTimer = Timer(kakaoTypeAheadReset, () => _typed = '');
+    _typedTimer = Timer(typeAheadReset, () => _typed = '');
     _typed += char.toLowerCase();
     final on = _enabled;
     if (on.isEmpty) return false;

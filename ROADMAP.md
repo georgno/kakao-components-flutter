@@ -1,8 +1,8 @@
 # Roadmap
 
-Ported: button, tooltip, card, dialog, progress, popover, menu (plus theme-switch
-settings for the cross-fade). The order below follows shared building blocks: build a block
-once, then the components that use it follow quickly.
+Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
+popover, menu (plus theme-switch settings for the cross-fade). The order below follows
+shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
 other"). Here, shared building blocks are internal (`lib/src/internal/`); each
@@ -15,7 +15,8 @@ block, so two widgets built on the same block can differ where the web ones do.
 elements next to showcase fixtures at the same width, theme and contrast,
 diffed into `build/lookalike/report.html`. Runs locally, not in Actions.
 Every component after this gets cases in `tool/lookalike/cases.json` and a
-pass of it. Cases so far: button, card, progress, popover and menu (opened first).
+pass of it. Cases so far: button (with the dropdown closed and opened, and the segment), card, progress,
+popover and menu (opened first).
 
 ## 1. Anchored panel and option list
 
@@ -27,7 +28,7 @@ pass of it. Cases so far: button, card, progress, popover and menu (opened first
   `lib/src/internal/kakao_option_list.dart`, `KakaoOptionList`; rows, check mark,
   keyboard and pointer highlight, type-ahead, groups, separators).
 - Then: `popover` (done), `menu` (done), the button's menu mode (with its chevron) and
-  segmented group, `select`, `combobox`, `multi-dropdown`, `command-palette`.
+  segmented group (done), `select`, `combobox`, `multi-dropdown`, `command-palette`.
 
 ## 2. Fields
 
@@ -56,7 +57,15 @@ pass of it. Cases so far: button, card, progress, popover and menu (opened first
 
 ## Known gaps in ported widgets
 
-- Button: segmented group, menu mode (step 1).
+- Button menu: the menu is not capped to the room or clamped on the web (it may run off
+  the screen), here it stays 8 px inside; the flip threshold is room < height + 14 px (offset +
+  margin), button.js uses + 16; type-ahead uses the option list's rule (one letter typed again
+  walks on), button.js searches the doubled letters; a pointer down outside returns focus to
+  the button (button.js leaves it); the menu's text uses the demo page's line height 1.5.
+- Button segment: exclusivity is the owner's (as the web demo's script); no Left / Right
+  roving between items (the web has none either); a labelled item keeps its size's side
+  padding where the web CSS fixes 38 px; Material icons stand in for the demo's Font Awesome
+  align icons.
 - Tooltip: left / right placement, staying open while the pointer is on the
   label, showing at once after another label, Escape to hide.
 - Card: `theme-glow`; its resize also animates width changes (the web card

@@ -125,3 +125,35 @@ const messageMenuItems = <KakaoMenuEntry>[
   KakaoMenuItem('Mark as unread', value: 'unread', type: KakaoMenuItemType.checkbox),
   KakaoMenuItem('Delete', value: 'delete', danger: true),
 ];
+
+// button/demo.html "Menu" and "Toggle" content.
+
+/// "Shows the choice · show-selected": the sort menu.
+const sortMenuItems = [
+  KakaoButtonMenuItem('newest', label: 'Newest first'),
+  KakaoButtonMenuItem('oldest', label: 'Oldest first'),
+  KakaoButtonMenuItem('name', label: 'Name'),
+  KakaoButtonMenuItem('size', label: 'Size', disabled: true),
+];
+
+/// "Segment (exclusive)": the alignment toggles (fas fa-align-* on the web).
+const alignmentSegment = [
+  ('left', 'Left', Icons.format_align_left),
+  ('center', 'Center', Icons.format_align_center),
+  ('right', 'Right', Icons.format_align_right),
+];
+
+/// The alignment segment: [pressed] is the pressed item's value.
+Widget alignmentButtons(String pressed, ValueChanged<String> onPress) => KakaoButtonSegment(
+  semanticLabel: 'Alignment',
+  children: [
+    for (final (value, label, icon) in alignmentSegment)
+      KakaoButton(
+        icon: Icon(icon),
+        semanticLabel: label,
+        toggle: true,
+        pressed: pressed == value,
+        onPressed: () => onPress(value),
+      ),
+  ],
+);

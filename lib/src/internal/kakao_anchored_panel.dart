@@ -127,18 +127,22 @@ class KakaoPanelPlacement {
 
 /// How a panel enters: it fades in over [duration] on [curve] while it moves
 /// [slide] px towards its anchor's far side (it starts [slide] px back
-/// towards the anchor: menu.js `translateY(-4px)` below, `4px` above).
+/// towards the anchor: menu.js `translateY(-4px)` below, `4px` above) and
+/// grows from [scale] to full size (button.js `scale(0.97)`), from its
+/// corner at the anchor (`transform-origin: top left`, `bottom left`,
+/// `top right` when lined up with the anchor's end, …).
 ///
 /// Closing is at once, as on the web (popover: `visibility` is not
 /// transitioned; menu and select: `display: none`). With reduced motion it
 /// appears at once.
 @immutable
 class KakaoPanelMotion {
-  const KakaoPanelMotion({required this.duration, required this.curve, this.slide = 0});
+  const KakaoPanelMotion({required this.duration, required this.curve, this.slide = 0, this.scale = 1});
 
   final Duration duration;
   final Curve curve;
   final double slide;
+  final double scale;
 }
 
 /// Why a panel closed itself.
@@ -431,6 +435,7 @@ class _KakaoAnchoredPanelState extends State<KakaoAnchoredPanel> with SingleTick
           placement: widget.placement,
           animation: _curved,
           slide: widget.motion.slide,
+          scale: widget.motion.scale,
           side: _side,
           child: TapRegion(
             groupId: widget.tapRegionGroup ?? this,
@@ -455,6 +460,7 @@ class _PanelLayout extends SingleChildRenderObjectWidget {
     required this.placement,
     required this.animation,
     required this.slide,
+    required this.scale,
     required this.side,
     required super.child,
   });
@@ -463,11 +469,18 @@ class _PanelLayout extends SingleChildRenderObjectWidget {
   final KakaoPanelPlacement placement;
   final Animation<double> animation;
   final double slide;
+  final double scale;
   final ValueNotifier<KakaoPanelSide> side;
 
   @override
-  _RenderPanelLayout createRenderObject(BuildContext context) =>
-      _RenderPanelLayout(anchor: anchor, placement: placement, animation: animation, slide: slide, side: side);
+  _RenderPanelLayout createRenderObject(BuildContext context) => _RenderPanelLayout(
+    anchor: anchor,
+    placement: placement,
+    animation: animation,
+    slide: slide,
+    scale: scale,
+    side: side,
+  );
 
   @override
   void updateRenderObject(BuildContext context, _RenderPanelLayout r) {
@@ -476,6 +489,7 @@ class _PanelLayout extends SingleChildRenderObjectWidget {
       ..placement = placement
       ..animation = animation
       ..slide = slide
+      ..scale = scale
       ..side = side;
   }
 }
@@ -486,6 +500,7 @@ class _RenderPanelLayout extends RenderShiftedBox {
     required this._placement,
     required this._animation,
     required this._slide,
+    required this._scale,
     required this.side,
   }) : super(null);
 
@@ -526,10 +541,22 @@ class _RenderPanelLayout extends RenderShiftedBox {
     markNeedsPaint();
   }
 
+  double get scale => _scale;
+  double _scale;
+  set scale(double v) {
+    if (v == _scale) return;
+    _scale = v;
+    markNeedsPaint();
+  }
+
+  /// The corner the entry scale grows from, in the panel's coordinates.
+  Offset _origin = Offset.zero;
+
   /// The side chosen with [placement.keepSide], and the screen it was chosen for.
   (KakaoPanelSide, Size)? _kept;
   KakaoPanelSide _current = KakaoPanelSide.bottom;
   final _opacity = LayerHandle<OpacityLayer>();
+  final _transform = LayerHandle<TransformLayer>();
 
   @override
   void attach(PipelineOwner owner) {
@@ -546,6 +573,7 @@ class _RenderPanelLayout extends RenderShiftedBox {
   @override
   void dispose() {
     _opacity.layer = null;
+    _transform.layer = null;
     super.dispose();
   }
 
@@ -577,8 +605,19 @@ class _RenderPanelLayout extends RenderShiftedBox {
       final room = math.max(p.minRoom, kakaoPanelRoom(anchor, size, s, p).floorToDouble());
       if (child.size.height > room) child.layout(box(math.min(maxH, room)), parentUsesSize: true);
     }
-    (child.parentData! as BoxParentData).offset = kakaoPanelPosition(anchor, child.size, size, s, p);
+    final at = kakaoPanelPosition(anchor, child.size, size, s, p);
+    (child.parentData! as BoxParentData).offset = at;
     _current = s;
+    // The corner at the anchor; the far edge when lined up with the anchor's end.
+    final w = child.size.width;
+    final h = child.size.height;
+    final atEnd = (at.dx + w - anchor.right).abs() < .5 && (at.dx - anchor.left).abs() >= .5;
+    _origin = switch (s) {
+      KakaoPanelSide.bottom => Offset(atEnd ? w : 0, 0),
+      KakaoPanelSide.top => Offset(atEnd ? w : 0, h),
+      KakaoPanelSide.right => Offset.zero,
+      KakaoPanelSide.left => Offset(w, 0),
+    };
     // Painters listening to the side repaint; nothing rebuilds.
     side.value = s;
   }
@@ -599,12 +638,28 @@ class _RenderPanelLayout extends RenderShiftedBox {
     if (child == null) return;
     final t = animation.value;
     final at = offset + (child.parentData! as BoxParentData).offset + _slideOffset;
-    _opacity.layer = context.pushOpacity(
-      at,
-      (t.clamp(0.0, 1.0) * 255).round(),
-      (context, offset) => context.paintChild(child, offset),
-      oldLayer: _opacity.layer,
-    );
+    final k = scale + (1 - scale) * t;
+    void paintChild(PaintingContext context, Offset offset) {
+      if (k == 1) {
+        _transform.layer = null;
+        context.paintChild(child, offset);
+        return;
+      }
+      final o = offset + _origin;
+      final m = Matrix4.identity()
+        ..translateByDouble(o.dx, o.dy, 0, 1)
+        ..scaleByDouble(k, k, 1, 1)
+        ..translateByDouble(-o.dx, -o.dy, 0, 1);
+      _transform.layer = context.pushTransform(
+        true,
+        Offset.zero,
+        m,
+        (context, _) => context.paintChild(child, offset),
+        oldLayer: _transform.layer,
+      );
+    }
+
+    _opacity.layer = context.pushOpacity(at, (t.clamp(0.0, 1.0) * 255).round(), paintChild, oldLayer: _opacity.layer);
   }
 
   @override

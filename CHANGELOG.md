@@ -26,6 +26,17 @@
   one highlight for keys and pointer (arrows wrap, Home / End, type-ahead, Enter), disabled
   rows, groups with headings, separators. The anchored panel takes `anchorInsets` and a shared
   `tapRegionGroup` (submenus).
+- `KakaoButton` menu form (`list-data`): `menu`, `selected`, `showSelected`, `noChevron`,
+  `onSelect` (value, label, previous, position), `onMenuChanged`, `onMenuHover` (mouse only),
+  `KakaoButtonMenuController`; chevron that turns over; icon-only dropdowns as a pill (round
+  with `noChevron`); the menu from the button's own `--kakao-button-menu-*` settings on the
+  anchored panel and option list: opens on the checked item (last with Up), keys, type-ahead,
+  disabled items, flips above without room, lines up with the right edge, enters with fade,
+  slide and 97 % scale. A theme picker is `onMenuHover` + `onSelect` setting the theme.
+- `KakaoButtonSegment` (`.kakao-button-segment`): toggle buttons in one tray, pressed item on
+  `segment-pressed-bg`, variant hover colours, the settling shadow when an item becomes pressed.
+- Anchored panel motion takes an entry `scale` (from the corner at the anchor); the option
+  list controller takes its own type-ahead reset.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

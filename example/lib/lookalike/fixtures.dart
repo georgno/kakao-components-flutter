@@ -23,6 +23,14 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     KakaoButton(label: 'Medium', onPressed: _noop),
     KakaoButton(label: 'Large', size: KakaoButtonSize.lg, onPressed: _noop),
   ]),
+  // button/demo.html "Menu": #sort, closed and opened.
+  'button-menu': (_) => _row([const _SortMenu(open: false)]),
+  'button-menu-open': (c) => Align(
+    alignment: Alignment.topLeft,
+    child: _SortMenu(open: LookalikeApp.isOpen(c), menuKey: LookalikeApp.subjectOf(c)),
+  ),
+  // button/demo.html "Segment (exclusive)": Left pressed.
+  'button-segment': (_) => _row([alignmentButtons('left', (_) {})]),
   'card-primary': (c) => _card(c, 'Upgrade to Pro', 'Unlimited projects, version history and priority support.', [
     KakaoButton(label: 'Upgrade', onPressed: _noop),
     KakaoButton(label: 'Later', variant: KakaoButtonVariant.ghost, onPressed: _noop),
@@ -82,6 +90,46 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
 };
 
 void _noop() {}
+
+/// button/demo.html `#sort`: a secondary show-selected dropdown, opened
+/// after the first frame when the case is an `open` one.
+class _SortMenu extends StatefulWidget {
+  const _SortMenu({required this.open, this.menuKey});
+
+  final bool open;
+  final Key? menuKey;
+
+  @override
+  State<_SortMenu> createState() => _SortMenuState();
+}
+
+class _SortMenuState extends State<_SortMenu> {
+  final _controller = KakaoButtonMenuController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.open) WidgetsBinding.instance.addPostFrameCallback((_) => _controller.open());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => KakaoButton(
+    label: 'Sort by',
+    variant: KakaoButtonVariant.secondary,
+    showSelected: true,
+    selected: 'newest',
+    menu: sortMenuItems,
+    onSelect: (_) {},
+    menuController: _controller,
+    menuKey: widget.menuKey,
+  );
+}
 
 /// popover/demo.html: a small secondary button and its popover, opened
 /// after the first frame when the case is an `open` one.

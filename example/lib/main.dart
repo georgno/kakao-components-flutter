@@ -104,13 +104,25 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
                   ),
                   for (final t in KakaoThemeData.all)
                     KakaoButton(
-                      label: t.name[0].toUpperCase() + t.name.substring(1),
+                      label: _themeName(t),
                       size: KakaoButtonSize.sm,
                       variant: KakaoButtonVariant.secondary,
                       toggle: true,
                       pressed: choice.chosen == t,
                       onPressed: () => choice.onChoose(t),
                     ),
+                  // The theme picker (`<kakao-button theme-picker>`): the page
+                  // follows the pointer down the list and the pick.
+                  KakaoButton(
+                    label: 'Theme',
+                    size: KakaoButtonSize.sm,
+                    variant: KakaoButtonVariant.secondary,
+                    showSelected: true,
+                    selected: (choice.chosen ?? theme.data).name,
+                    menu: [for (final t in KakaoThemeData.all) KakaoButtonMenuItem(t.name, label: _themeName(t))],
+                    onMenuHover: (i) => choice.onChoose(KakaoThemeData.all.firstWhere((t) => t.name == i.value)),
+                    onSelect: (e) => choice.onChoose(KakaoThemeData.all.firstWhere((t) => t.name == e.value)),
+                  ),
                 ],
               ),
             ),
@@ -167,6 +179,8 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
                 ],
               ),
             ),
+            _Section(title: 'Button · menu', child: const _ButtonMenuExamples()),
+            _Section(title: 'Button · toggle and segment', child: const _ToggleExamples()),
             const _Heading('Card'),
             const _CardExamples(),
             _Section(title: 'Dialog', child: const _DialogExamples()),
@@ -192,6 +206,136 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
           ],
         ),
       ),
+    );
+  }
+}
+
+String _themeName(KakaoThemeData t) => t.name[0].toUpperCase() + t.name.substring(1);
+
+/// button/demo.html "Menu": any variant as a dropdown button.
+class _ButtonMenuExamples extends StatefulWidget {
+  const _ButtonMenuExamples();
+
+  @override
+  State<_ButtonMenuExamples> createState() => _ButtonMenuExamplesState();
+}
+
+class _ButtonMenuExamplesState extends State<_ButtonMenuExamples> {
+  String _log = 'Pick something';
+
+  void _select(KakaoButtonSelectEvent e) =>
+      setState(() => _log = 'kakao-button-select · ${e.value}${e.previous == null ? '' : ' (was ${e.previous})'}');
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            KakaoButton(
+              label: 'Sort by',
+              variant: KakaoButtonVariant.secondary,
+              showSelected: true,
+              selected: 'newest',
+              menu: sortMenuItems,
+              onSelect: _select,
+              onMenuChanged: (open) => setState(() => _log = 'kakao-button-menu · open $open'),
+            ),
+            KakaoButton(
+              label: 'Export',
+              icon: const Icon(Icons.download),
+              menu: const [
+                KakaoButtonMenuItem('csv', label: 'CSV'),
+                KakaoButtonMenuItem('xlsx', label: 'Excel'),
+                KakaoButtonMenuItem('pdf', label: 'PDF'),
+              ],
+              onSelect: _select,
+            ),
+            KakaoButton(
+              icon: const Icon(Icons.more_horiz),
+              semanticLabel: 'More actions',
+              variant: KakaoButtonVariant.ghost,
+              noChevron: true,
+              menu: const [
+                KakaoButtonMenuItem('edit', label: 'Edit'),
+                KakaoButtonMenuItem('duplicate', label: 'Duplicate'),
+                KakaoButtonMenuItem('delete', label: 'Delete'),
+              ],
+              onSelect: _select,
+            ),
+            KakaoButton(
+              icon: const Icon(Icons.more_vert),
+              semanticLabel: 'More actions',
+              variant: KakaoButtonVariant.ghost,
+              menu: const [
+                KakaoButtonMenuItem('rename', label: 'Rename'),
+                KakaoButtonMenuItem('move', label: 'Move'),
+                KakaoButtonMenuItem('archive', label: 'Archive'),
+              ],
+              onSelect: _select,
+            ),
+            KakaoButton(
+              label: 'View',
+              variant: KakaoButtonVariant.ghost,
+              size: KakaoButtonSize.sm,
+              showSelected: true,
+              selected: 'list',
+              menu: const [
+                KakaoButtonMenuItem('list', label: 'List'),
+                KakaoButtonMenuItem('grid', label: 'Grid'),
+                KakaoButtonMenuItem('map', label: 'Map'),
+              ],
+              onSelect: _select,
+            ),
+            const KakaoButton(
+              label: 'Disabled',
+              variant: KakaoButtonVariant.secondary,
+              menu: [KakaoButtonMenuItem('never')],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: theme.colors.textSoft)),
+      ],
+    );
+  }
+}
+
+/// button/demo.html "Toggle": a single toggle and the exclusive segment.
+class _ToggleExamples extends StatefulWidget {
+  const _ToggleExamples();
+
+  @override
+  State<_ToggleExamples> createState() => _ToggleExamplesState();
+}
+
+class _ToggleExamplesState extends State<_ToggleExamples> {
+  bool _bold = false;
+  String _align = 'left';
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 12,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        KakaoButton(
+          label: 'Bold',
+          icon: const Icon(Icons.format_bold),
+          variant: KakaoButtonVariant.secondary,
+          toggle: true,
+          pressed: _bold,
+          onPressed: () => setState(() => _bold = !_bold),
+        ),
+        // Exclusive: pressing one releases the others (the demo's script).
+        alignmentButtons(_align, (v) => setState(() => _align = v)),
+      ],
     );
   }
 }
