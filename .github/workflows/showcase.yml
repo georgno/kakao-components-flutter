@@ -1,13 +1,22 @@
 name: Showcase app
 
-# Every push: analyze and test the library and the showcase, build the Android
-# showcase APK. On the default branch the APK also replaces the one on the
-# rolling "debug" pre-release, where the app's updater finds it
-# (example/lib/updater). Other branches keep their APK as a run artifact.
+# Every push and pull request: analyze and test the library and the showcase.
+# The default branch (or a manual run) also builds the Android showcase APK
+# and puts it on the rolling "debug" pre-release, where the app's updater
+# finds it (example/lib/updater). Changes that can't affect the app (docs,
+# tool/) don't start a run at all.
 
 on:
   push:
+    paths-ignore:
+      - '**.md'
+      - 'tool/**'
+      - 'fonts/OFL.txt'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'tool/**'
+      - 'fonts/OFL.txt'
   workflow_dispatch:
 
 permissions:
@@ -24,13 +33,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      # Build and publish only from the default branch, or when run by hand.
+      SHIP: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref_name == github.event.repository.default_branch) }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
 
       - uses: subosito/flutter-action@v2
         with:
@@ -50,20 +57,30 @@ jobs:
           flutter analyze
           flutter test
 
-      # Release mode (small and fast), signed with the public showcase key so
-      # each build installs over the last. The run number is the build number
-      # the updater compares.
+      - uses: actions/setup-java@v4
+        if: env.SHIP == 'true'
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      # Release mode (small and fast), arm64 only (every current phone),
+      # signed with the public showcase key so each build installs over the
+      # last. The run number is the build number the updater compares.
       - name: Build APK
+        if: env.SHIP == 'true'
         working-directory: example
         run: |
-          flutter build apk --release \
+          flutter build apk --release --target-platform android-arm64 \
             --build-number=${{ github.run_number }} \
             --build-name=0.1.${{ github.run_number }} \
             --dart-define=BUILD_NUMBER=${{ github.run_number }} \
             --dart-define=COMMIT=${GITHUB_SHA::7}
           cp build/app/outputs/flutter-apk/app-release.apk "$GITHUB_WORKSPACE/kakao-showcase.apk"
+          ls -l "$GITHUB_WORKSPACE/kakao-showcase.apk"
 
       - name: Describe the build
+        if: env.SHIP == 'true'
         env:
           MESSAGE: ${{ github.event.head_commit.message }}
         run: |
@@ -75,17 +92,10 @@ jobs:
             '{build: $build, commit: $commit, message: $message, apk: $apk}' > version.json
           cat version.json
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kakao-showcase-${{ github.run_number }}
-          path: |
-            kakao-showcase.apk
-            version.json
-
       # Upload the APK first and version.json last: the app only sees the new
       # build once its APK is in place.
       - name: Publish to the rolling debug release
-        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        if: env.SHIP == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

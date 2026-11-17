@@ -35,6 +35,7 @@ KakaoTheme(
 The CI build of it updates itself. Every push to the default branch builds
 an APK and puts it on the rolling
 [`debug` pre-release](https://github.com/georgno/kakao-components-flutter/releases/tag/debug).
+The APK is built for arm64, which covers current phones (not x86 emulators).
 To start, download `kakao-showcase.apk` from that page on your phone, allow
 the install, and you're set. After that, the app checks for a newer build
 whenever it opens. It offers the update, downloads it and hands it to
