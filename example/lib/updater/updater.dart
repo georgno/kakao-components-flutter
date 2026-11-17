@@ -69,8 +69,9 @@ class _UpdaterState extends State<Updater> with WidgetsBindingObserver {
   Future<void> _check({bool manual = false}) async {
     if (_open) return;
     if (!_platform.supported || widget.currentBuild <= 0) {
-      if (manual)
+      if (manual) {
         _message('Updates', 'Only CI builds on Android update themselves. This is a ${BuildInfo.label.toLowerCase()}.');
+      }
       return;
     }
     _lastCheck = DateTime.now();
