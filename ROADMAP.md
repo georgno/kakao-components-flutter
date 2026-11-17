@@ -1,6 +1,6 @@
 # Roadmap
 
-Ported: button, tooltip, card, dialog, progress, popover (plus theme-switch
+Ported: button, tooltip, card, dialog, progress, popover, menu (plus theme-switch
 settings for the cross-fade). The order below follows shared building blocks: build a block
 once, then the components that use it follow quickly.
 
@@ -15,7 +15,7 @@ block, so two widgets built on the same block can differ where the web ones do.
 elements next to showcase fixtures at the same width, theme and contrast,
 diffed into `build/lookalike/report.html`. Runs locally, not in Actions.
 Every component after this gets cases in `tool/lookalike/cases.json` and a
-pass of it. Cases so far: button, card, progress, popover (opened first).
+pass of it. Cases so far: button, card, progress, popover and menu (opened first).
 
 ## 1. Anchored panel and option list
 
@@ -23,9 +23,10 @@ pass of it. Cases so far: button, card, progress, popover (opened first).
   `KakaoAnchoredPanel`; position next to an anchor or a point, flip rules of
   popover.js and menu.js / select.js, start / centre / end alignment, height
   capped by the room, keep-side, anchor width, entry motion, outside tap,
-  Escape, focus return) and an option list (rows, check mark, keyboard and
-  pointer highlight, groups).
-- Then: `popover` (done), `menu`, the button's menu mode (with its chevron) and
+  Escape, focus return) and an option list (done:
+  `lib/src/internal/kakao_option_list.dart`, `KakaoOptionList`; rows, check mark,
+  keyboard and pointer highlight, type-ahead, groups, separators).
+- Then: `popover` (done), `menu` (done), the button's menu mode (with its chevron) and
   segmented group, `select`, `combobox`, `multi-dropdown`, `command-palette`.
 
 ## 2. Fields
@@ -70,6 +71,17 @@ pass of it. Cases so far: button, card, progress, popover (opened first).
   the panel is placed in left-to-right terms (no RTL mirroring of
   start / end yet). In the look-alike web build the ✕ can show a focus ring
   after the page itself takes focus (Flutter web moves focus on view focus).
+
+- Popover: its label / value rows keep their own roving focus and are not on the option
+  list (hover and focus are separate there, and Left / Right move too).
+- Menu: no `href` link items (navigate in `onSelect`); shortcuts are plain text, not
+  `<kakao-kbd>` keycaps (kbd is not ported; the web demo loads it, so the look-alike panels
+  are narrower); Material icons stand in for menu.js's named glyphs; the trigger's text is
+  not its default accessible name (`label`, else "Menu"); a submenu with no room on either
+  side is pushed inside the screen over its parent instead of opening under its item; a
+  submenu (and a point menu) slides in from its own side, not always from 4 px above; a
+  menu opened at a point follows scrolling instead of closing; focus moving elsewhere by
+  script or a window blur does not close it; `aria-haspopup` has no Flutter equivalent.
 
 - Text: Flutter rounds every line box to whole pixels (14 px at 1.4 is
   20 px tall, not 19.6), so text with a fractional line height runs up to

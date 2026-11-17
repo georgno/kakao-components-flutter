@@ -58,6 +58,14 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     ),
     KakaoProgress(tone: KakaoProgressTone.danger, label: 'Danger', value: 0.3, showValue: true),
   ]),
+  'menu-icons': (c) => _OpenMenu(
+    items: fileMenuItems(subject: LookalikeApp.subjectOf(c)),
+    anchor: 'Actions',
+  ),
+  'menu-groups': (c) => _OpenMenu(
+    items: accountMenuItems(subject: LookalikeApp.subjectOf(c)),
+    anchor: 'Account',
+  ),
   'popover-click': (_) =>
       _OpenPopover(header: const Text('Account'), content: const AccountDetails(), anchor: 'Account info'),
   'popover-list': (_) => const _OpenPopover(
@@ -132,6 +140,51 @@ class _OpenPopoverState extends State<_OpenPopover> {
           size: KakaoButtonSize.sm,
           onPressed: p.toggle,
         ),
+      ),
+    );
+  }
+}
+
+/// menu/demo.html: a secondary button and its menu, opened after the first
+/// frame when the case is an `open` one. The subject key sits on an icon in
+/// the panel (see demo_content.dart).
+class _OpenMenu extends StatefulWidget {
+  const _OpenMenu({required this.items, required this.anchor});
+
+  final List<KakaoMenuEntry> items;
+  final String anchor;
+
+  @override
+  State<_OpenMenu> createState() => _OpenMenuState();
+}
+
+class _OpenMenuState extends State<_OpenMenu> {
+  final _controller = KakaoMenuController();
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started || !LookalikeApp.isOpen(context)) return;
+    _started = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _controller.open());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: KakaoMenu(
+        controller: _controller,
+        items: widget.items,
+        anchorBuilder: (context, m) =>
+            KakaoButton(label: widget.anchor, variant: KakaoButtonVariant.secondary, onPressed: m.toggle),
       ),
     );
   }

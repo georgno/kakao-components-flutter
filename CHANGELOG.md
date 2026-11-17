@@ -16,6 +16,16 @@
 - Internal anchored panel (`lib/src/internal/kakao_anchored_panel.dart`) for popover, menu,
   select and the pickers: placement, flip rules, height capped by the room, entry motion,
   dismissal and focus return. Look-alike check: cases can open their element first (`open`).
+- `KakaoMenu`: trigger (`for`), context menu (`context-for`: secondary click, long press,
+  Shift+F10 / Menu key), `openAt`, and inline; groups with headings, separators, icons,
+  shortcut hints, danger tone, checkbox and radio items (`keepOpen`), submenus (hover after
+  140 ms, Right / Left, Escape closes the submenu first); four placements with flip toward
+  more room and height capped by the room; cancelable `onSelect`; disabled.
+- Internal option list (`lib/src/internal/kakao_option_list.dart`) for menu, the button's menu
+  mode, select, combobox, multi-dropdown and command palette: rows with check mark or icon,
+  one highlight for keys and pointer (arrows wrap, Home / End, type-ahead, Enter), disabled
+  rows, groups with headings, separators. The anchored panel takes `anchorInsets` and a shared
+  `tapRegionGroup` (submenus).
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

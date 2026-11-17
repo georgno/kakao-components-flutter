@@ -170,6 +170,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             const _Heading('Card'),
             const _CardExamples(),
             _Section(title: 'Dialog', child: const _DialogExamples()),
+            _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(
@@ -577,6 +578,148 @@ class _PopoverExamplesState extends State<_PopoverExamples> {
         ),
         const SizedBox(height: 8),
         Text(_log, style: theme.text(color: theme.colors.textSoft)),
+      ],
+    );
+  }
+}
+
+/// menu/demo.html: icons and shortcuts, placements, groups, check and radio
+/// items, submenus, a context menu, opened by script, and inline.
+class _MenuExamples extends StatefulWidget {
+  const _MenuExamples();
+
+  @override
+  State<_MenuExamples> createState() => _MenuExamplesState();
+}
+
+class _MenuExamplesState extends State<_MenuExamples> {
+  final _api = KakaoMenuController();
+  String _log = 'no events yet';
+
+  static const _profile = [KakaoMenuItem('Profile'), KakaoMenuItem('Settings'), KakaoMenuItem('Sign out')];
+
+  @override
+  void dispose() {
+    _api.dispose();
+    super.dispose();
+  }
+
+  void _note(String e) => setState(() => _log = e);
+
+  void _select(KakaoMenuSelectEvent e) {
+    if (e.value == 'stay') e.preventDefault(); // the menu stays open
+    _note('menu-select · ${e.value}${e.checked == null ? '' : ' · checked ${e.checked}'}');
+  }
+
+  Widget _trigger(String label, KakaoMenuController m) =>
+      KakaoButton(label: label, variant: KakaoButtonVariant.secondary, onPressed: m.toggle);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    final c = theme.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoMenu(
+              items: fileMenuItems(),
+              onSelect: _select,
+              onOpen: () => _note('menu-open'),
+              onClose: () => _note('menu-close'),
+              anchorBuilder: (context, m) => _trigger('Actions', m),
+            ),
+            KakaoMenu(
+              items: accountMenuItems(),
+              onSelect: _select,
+              anchorBuilder: (context, m) => _trigger('Account', m),
+            ),
+            KakaoMenu(
+              items: viewMenuItems,
+              keepOpen: true,
+              onSelect: _select,
+              anchorBuilder: (context, m) => _trigger('View', m),
+            ),
+            KakaoMenu(items: docMenuItems, onSelect: _select, anchorBuilder: (context, m) => _trigger('Document', m)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (label, p) in [
+              ('Bottom start', KakaoMenuPlacement.bottomStart),
+              ('Top start', KakaoMenuPlacement.topStart),
+              ('Bottom end', KakaoMenuPlacement.bottomEnd),
+            ])
+              KakaoMenu(
+                items: _profile,
+                placement: p,
+                onSelect: _select,
+                anchorBuilder: (context, m) => _trigger(label, m),
+              ),
+            KakaoMenu(
+              items: const [KakaoMenuItem('Never shown')],
+              disabled: true,
+              anchorBuilder: (context, m) => _trigger('Disabled', m),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // menu/demo.html `.target`: dashed border, muted text, centred.
+        KakaoMenu.context(
+          items: canvasMenuItems,
+          label: 'Canvas',
+          onSelect: _select,
+          child: Focus(
+            child: Container(
+              height: 128,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: c.border),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Right-click, long-press, or focus and press Shift+F10',
+                textAlign: TextAlign.center,
+                style: theme.text(color: c.muted),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoMenu(
+              controller: _api,
+              label: 'Insert',
+              items: const [
+                KakaoMenuItem('Table', value: 'table'),
+                KakaoMenuItem('Image', value: 'image'),
+                KakaoMenuItem('Keep open', value: 'stay'),
+              ],
+              onSelect: _select,
+              anchorBuilder: (context, m) =>
+                  KakaoButton(label: 'open()', variant: KakaoButtonVariant.secondary, onPressed: m.open),
+            ),
+            KakaoButton(
+              label: 'openAt(120, 40)',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => _api.openAt(const Offset(120, 40)),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        KakaoMenu.inline(items: messageMenuItems, label: 'Message', onSelect: _select),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: c.textSoft)),
       ],
     );
   }

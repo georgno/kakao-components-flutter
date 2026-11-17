@@ -6,6 +6,8 @@
     { "id": "card-primary", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 0, "margin": 14 },
     { "id": "card-danger", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 1, "margin": 14 },
     { "id": "card-single-button", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 2, "margin": 14 },
+    { "id": "menu-icons", "page": "components/menu/demo.html", "open": "#file-actions", "selector": "kakao-menu#file-menu .panel[data-depth='0']" },
+    { "id": "menu-groups", "page": "components/menu/demo.html", "open": "#account", "selector": "kakao-menu[for='account'] .panel[data-depth='0']" },
     { "id": "popover-click", "page": "components/popover/demo.html", "open": "#anchor-click", "selector": "kakao-popover[for='anchor-click'] .surface" },
     { "id": "popover-list", "page": "components/popover/demo.html", "open": "#anchor-list", "selector": "kakao-popover[for='anchor-list'] .surface" },
     { "id": "progress-segments", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 0 },

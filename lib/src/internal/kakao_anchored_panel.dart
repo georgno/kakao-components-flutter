@@ -244,7 +244,13 @@ class KakaoAnchoredPanelController extends ChangeNotifier {
 /// `repaint: side`), not while building.
 ///
 /// [point] anchors the panel at a point in [child]'s coordinates instead of
-/// its box (a context menu).
+/// its box (a context menu). [anchorInsets] grows the anchor's box before
+/// placing (a submenu lines up with its parent panel's edge and padding, not
+/// its row's).
+///
+/// [tapRegionGroup] puts the panel and anchor in a shared tap region group,
+/// so panels that belong together (a menu and its submenus) do not count a
+/// tap in one another as outside. Default: a group of this panel's own.
 ///
 /// Needs an [Overlay] and a [TapRegionSurface] above it, as every
 /// `WidgetsApp` has.
@@ -262,6 +268,8 @@ class KakaoAnchoredPanel extends StatefulWidget {
     this.returnFocus = true,
     this.onDismiss,
     this.point,
+    this.anchorInsets = EdgeInsets.zero,
+    this.tapRegionGroup,
   });
 
   final KakaoAnchoredPanelController controller;
@@ -281,6 +289,8 @@ class KakaoAnchoredPanel extends StatefulWidget {
   /// Called after the panel closed itself (outside tap or Escape).
   final ValueChanged<KakaoPanelDismiss>? onDismiss;
   final Offset? point;
+  final EdgeInsets anchorInsets;
+  final Object? tapRegionGroup;
 
   @override
   State<KakaoAnchoredPanel> createState() => _KakaoAnchoredPanelState();
@@ -407,9 +417,15 @@ class _KakaoAnchoredPanelState extends State<KakaoAnchoredPanel> with SingleTick
       overlayChildBuilder: (context, info) {
         final box = MatrixUtils.transformRect(info.childPaintTransform, Offset.zero & info.childSize);
         final point = widget.point;
-        final anchor = point == null
-            ? box
-            : Rect.fromCenter(center: MatrixUtils.transformPoint(info.childPaintTransform, point), width: 0, height: 0);
+        final anchor = widget.anchorInsets.inflateRect(
+          point == null
+              ? box
+              : Rect.fromCenter(
+                  center: MatrixUtils.transformPoint(info.childPaintTransform, point),
+                  width: 0,
+                  height: 0,
+                ),
+        );
         return _PanelLayout(
           anchor: anchor,
           placement: widget.placement,
@@ -417,14 +433,14 @@ class _KakaoAnchoredPanelState extends State<KakaoAnchoredPanel> with SingleTick
           slide: widget.motion.slide,
           side: _side,
           child: TapRegion(
-            groupId: this,
+            groupId: widget.tapRegionGroup ?? this,
             onTapOutside: widget.dismissOnTapOutside ? (_) => _dismiss(KakaoPanelDismiss.outsideTap) : null,
             child: Focus(focusNode: _panelFocus, child: widget.panelBuilder(context, _side)),
           ),
         );
       },
       child: TapRegion(
-        groupId: this,
+        groupId: widget.tapRegionGroup ?? this,
         child: Focus(focusNode: _anchorFocus, child: widget.child),
       ),
     );
