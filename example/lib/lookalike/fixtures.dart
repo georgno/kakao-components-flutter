@@ -87,9 +87,78 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     ],
     anchor: 'Server status',
   ),
+  // select/demo.html "Single · child options": #s1, closed and opened.
+  'select-closed': (_) => const _Countries(),
+  'select-open': (c) => _Countries(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
+  // select/demo.html "Disabled · error": display grid, gap 0.6rem.
+  'select-states': (_) => const Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      KakaoSelect(
+        disabled: true,
+        label: 'Disabled',
+        options: [KakaoSelectOption('One'), KakaoSelectOption('Two')],
+        values: ['One'],
+      ),
+      SizedBox(height: 9.6),
+      KakaoSelect(
+        label: 'Plan',
+        error: 'Pick a plan to continue.',
+        options: [KakaoSelectOption('Free'), KakaoSelectOption('Pro'), KakaoSelectOption('Team')],
+      ),
+    ],
+  ),
 };
 
 void _noop() {}
+
+/// select/demo.html `#s1`, opened after the first frame when [open].
+class _Countries extends StatefulWidget {
+  const _Countries({this.open = false, this.panelKey});
+
+  final bool open;
+  final Key? panelKey;
+
+  @override
+  State<_Countries> createState() => _CountriesState();
+}
+
+class _CountriesState extends State<_Countries> {
+  final _controller = KakaoSelectController();
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.open) return;
+    // Focus the field first, as the click on the web does: the first focus
+    // in a Flutter web view focuses the view, which moves focus to its first
+    // focusable widget and would take it from the search again.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focus.requestFocus();
+      Future<void>.delayed(const Duration(milliseconds: 200), _controller.open);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => KakaoSelect(
+    label: 'Country',
+    hint: 'Type to filter: “osterr” finds Österreich.',
+    options: countryOptions,
+    values: const ['de'],
+    controller: _controller,
+    focusNode: _focus,
+    panelKey: widget.panelKey,
+  );
+}
 
 /// button/demo.html `#sort`: a secondary show-selected dropdown, opened
 /// after the first frame when the case is an `open` one.

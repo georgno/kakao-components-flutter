@@ -157,3 +157,51 @@ Widget alignmentButtons(String pressed, ValueChanged<String> onPress) => KakaoBu
       ),
   ],
 );
+
+// select/demo.html lists.
+
+/// "Single · child options": the countries.
+const countryOptions = [
+  KakaoSelectOption('at', label: 'Österreich'),
+  KakaoSelectOption('de', label: 'Deutschland'),
+  KakaoSelectOption('ch', label: 'Schweiz'),
+  KakaoSelectOption('li', label: 'Liechtenstein'),
+  KakaoSelectOption('lu', label: 'Luxembourg'),
+  KakaoSelectOption('be', label: 'Belgique'),
+  KakaoSelectOption('fr', label: 'France'),
+  KakaoSelectOption('it', label: 'Italia'),
+];
+
+/// "Groups · optgroup": cities, one sold out.
+const cityOptions = [
+  KakaoSelectGroup('Germany', [
+    KakaoSelectOption('Berlin'),
+    KakaoSelectOption('Hamburg'),
+    KakaoSelectOption('München'),
+    KakaoSelectOption('Köln'),
+  ]),
+  KakaoSelectGroup('Austria', [
+    KakaoSelectOption('Wien'),
+    KakaoSelectOption('Graz'),
+    KakaoSelectOption('Linz'),
+    KakaoSelectOption('Salzburg (sold out)', disabled: true),
+  ]),
+  KakaoSelectGroup('Switzerland', [
+    KakaoSelectOption('Zürich'),
+    KakaoSelectOption('Genève'),
+    KakaoSelectOption('Basel'),
+  ]),
+];
+
+/// "Multiple · select all": the genres.
+const genreOptions = [
+  KakaoSelectOption('action', label: 'Action'),
+  KakaoSelectOption('comedy', label: 'Comedy'),
+  KakaoSelectOption('drama', label: 'Drama'),
+  KakaoSelectOption('horror', label: 'Horror'),
+  KakaoSelectOption('romance', label: 'Romance'),
+  KakaoSelectOption('thriller', label: 'Thriller'),
+  KakaoSelectOption('sci-fi', label: 'Science fiction'),
+  KakaoSelectOption('doc', label: 'Documentary'),
+  KakaoSelectOption('anim', label: 'Animation'),
+];

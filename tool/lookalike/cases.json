@@ -15,6 +15,9 @@
     { "id": "popover-list", "page": "components/popover/demo.html", "open": "#anchor-list", "selector": "kakao-popover[for='anchor-list'] .surface" },
     { "id": "progress-segments", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 0 },
     { "id": "progress-sizes", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 2 },
-    { "id": "progress-tones", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 3 }
+    { "id": "progress-tones", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 3 },
+    { "id": "select-closed", "page": "components/select/demo.html", "selector": "kakao-select#s1" },
+    { "id": "select-open", "page": "components/select/demo.html", "open": "kakao-select#s1 .trigger", "selector": "kakao-select#s1 .panel" },
+    { "id": "select-states", "page": "components/select/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div" }
   ]
 }

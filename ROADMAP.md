@@ -1,7 +1,7 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -16,7 +16,7 @@ elements next to showcase fixtures at the same width, theme and contrast,
 diffed into `build/lookalike/report.html`. Runs locally, not in Actions.
 Every component after this gets cases in `tool/lookalike/cases.json` and a
 pass of it. Cases so far: button (with the dropdown closed and opened, and the segment), card, progress,
-popover and menu (opened first).
+popover and menu (opened first), select (closed, opened, disabled and error).
 
 ## 1. Anchored panel and option list
 
@@ -28,12 +28,14 @@ popover and menu (opened first).
   `lib/src/internal/kakao_option_list.dart`, `KakaoOptionList`; rows, check mark,
   keyboard and pointer highlight, type-ahead, groups, separators).
 - Then: `popover` (done), `menu` (done), the button's menu mode (with its chevron) and
-  segmented group (done), `select`, `combobox`, `multi-dropdown`, `command-palette`.
+  segmented group (done), `select` (done), `combobox`, `multi-dropdown`, `command-palette`.
 
 ## 2. Fields
 
 - Internal: field chrome (label, border, focus ring, help and error text,
-  heights 36 / 44 / 52 like the button).
+  heights 36 / 44 / 52 like the button). Select's trigger already draws it with private
+  `_Field` (label, hint / error, disabled opacity) and `_FieldBox` / `_Ring` (bordered box,
+  outline) in `kakao_select.dart`: move those to `lib/src/internal/` and build on them.
 - Then: `text-input`, `textarea`, `password-input`, `number-input`,
   `date-input` and `time-input` (date picker on the anchored panel),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
@@ -92,6 +94,16 @@ popover and menu (opened first).
   menu opened at a point follows scrolling instead of closing; focus moving elsewhere by
   script or a window blur does not close it; `aria-haspopup` has no Flutter equivalent.
 
+- Select: no form participation (`name`, `required`, reset, state restore, validity): the
+  owner keeps the value and sets `error`; no child `<option>` source (options are data); the
+  selected option is scrolled into view at the edge of the list, not centred; a pointer over a
+  disabled option clears the highlight (select.js keeps it); focus that leaves to nowhere (a
+  window blur) does not close the panel; the match count is a live region, not a status role,
+  and Flutter has no listbox / option roles (a list of selectable rows); no `data-*` mirroring;
+  the label and hint sit about 1 px higher (line box rounding, see Text). In a Flutter web
+  view that has never had focus, focusing the search first focuses the view, which moves
+  focus to the first focusable widget and closes the panel: the look-alike fixture focuses
+  the field before opening (a click does the same in a real page).
 - Text: Flutter rounds every line box to whole pixels (14 px at 1.4 is
   20 px tall, not 19.6), so text with a fractional line height runs up to
   half a pixel taller per line than on the web (progress labels: 34.5 px

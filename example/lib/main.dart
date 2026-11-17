@@ -187,6 +187,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
+            _Section(title: 'Select', child: const _SelectExamples()),
             _Section(
               title: 'About this build',
               child: Column(
@@ -335,6 +336,97 @@ class _ToggleExamplesState extends State<_ToggleExamples> {
         ),
         // Exclusive: pressing one releases the others (the demo's script).
         alignmentButtons(_align, (v) => setState(() => _align = v)),
+      ],
+    );
+  }
+}
+
+/// select/demo.html: single, groups, multiple with select all, sizes,
+/// disabled and error.
+class _SelectExamples extends StatefulWidget {
+  const _SelectExamples();
+
+  @override
+  State<_SelectExamples> createState() => _SelectExamplesState();
+}
+
+class _SelectExamplesState extends State<_SelectExamples> {
+  String _log = 'Pick something';
+
+  void _change(KakaoSelectChange e) =>
+      setState(() => _log = 'select-change · ${e.value.isEmpty ? '(nothing)' : e.value} (was ${e.previous.join(',')})');
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget column(List<Widget> children) => SizedBox(
+      width: 320,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            column([
+              KakaoSelect(
+                label: 'Country',
+                hint: 'Type to filter: “osterr” finds Österreich.',
+                options: countryOptions,
+                values: const ['de'],
+                onChanged: _change,
+              ),
+              KakaoSelect(label: 'City', placeholder: 'Choose a city', options: cityOptions, onChanged: _change),
+              KakaoSelect(
+                label: 'Genres',
+                multiple: true,
+                hint: 'Type “ma” and use “Select all N matches”: only the matches change.',
+                options: genreOptions,
+                values: const ['drama', 'comedy'],
+                onChanged: _change,
+              ),
+            ]),
+            column([
+              const KakaoSelect(
+                size: KakaoSelectSize.sm,
+                label: 'Small',
+                options: [KakaoSelectOption('36px'), KakaoSelectOption('Other')],
+                values: ['36px'],
+              ),
+              const KakaoSelect(
+                label: 'Medium',
+                options: [KakaoSelectOption('44px'), KakaoSelectOption('Other')],
+                values: ['44px'],
+              ),
+              const KakaoSelect(
+                size: KakaoSelectSize.lg,
+                label: 'Large',
+                options: [KakaoSelectOption('52px'), KakaoSelectOption('Other')],
+                values: ['52px'],
+              ),
+              const KakaoSelect(
+                disabled: true,
+                label: 'Disabled',
+                options: [KakaoSelectOption('One'), KakaoSelectOption('Two')],
+                values: ['One'],
+              ),
+              const KakaoSelect(
+                label: 'Plan',
+                error: 'Pick a plan to continue.',
+                options: [KakaoSelectOption('Free'), KakaoSelectOption('Pro'), KakaoSelectOption('Team')],
+              ),
+            ]),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: theme.colors.textSoft)),
       ],
     );
   }

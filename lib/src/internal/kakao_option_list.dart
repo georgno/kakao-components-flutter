@@ -118,6 +118,7 @@ class KakaoOptionListStyle {
     this.disabledColor,
     this.focus,
     this.focusWidth = 0,
+    this.checkBuilder,
   });
 
   /// The row text (size, weight, colour, line height).
@@ -168,6 +169,10 @@ class KakaoOptionListStyle {
   /// `.item:focus-visible`), drawn inside the row. Null: no ring.
   final Color? focus;
   final double focusWidth;
+
+  /// The lead of a checkable row instead of the check mark (a multiple
+  /// select's checkbox, select.js `.box`), for checked and unchecked rows.
+  final Widget Function(bool checked)? checkBuilder;
 }
 
 /// The highlighted row of a [KakaoOptionList] and the keys that move it.
@@ -573,8 +578,9 @@ class _Row extends StatelessWidget {
 
     Widget? leadBox;
     if (lead) {
+      final box = s.checkBuilder;
       final Widget? inner = o.checked != null
-          ? (checked ? CustomPaint(painter: KakaoCheckPainter(s.check)) : null)
+          ? (box != null ? box(checked) : (checked ? CustomPaint(painter: KakaoCheckPainter(s.check)) : null))
           : (o.leading == null
                 ? null
                 : IconTheme(

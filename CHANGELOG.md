@@ -37,6 +37,18 @@
   `segment-pressed-bg`, variant hover colours, the settling shadow when an item becomes pressed.
 - Anchored panel motion takes an entry `scale` (from the corner at the anchor); the option
   list controller takes its own type-ahead reset.
+- `KakaoSelect`: options and groups (`KakaoSelectOption`, `KakaoSelectGroup`), single or
+  `multiple`; the field look (label, hint, error with danger border and invalid semantics,
+  placeholder, sizes 36 / 44 / 52, disabled, focus border and outline, chevron that turns
+  over), "+N" for more values; the panel on the anchored panel (below, as wide as the field or
+  `panel-min-width`, flips toward more room once on open, capped by `panel-height` and the
+  room) with a focused search that filters (case and accents ignored), groups that hide
+  without matches, "No matches", a polite match count; check mark and weight 600 on the
+  selected option, a checkbox per row and a tri-state "Select all (N matches)" row in a
+  multiple select; keys as select.js (a letter on the field opens with it in the search,
+  Delete clears, arrows and Page Up / Down clamp, Enter picks, Alt+Up / Escape / Tab close);
+  `onChanged` (values, previous), `onOpenChanged`, `KakaoSelectController`. The option list
+  style takes a `checkBuilder` for the checkbox lead.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.
