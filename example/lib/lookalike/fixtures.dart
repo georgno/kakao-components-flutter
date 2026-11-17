@@ -109,9 +109,99 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       ),
     ],
   ),
+  // combobox/demo.html "Strict · only listed values": closed, with a value.
+  'combobox-closed': (_) => const KakaoCombobox(
+    label: 'Currency',
+    strict: true,
+    value: 'eur',
+    hint: 'Unlisted text goes back to the last value.',
+    options: comboCurrencies,
+  ),
+  // combobox/demo.html `#c1`, opened while filtering by "ch".
+  'combobox-open': (c) => _ComboCountries(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
+  // combobox/demo.html "Disabled · error": display grid, gap 0.6rem.
+  'combobox-states': (_) => const Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      KakaoCombobox(
+        disabled: true,
+        label: 'Disabled',
+        options: [KakaoComboboxOption('One'), KakaoComboboxOption('Two')],
+        value: 'One',
+      ),
+      SizedBox(height: 9.6),
+      KakaoCombobox(
+        label: 'Plan',
+        error: 'Pick or name a plan.',
+        options: [KakaoComboboxOption('Free'), KakaoComboboxOption('Pro'), KakaoComboboxOption('Team')],
+      ),
+    ],
+  ),
 };
 
 void _noop() {}
+
+/// combobox/demo.html `#c1`; when [open], focused after the first frame and
+/// "ch" typed into it, as the case's `open` click and `type` do on the web.
+class _ComboCountries extends StatefulWidget {
+  const _ComboCountries({this.open = false, this.panelKey});
+
+  final bool open;
+  final Key? panelKey;
+
+  @override
+  State<_ComboCountries> createState() => _ComboCountriesState();
+}
+
+class _ComboCountriesState extends State<_ComboCountries> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.open) return;
+    // Focus first (the first focus in a Flutter web view focuses the view
+    // and moves focus to its first focusable widget), then type.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focus.requestFocus();
+      Future<void>.delayed(const Duration(milliseconds: 200), _type);
+    });
+  }
+
+  /// Types "ch" as the user would: through the field's editing state, so it
+  /// filters as typing does.
+  void _type() {
+    if (!mounted) return;
+    EditableTextState? editable;
+    void visit(Element e) {
+      if (e is StatefulElement && e.state is EditableTextState) editable = e.state as EditableTextState;
+      if (editable == null) e.visitChildren(visit);
+    }
+
+    context.visitChildElements(visit);
+    editable?.userUpdateTextEditingValue(
+      const TextEditingValue(text: 'ch', selection: TextSelection.collapsed(offset: 2)),
+      SelectionChangedCause.keyboard,
+    );
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => KakaoCombobox(
+    label: 'Country',
+    placeholder: 'Pick or type a country',
+    hint: '“osterr” finds Österreich. Any other text is kept too.',
+    options: comboCountries,
+    focusNode: _focus,
+    panelKey: widget.panelKey,
+  );
+}
 
 /// select/demo.html `#s1`, opened after the first frame when [open].
 class _Countries extends StatefulWidget {

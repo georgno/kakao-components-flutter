@@ -183,6 +183,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Button · toggle and segment', child: const _ToggleExamples()),
             const _Heading('Card'),
             const _CardExamples(),
+            _Section(title: 'Combobox', child: const _ComboboxExamples()),
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
@@ -421,6 +422,145 @@ class _SelectExamplesState extends State<_SelectExamples> {
                 label: 'Plan',
                 error: 'Pick a plan to continue.',
                 options: [KakaoSelectOption('Free'), KakaoSelectOption('Pro'), KakaoSelectOption('Team')],
+              ),
+            ]),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: theme.colors.textSoft)),
+      ],
+    );
+  }
+}
+
+/// combobox/demo.html: suggestions, groups, free text with the "Use" row,
+/// inline completion, strict, a long list, sizes, disabled and error.
+class _ComboboxExamples extends StatefulWidget {
+  const _ComboboxExamples();
+
+  @override
+  State<_ComboboxExamples> createState() => _ComboboxExamplesState();
+}
+
+class _ComboboxExamplesState extends State<_ComboboxExamples> {
+  String _log = 'Pick or type something';
+
+  void _change(KakaoComboboxChange e) => setState(
+    () => _log =
+        'combobox-change · ${e.value.isEmpty ? '(empty)' : e.value}'
+        '${e.option == null ? ' (free text)' : ''} (was ${e.previous.isEmpty ? 'empty' : e.previous})',
+  );
+
+  void _create(String value) => setState(() => _log = '$_log · combobox-create · $value');
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget column(List<Widget> children) => SizedBox(
+      width: 320,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            column([
+              KakaoCombobox(
+                label: 'Country',
+                placeholder: 'Pick or type a country',
+                hint: '“osterr” finds Österreich. Any other text is kept too.',
+                options: comboCountries,
+                onChanged: _change,
+                onCreate: _create,
+              ),
+              KakaoCombobox(
+                label: 'City',
+                placeholder: 'Pick or type a city',
+                options: comboCities,
+                onChanged: _change,
+                onCreate: _create,
+              ),
+              KakaoCombobox(
+                label: 'Tag',
+                placeholder: 'Add a tag',
+                createLabel: 'Create tag “{text}”',
+                hint: 'Type “Release” to see the create row; picking it fires combobox-create.',
+                options: comboTags,
+                onChanged: _change,
+                onCreate: _create,
+              ),
+              KakaoCombobox(
+                label: 'Fruit',
+                placeholder: 'Start typing',
+                autocomplete: KakaoComboboxAutocomplete.both,
+                hint: 'Type “ba”: the field completes to Banana, the added part selected.',
+                options: comboFruits,
+                onChanged: _change,
+              ),
+              KakaoCombobox(
+                label: 'Currency',
+                strict: true,
+                value: 'eur',
+                hint: 'Unlisted text goes back to the last value.',
+                options: comboCurrencies,
+                onChanged: _change,
+              ),
+              KakaoCombobox(
+                label: 'Product',
+                placeholder: 'Search or name a product',
+                options: comboProducts,
+                onChanged: _change,
+                onCreate: _create,
+              ),
+            ]),
+            column(const [
+              KakaoCombobox(
+                size: KakaoComboboxSize.sm,
+                label: 'Small',
+                options: [KakaoComboboxOption('36px'), KakaoComboboxOption('Other')],
+                value: '36px',
+              ),
+              KakaoCombobox(
+                label: 'Medium',
+                options: [KakaoComboboxOption('44px'), KakaoComboboxOption('Other')],
+                value: '44px',
+              ),
+              KakaoCombobox(
+                size: KakaoComboboxSize.lg,
+                label: 'Large',
+                options: [KakaoComboboxOption('52px'), KakaoComboboxOption('Other')],
+                value: '52px',
+              ),
+              KakaoCombobox(
+                disabled: true,
+                label: 'Disabled',
+                options: [KakaoComboboxOption('One'), KakaoComboboxOption('Two')],
+                value: 'One',
+              ),
+              KakaoCombobox(
+                label: 'Plan',
+                error: 'Pick or name a plan.',
+                options: [KakaoComboboxOption('Free'), KakaoComboboxOption('Pro'), KakaoComboboxOption('Team')],
+              ),
+              KakaoCombobox(
+                label: 'Postcode',
+                noCreate: true,
+                maxLength: 5,
+                hint: 'At most five characters. Free text, no “Use” row.',
+                options: [
+                  KakaoComboboxOption('1010'),
+                  KakaoComboboxOption('10115'),
+                  KakaoComboboxOption('20095'),
+                  KakaoComboboxOption('8001'),
+                ],
               ),
             ]),
           ],

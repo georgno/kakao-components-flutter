@@ -49,6 +49,18 @@
   Delete clears, arrows and Page Up / Down clamp, Enter picks, Alt+Up / Escape / Tab close);
   `onChanged` (values, previous), `onOpenChanged`, `KakaoSelectController`. The option list
   style takes a `checkBuilder` for the checkbox lead.
+- `KakaoCombobox`: a text field with suggestions (`KakaoComboboxOption`, `KakaoComboboxGroup`):
+  typing opens and filters the select's panel (case and accents ignored, groups hide, "No
+  matches", a polite count); free text with a first "Use “text”" row (`createLabel`,
+  `noCreate`), `strict` (unlisted text reverts), inline completion (`autocomplete: both`, the
+  added part selected; `none` does not filter); keys as combobox.js (Down / Up / Page keys
+  clamp, Alt+Down / Alt+Up, Enter picks or commits, Escape closes then clears, Tab commits),
+  focus stays in the field, leaving it commits; check mark on the current value; `maxLength`;
+  `onChanged` (value, label, option, previous), `onCreate`, `onTextChanged`, `onOpenChanged`,
+  `KakaoComboboxController`. The field chrome moved out of select into
+  `lib/src/internal/kakao_field.dart` (`KakaoField`, `KakaoFieldBox`, `KakaoRing`,
+  `KakaoChevronPainter`, `kakaoFold`) with a new `KakaoFieldText` (a bare one-line text field
+  with pointer gestures and a placeholder). Look-alike cases can `type` after opening.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

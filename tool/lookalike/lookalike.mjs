@@ -107,6 +107,8 @@ async function shootWeb(browser, base, c, run) {
   if (c.open) {
     // Open it, then move the pointer away so nothing shows hover.
     await page.locator(c.open).first().click();
+    // A field that filters as you type (combobox): type into it.
+    if (c.type) await page.keyboard.type(c.type);
     await page.mouse.move(0, 0);
     await page.waitForTimeout(OPEN_MS);
   }

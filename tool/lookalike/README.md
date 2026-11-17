@@ -49,3 +49,8 @@ the fixture checks `LookalikeApp.isOpen(context)`, opens itself after the
 first frame, and puts `LookalikeApp.subjectOf(context)` on a widget inside
 its panel. The reported box is the panel around that widget (the outermost
 box above it that is smaller than the screen).
+
+A field that filters as you type (the combobox) can add `type`: the text
+typed after the `open` click on the web page. The Flutter fixture types the
+same text itself (through the field's editing state, so it filters as typing
+does) after focusing the field.

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../internal/kakao_anchored_panel.dart';
+import '../internal/kakao_field.dart';
 import '../internal/kakao_option_list.dart';
 import '../settings/kakao_select_settings.g.dart';
 import '../theme/kakao_theme.dart';
@@ -85,7 +86,6 @@ const _headingPadding = EdgeInsets.fromLTRB(9.6, 8.8, 9.6, 4); // .group-label p
 const _searchPaddingX = 9.6; // .search padding: 0 0.6rem
 const _searchGap = 7.2; // .search gap: 0.45rem
 const _searchFont = .92; // .search input font-size: 0.92em
-const _caretWidth = 1.0; // the browser's text caret
 const _emptyPadding = EdgeInsets.symmetric(vertical: 12, horizontal: 9.6); // .empty padding: 0.75rem 0.6rem
 const _emptyFont = .9; // .empty font-size: 0.9em
 const _boxMark = .72; // .box svg width / height: 72%
@@ -253,23 +253,6 @@ List<_Item> _flatten(List<KakaoSelectEntry> entries) => [
       ],
     },
 ];
-
-const _foldFrom = 'àáâãäåāăąçćĉċčďèéêëēĕėęěĝğġģĥìíîïĩīĭįĵķĺļľñńņňòóôõöōŏőŕŗřśŝşšţťùúûüũūŭůűųŵýÿŷźżž';
-const _foldTo = 'aaaaaaaaacccccdeeeeeeeeegggghiiiiiiiijklllnnnnoooooooorrrssssttuuuuuuuuuuwyyyzzz';
-
-/// select.js `fold`: lower case without accents (NFD, combining marks
-/// dropped), for matching.
-@visibleForTesting
-String kakaoFold(String s) {
-  final out = StringBuffer();
-  for (final r in s.toLowerCase().runes) {
-    if (r >= 0x300 && r <= 0x36f) continue;
-    final c = String.fromCharCode(r);
-    final i = _foldFrom.indexOf(c);
-    out.write(i < 0 ? c : _foldTo[i]);
-  }
-  return out.toString();
-}
 
 class _KakaoSelectState extends State<KakaoSelect> {
   KakaoSelectController? _own;
@@ -489,12 +472,12 @@ class _KakaoSelectState extends State<KakaoSelect> {
           turns: _open ? .5 : 0,
           duration: reduce ? Duration.zero : _chevronTurn,
           curve: st.ease,
-          child: CustomPaint(size: Size.square(chevron), painter: _ChevronPainter(st.muted)),
+          child: CustomPaint(size: Size.square(chevron), painter: KakaoChevronPainter(st.muted)),
         ),
       ],
     );
 
-    Widget trigger = _FieldBox(
+    Widget trigger = KakaoFieldBox(
       height: height,
       paddingX: paddingX,
       radius: st.radius,
@@ -596,7 +579,7 @@ class _KakaoSelectState extends State<KakaoSelect> {
       child: trigger,
     );
 
-    return _Field(
+    return KakaoField(
       label: widget.label,
       message: error ?? hint,
       messageColor: error != null ? st.danger : st.muted,
@@ -607,171 +590,6 @@ class _KakaoSelectState extends State<KakaoSelect> {
       disabledOpacity: widget.disabled ? st.disabledOpacity : null,
       onLabelTap: widget.disabled ? null : _focus.requestFocus,
       child: field,
-    );
-  }
-}
-
-/// The field chrome around the trigger, as select.js draws it (`.label`,
-/// `.hint`, `.error`, `:host([disabled])`): the label above, the hint or
-/// error below, the whole dimmed when disabled. The text input's field
-/// (ROADMAP step 2, "field chrome") is the same; this and [_FieldBox] move
-/// to `lib/src/internal/` with it.
-class _Field extends StatelessWidget {
-  const _Field({
-    required this.label,
-    required this.message,
-    required this.messageColor,
-    required this.labelStyle,
-    required this.messageStyle,
-    required this.labelGap,
-    required this.messageGap,
-    required this.disabledOpacity,
-    required this.onLabelTap,
-    required this.child,
-  });
-
-  final String? label;
-  final String? message;
-  final Color messageColor;
-  final TextStyle labelStyle;
-  final TextStyle messageStyle;
-  final double labelGap;
-  final double messageGap;
-
-  /// Not null: disabled, at this opacity.
-  final double? disabledOpacity;
-  final VoidCallback? onLabelTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = this.label;
-    final message = this.message;
-    Widget field = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (label != null && label.isNotEmpty)
-          Padding(
-            padding: EdgeInsets.only(bottom: labelGap),
-            // The trigger's accessible name carries the label.
-            child: ExcludeSemantics(
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: onLabelTap,
-                  child: Text(label, style: labelStyle),
-                ),
-              ),
-            ),
-          ),
-        child,
-        if (message != null)
-          Padding(
-            padding: EdgeInsets.only(top: messageGap),
-            // aria-describedby: the trigger's semantics hint carries it.
-            child: ExcludeSemantics(
-              child: Text(message, style: messageStyle.copyWith(color: messageColor)),
-            ),
-          ),
-      ],
-    );
-    final o = disabledOpacity;
-    if (o != null) field = Opacity(opacity: o, child: field);
-    return field;
-  }
-}
-
-/// The bordered field box (`.trigger`): min height, side padding, 1 px
-/// border fading between colours, and the keyboard focus outline [ring]
-/// [ringWidth] wide, [ringOffset] outside the border.
-class _FieldBox extends StatelessWidget {
-  const _FieldBox({
-    required this.height,
-    required this.paddingX,
-    required this.radius,
-    required this.background,
-    required this.border,
-    required this.ring,
-    required this.ringWidth,
-    required this.ringOffset,
-    required this.duration,
-    required this.curve,
-    required this.child,
-  });
-
-  final double height;
-  final double paddingX;
-  final double radius;
-  final Color background;
-  final Color border;
-  final Color? ring;
-  final double ringWidth;
-  final double ringOffset;
-  final Duration duration;
-  final Curve curve;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final box = AnimatedContainer(
-      duration: duration,
-      curve: curve,
-      constraints: BoxConstraints(minHeight: height),
-      padding: EdgeInsets.symmetric(horizontal: paddingX),
-      alignment: AlignmentDirectional.centerStart,
-      decoration: BoxDecoration(
-        color: background,
-        border: Border.all(color: border),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: child,
-    );
-    return _Ring(color: ring, width: ringWidth, offset: ringOffset, radius: radius, child: box);
-  }
-}
-
-/// A CSS `outline`: [width] wide, [offset] outside [child], following its
-/// corner [radius]. Nothing when [color] is null.
-class _Ring extends StatelessWidget {
-  const _Ring({
-    required this.color,
-    required this.width,
-    required this.offset,
-    required this.radius,
-    required this.child,
-  });
-
-  final Color? color;
-  final double width;
-  final double offset;
-  final double radius;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = this.color;
-    if (color == null) return child;
-    final out = -(offset + width);
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        child,
-        Positioned(
-          left: out,
-          top: out,
-          right: out,
-          bottom: out,
-          child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(color: color, width: width),
-                borderRadius: BorderRadius.circular(radius + offset + width),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -1213,7 +1031,7 @@ class _SearchFieldState extends State<_SearchField> {
             focusNode: widget.focusNode,
             style: style,
             cursorColor: st.text,
-            cursorWidth: _caretWidth,
+            cursorWidth: KakaoFieldText.caretWidth,
             backgroundCursorColor: st.muted,
             selectionColor: st.focus.withValues(alpha: .25),
             maxLines: 1,
@@ -1227,7 +1045,7 @@ class _SearchFieldState extends State<_SearchField> {
         ),
       ],
     );
-    return _Ring(
+    return KakaoRing(
       color: focused ? st.focus : null,
       width: st.focusWidth,
       offset: st.focusOffset,
@@ -1365,27 +1183,6 @@ Paint _stroke(Color color, double width) => Paint()
   ..strokeWidth = width
   ..strokeCap = StrokeCap.round
   ..strokeJoin = StrokeJoin.round;
-
-/// select.js CHEVRON: `M6 9l6 6 6-6` in a 24 box, stroke 2.4, round.
-class _ChevronPainter extends CustomPainter {
-  const _ChevronPainter(this.color);
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final k = size.width / 24;
-    canvas.drawPath(
-      Path()
-        ..moveTo(6 * k, 9 * k)
-        ..lineTo(12 * k, 15 * k)
-        ..lineTo(18 * k, 9 * k),
-      _stroke(color, 2.4 * k),
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ChevronPainter old) => old.color != color;
-}
 
 /// select.js SEARCH: a circle r 6.5 at 11,11 and `M16 16l4.5 4.5`, stroke
 /// 2.2, round caps.

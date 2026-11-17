@@ -205,3 +205,78 @@ const genreOptions = [
   KakaoSelectOption('doc', label: 'Documentary'),
   KakaoSelectOption('anim', label: 'Animation'),
 ];
+
+// combobox/demo.html lists.
+
+/// "Suggestions · child options": the countries.
+const comboCountries = [
+  KakaoComboboxOption('at', label: 'Österreich'),
+  KakaoComboboxOption('de', label: 'Deutschland'),
+  KakaoComboboxOption('ch', label: 'Schweiz'),
+  KakaoComboboxOption('li', label: 'Liechtenstein'),
+  KakaoComboboxOption('lu', label: 'Luxembourg'),
+  KakaoComboboxOption('be', label: 'Belgique'),
+  KakaoComboboxOption('fr', label: 'France'),
+  KakaoComboboxOption('it', label: 'Italia'),
+];
+
+/// "Groups · optgroup": cities, one sold out.
+const comboCities = [
+  KakaoComboboxGroup('Germany', [
+    KakaoComboboxOption('Berlin'),
+    KakaoComboboxOption('Hamburg'),
+    KakaoComboboxOption('München'),
+    KakaoComboboxOption('Köln'),
+  ]),
+  KakaoComboboxGroup('Austria', [
+    KakaoComboboxOption('Wien'),
+    KakaoComboboxOption('Graz'),
+    KakaoComboboxOption('Linz'),
+    KakaoComboboxOption('Salzburg (sold out)', disabled: true),
+  ]),
+  KakaoComboboxGroup('Switzerland', [
+    KakaoComboboxOption('Zürich'),
+    KakaoComboboxOption('Genève'),
+    KakaoComboboxOption('Basel'),
+  ]),
+];
+
+/// "Free text · Use row": the tags.
+const comboTags = [
+  KakaoComboboxOption('Bug'),
+  KakaoComboboxOption('Feature'),
+  KakaoComboboxOption('Docs'),
+  KakaoComboboxOption('Design'),
+  KakaoComboboxOption('Performance'),
+  KakaoComboboxOption('Security'),
+];
+
+/// "Inline completion": the fruits.
+final comboFruits = [
+  for (final f in [
+    'Apple', 'Apricot', 'Banana', 'Blackberry', 'Blueberry', 'Cherry', //
+    'Grape', 'Mango', 'Melon', 'Orange', 'Peach', 'Pear',
+  ])
+    KakaoComboboxOption(f),
+];
+
+/// "Strict · only listed values": the currencies.
+const comboCurrencies = [
+  KakaoComboboxOption('eur', label: 'Euro'),
+  KakaoComboboxOption('chf', label: 'Swiss franc'),
+  KakaoComboboxOption('usd', label: 'US dollar'),
+  KakaoComboboxOption('gbp', label: 'Pound sterling'),
+];
+
+/// "Long list · 200 items": the demo script's products.
+final comboProducts = () {
+  const words = ['Alpine', 'Basalt', 'Cedar', 'Delta', 'Ember', 'Fjord', 'Granit', 'Harbor', 'Indigo', 'Juniper'];
+  const kinds = ['lamp', 'chair', 'table', 'shelf', 'rug', 'vase', 'clock', 'mirror', 'stool', 'bench'];
+  return [
+    for (var i = 0; i < 200; i++)
+      KakaoComboboxOption(
+        'p${i + 1}',
+        label: '${words[i % 10]} ${kinds[(i ~/ 10) % 10]} ${i < 100 ? 'Classic' : 'Pro'}',
+      ),
+  ];
+}();
