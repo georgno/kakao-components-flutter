@@ -14,4 +14,5 @@ component's `@kakao-settings` block and say which setting a literal comes from.
 - Never use uppercase styling, and no thick accent stripe on one side of a box
   ("fingernail" borders). Use a tint, a full thin border, weight or colour.
 - Every widget gets a section in the showcase (`example/lib/main.dart`) and tests.
+- What to port next, and the known gaps: `ROADMAP.md`.
 - Before committing: `flutter analyze && flutter test` in the root and in `example/`.
