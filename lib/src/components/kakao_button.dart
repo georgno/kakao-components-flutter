@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
+import '../settings/kakao_button_settings.g.dart';
 import '../theme/kakao_theme.dart';
 import 'kakao_tooltip.dart';
 
@@ -12,24 +13,20 @@ enum KakaoButtonVariant { primary, secondary, ghost, danger }
 /// `<kakao-button size>`.
 enum KakaoButtonSize { sm, md, lg }
 
-/// The settings block of `components/button/button.css`, sizes part.
+/// One size's values from the generated settings (`--kakao-button-<size>-*`).
 class _Size {
   const _Size(this.height, this.paddingX, this.fontSize, this.radius, this.gap);
   final double height, paddingX, fontSize, radius, gap;
+
+  factory _Size.of(KakaoButtonSettings st, KakaoButtonSize size) => switch (size) {
+    KakaoButtonSize.sm => _Size(st.smHeight, st.smPaddingX, st.smFontSize, st.smRadius, st.smGap),
+    KakaoButtonSize.md => _Size(st.mdHeight, st.mdPaddingX, st.mdFontSize, st.mdRadius, st.mdGap),
+    KakaoButtonSize.lg => _Size(st.lgHeight, st.lgPaddingX, st.lgFontSize, st.lgRadius, st.lgGap),
+  };
 }
 
-const _sizes = {
-  KakaoButtonSize.sm: _Size(36, 16, 13, 10, 6),
-  KakaoButtonSize.md: _Size(44, 22, 14.5, 14, 8),
-  KakaoButtonSize.lg: _Size(52, 28, 16, 14, 10),
-};
-
-const _labelWeight = 550.0; // --kakao-button-label-weight
-const _focusRingWidth = 4.0; // --kakao-button-focus-ring-width
-const _disabledOpacity = 0.2; // --kakao-button-disabled-opacity
-const _spinnerSize = 18.0; // --kakao-button-spinner-size
-const _transition = Duration(milliseconds: 200); // --kakao-button-transition
-const _toggleOffOpacity = 0.45; // --kakao-button-toggle-off-opacity
+/// The CSS `transition: … ease` the button uses with its --kakao-button-transition.
+const _ease = Curves.ease;
 
 // button.js easings.
 const _bounce = Cubic(0.34, 1.3, 0.64, 1); // BOUNCE
@@ -230,41 +227,29 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
-    final c = theme.colors;
-    final s = _sizes[widget.size]!;
+    final st = KakaoButtonSettings.of(theme.colors);
+    final s = _Size.of(st, widget.size);
     final iconOnly = widget.label == null;
 
-    // Colours: the --_primary-* / --_secondary-* … defaults of button.css.
-    late Color bg, hoverBg, fg, ring;
-    List<BoxShadow> shadow = const [];
-    switch (widget.variant) {
-      case KakaoButtonVariant.primary:
-        bg = c.ink;
-        hoverBg = c.inkHover;
-        fg = c.onInk;
-        ring = c.ink.withValues(alpha: .16);
-        shadow = const [BoxShadow(offset: Offset(0, 2), blurRadius: 24, color: Color(0x0A000000))];
-      case KakaoButtonVariant.secondary:
-        bg = c.subtle;
-        hoverBg = c.subtleStrong;
-        fg = c.ink;
-        ring = c.ink.withValues(alpha: .12);
-      case KakaoButtonVariant.ghost:
-        bg = c.ink.withValues(alpha: 0);
-        hoverBg = c.ink.withValues(alpha: .045);
-        fg = c.textSoft;
-        ring = c.ink.withValues(alpha: .10);
-      case KakaoButtonVariant.danger:
-        bg = c.danger;
-        hoverBg = c.dangerHover;
-        fg = c.onDanger;
-        ring = c.danger.withValues(alpha: .18);
-        shadow = const [BoxShadow(offset: Offset(0, 2), blurRadius: 24, color: Color(0x0FBD4B43))];
-    }
-    final shadows = _focusVisible ? [BoxShadow(color: ring, spreadRadius: _focusRingWidth)] : shadow;
+    // Colours per variant: the generated --kakao-button-<variant>-* settings.
+    // A ghost button has no fill at rest (transparent ink, so hover blends from ink).
+    final (Color bg, Color hoverBg, Color fg, Color ring, List<BoxShadow> shadow) = switch (widget.variant) {
+      KakaoButtonVariant.primary => (st.primaryBg, st.primaryHoverBg, st.primaryText, st.primaryRing, st.primaryShadow),
+      KakaoButtonVariant.secondary => (
+        st.secondaryBg,
+        st.secondaryHoverBg,
+        st.secondaryText,
+        st.secondaryRing,
+        const [],
+      ),
+      KakaoButtonVariant.ghost => (st.ink.withValues(alpha: 0), st.ghostHoverBg, st.ghostText, st.ghostRing, const []),
+      KakaoButtonVariant.danger => (st.dangerBg, st.dangerHoverBg, st.dangerText, st.dangerRing, st.dangerShadow),
+    };
+    // Focus halo: box-shadow 0 0 0 <focus-ring-width> <ring>, in place of the rest shadow.
+    final shadows = _focusVisible ? [BoxShadow(color: ring, spreadRadius: st.focusRingWidth)] : shadow;
 
     // Toggles show their state with weight as well: 400 off, 600 pressed.
-    final weight = widget.toggle ? (widget.pressed ? 600.0 : 400.0) : _labelWeight;
+    final weight = widget.toggle ? (widget.pressed ? 600.0 : 400.0) : st.labelWeight;
     final textStyle = theme
         .text(size: s.fontSize, weight: weight, color: fg)
         .copyWith(letterSpacing: -0.01 * s.fontSize, height: 1);
@@ -281,8 +266,8 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
         if (!iconOnly)
           AnimatedDefaultTextStyle(
             style: textStyle,
-            duration: _transition,
-            curve: Curves.ease,
+            duration: st.transition,
+            curve: _ease,
             child: Text(widget.label!, maxLines: 1, softWrap: false),
           ),
       ],
@@ -298,20 +283,20 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
           _ScaleFade(
             controller: _spinner,
             from: .85,
-            child: _Spinner(color: fg, still: _reduceMotion),
+            child: _Spinner(color: fg, size: st.spinnerSize, still: _reduceMotion),
           ),
         if (_overlay == _Overlay.check)
           _ScaleFade(
             controller: _check,
             from: _checkFrom,
-            child: CustomPaint(size: const Size.square(_spinnerSize), painter: _CheckPainter(fg)),
+            child: CustomPaint(size: Size.square(st.spinnerSize), painter: _CheckPainter(fg)),
           ),
       ],
     );
 
     Widget box = AnimatedContainer(
-      duration: _transition,
-      curve: Curves.ease,
+      duration: st.transition,
+      curve: _ease,
       height: s.height,
       width: iconOnly ? s.height : null,
       padding: EdgeInsets.symmetric(horizontal: iconOnly ? 0 : s.paddingX),
@@ -327,12 +312,12 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
 
     box = AnimatedOpacity(
       opacity: !_hasAction
-          ? _disabledOpacity
+          ? st.disabledOpacity
           : (widget.toggle && !widget.pressed)
-          ? _toggleOffOpacity
+          ? st.toggleOffOpacity
           : 1,
-      duration: _transition,
-      curve: Curves.ease,
+      duration: st.transition,
+      curve: _ease,
       child: box,
     );
 
@@ -387,8 +372,9 @@ class _ScaleFade extends AnimatedWidget {
 /// per 0.85 s. With reduced motion it stands still and pulses instead
 /// (opacity .4 ↔ 1, 1.1 s ease-in-out), as kakao-button-pulse.
 class _Spinner extends StatefulWidget {
-  const _Spinner({required this.color, required this.still});
+  const _Spinner({required this.color, required this.size, required this.still});
   final Color color;
+  final double size;
   final bool still;
 
   @override
@@ -423,7 +409,7 @@ class _SpinnerState extends State<_Spinner> with SingleTickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    final arc = CustomPaint(size: const Size.square(_spinnerSize), painter: _ArcPainter(widget.color));
+    final arc = CustomPaint(size: Size.square(widget.size), painter: _ArcPainter(widget.color));
     if (widget.still) {
       return AnimatedBuilder(
         animation: _c,

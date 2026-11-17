@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'kakao_colors.g.dart';
+import '../settings/kakao_theme_switch_settings.g.dart';
+import 'kakao_tokens.g.dart';
 
 /// One step of the styleguide's type scale (styleguide.html, Typography).
 @immutable
@@ -15,30 +17,32 @@ class KakaoTextStep {
   final double tracking;
 }
 
-/// Non-colour main variables (`shared/tokens.css` on the web).
+/// Non-colour main variables (`shared/tokens.css` on the web), from the
+/// generated [KakaoSharedTokens], plus the styleguide's type scale and the
+/// theme pickers' cross-fade, which are not main variables on the web.
 ///
 /// Lengths are logical pixels; 1rem on the web is 16 here.
 class KakaoTokens {
   const KakaoTokens();
 
   // --kakao-space-*
-  double get spaceX => 12; // 0.75rem
-  double get spaceY => 8; // 0.5rem
-  double get spaceGap => 16; // 1rem
-  double get spaceBelowBar => 8;
-  double get scrollFade => 24; // 1.5rem
+  double get spaceX => KakaoSharedTokens.spaceX;
+  double get spaceY => KakaoSharedTokens.spaceY;
+  double get spaceGap => KakaoSharedTokens.spaceGap;
+  double get spaceBelowBar => KakaoSharedTokens.spaceBelowBar;
+  double get scrollFade => KakaoSharedTokens.scrollFade;
 
   // --kakao-radius-*
-  double get radiusXs => 4;
-  double get radiusSm => 6;
-  double get radiusMd => 10;
-  double get radiusLg => 14;
-  double get radiusPill => 999;
+  double get radiusXs => KakaoSharedTokens.radiusXs;
+  double get radiusSm => KakaoSharedTokens.radiusSm;
+  double get radiusMd => KakaoSharedTokens.radiusMd;
+  double get radiusLg => KakaoSharedTokens.radiusLg;
+  double get radiusPill => KakaoSharedTokens.radiusPill;
 
-  // --kakao-font-*
+  // --kakao-font-*: the family is always the bundled Inter Tight.
   String get fontFamily => 'Inter Tight';
   String get fontPackage => 'kakao_components';
-  double get fontSize => 15.2; // 0.95rem
+  double get fontSize => KakaoSharedTokens.fontSize;
 
   // Type scale (styleguide: Typography → Type scale).
   KakaoTextStep get text2xl => const KakaoTextStep(28, 650, -0.02); // page title
@@ -50,13 +54,14 @@ class KakaoTokens {
   KakaoTextStep get text2xs => const KakaoTextStep(12, 600); // group label, caption
 
   // --kakao-motion-duration, --kakao-ease-*
-  Duration get motionDuration => const Duration(milliseconds: 320);
-  Curve get easeStandard => const Cubic(.2, 0, 0, 1);
-  Curve get easeSpring => const Cubic(.5, 1.8, .4, 1);
+  Duration get motionDuration => KakaoSharedTokens.motionDuration;
+  Curve get easeStandard => KakaoSharedTokens.easeStandard;
+  Curve get easeSpring => KakaoSharedTokens.easeSpring;
 
-  // --kakao-theme-switch-fade-duration / -easing (theme pickers cross-fade).
-  Duration get themeFadeDuration => const Duration(milliseconds: 280);
-  Curve get themeFadeEasing => const Cubic(.4, 0, .2, 1);
+  // --kakao-theme-switch-fade-duration / -easing (theme pickers cross-fade);
+  // colour-free settings, so any theme's colours give the same values.
+  Duration get themeFadeDuration => KakaoThemeSwitchSettings.of(KakaoThemeData.light.colors).fadeDuration;
+  Curve get themeFadeEasing => KakaoThemeSwitchSettings.of(KakaoThemeData.light.colors).fadeEasing;
 }
 
 /// The resolved theme a widget reads: colours (with the platform's contrast
