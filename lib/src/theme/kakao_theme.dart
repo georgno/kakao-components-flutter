@@ -99,6 +99,9 @@ class KakaoThemeValues {
       letterSpacing: tracking == 0 ? null : tracking * s,
       color: color ?? colors.text,
       height: height,
+      // CSS puts half the extra line height above the text and half below;
+      // Flutter's default splits it by the font's ascent and descent.
+      leadingDistribution: TextLeadingDistribution.even,
       decoration: TextDecoration.none,
     );
   }

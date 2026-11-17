@@ -9,12 +9,13 @@ other"). Here, shared building blocks are internal (`lib/src/internal/`); each
 public widget still takes every value from its own web component's settings
 block, so two widgets built on the same block can differ where the web ones do.
 
-## 0. Look-alike check (before porting more)
+## 0. Look-alike check (done)
 
-A script that screenshots each web demo page and the matching showcase
-section, at the same viewport and theme (Playwright: web demo pages plus
-the showcase's web build), and diffs them. It runs locally, not in Actions.
-Every component after this gets a pass of it.
+`tool/lookalike` (see its README): Playwright screenshots of web demo
+elements next to showcase fixtures at the same width, theme and contrast,
+diffed into `build/lookalike/report.html`. Runs locally, not in Actions.
+Every component after this gets cases in `tool/lookalike/cases.json` and a
+pass of it. Cases so far: button, card, progress.
 
 ## 1. Anchored panel and option list
 
@@ -58,6 +59,19 @@ Every component after this gets a pass of it.
   only animates height).
 - Dialog: `contained` mode.
 - Progress: the percentage is always English-style ("40%"), not formatted for the locale.
+
+- Text: Flutter rounds every line box to whole pixels (14 px at 1.4 is
+  20 px tall, not 19.6), so text with a fractional line height runs up to
+  half a pixel taller per line than on the web (progress labels: 34.5 px
+  per bar instead of 34). No text style turns it off.
+- Button: the label sits about 1 px higher than on the web (look-alike
+  check, every size); `line-height: normal` instead of `height: 1` did not
+  fix it.
+
+## Seen on the web side
+
+- Progress: at 30 % of 4 segments the web draws a sliver of fill at the start
+  of the empty third segment (look-alike check, `progress-tones`, Danger).
 
 ## Later
 

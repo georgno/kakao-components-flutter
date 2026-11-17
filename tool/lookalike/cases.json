@@ -1,0 +1,13 @@
+{
+  "_doc": "Look-alike pairs: an element on a web demo page and the showcase fixture of the same id (example/lib/lookalike/fixtures.dart). selector is a Playwright selector (it pierces open shadow roots); nth picks among its matches (default 0). margin is the room around the element in the crop, in CSS pixels (default 8; more for a card's shadow and glow). See README.md.",
+  "cases": [
+    { "id": "button-variants", "page": "components/button/demo.html", "selector": "main > kakao-card .row[data-demo-wrap]" },
+    { "id": "button-sizes", "page": "components/button/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) .row" },
+    { "id": "card-primary", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 0, "margin": 14 },
+    { "id": "card-danger", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 1, "margin": 14 },
+    { "id": "card-single-button", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 2, "margin": 14 },
+    { "id": "progress-segments", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 0 },
+    { "id": "progress-sizes", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 2 },
+    { "id": "progress-tones", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 3 }
+  ]
+}

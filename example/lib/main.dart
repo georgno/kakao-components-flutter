@@ -3,9 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:kakao_components/kakao_components.dart';
 
 import 'build_info.dart';
+import 'lookalike/lookalike_app.dart';
 import 'updater/updater.dart';
 
-void main() => runApp(const ShowcaseApp());
+void main() {
+  // tool/lookalike opens the web build with ?lookalike=<case>.
+  final lookalike = LookalikeApp.queryOf(Uri.base);
+  runApp(lookalike != null ? LookalikeApp(query: lookalike) : const ShowcaseApp());
+}
 
 class ShowcaseApp extends StatefulWidget {
   const ShowcaseApp({super.key});

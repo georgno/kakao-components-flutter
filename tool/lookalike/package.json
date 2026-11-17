@@ -1,0 +1,14 @@
+{
+  "name": "kakao-lookalike",
+  "private": true,
+  "description": "Screenshots each web demo element and its showcase fixture, and diffs them. See README.md.",
+  "type": "module",
+  "scripts": {
+    "check": "node lookalike.mjs"
+  },
+  "devDependencies": {
+    "pixelmatch": "7.1.0",
+    "playwright": "1.56.1",
+    "pngjs": "7.0.0"
+  }
+}
