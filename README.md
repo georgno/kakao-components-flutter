@@ -8,15 +8,30 @@ iOS, web and desktop.
 
 | Part | State |
 |---|---|
-| Themes (light, beige, umber, dark, amoled, catppuccin, forest + more-contrast) | done, generated |
-| Shared tokens (space, radius, font, motion) | done, by hand until `tokens.json` lands |
-| `KakaoButton` | variants, sizes, icon, icon-only, loading, disabled |
+| Themes (light, beige, umber, dark, amoled, catppuccin, forest + more-contrast) | generated |
+| Shared tokens (space, radius, font size, motion) | generated |
+| `KakaoButton`, `KakaoTooltip`, `KakaoCard`, `KakaoDialog`, `KakaoProgress` | done, settings generated |
 | Other components | planned |
 
-Colours come from `lib/src/theme/kakao_colors.g.dart`, written by
-`node tool/import-colors.mjs ../kakao-components`. That interim script is
-replaced by a generator reading `tokens.json` once kakao-components ships
-`tools/export-tokens.js` (OpenSpec change `token-export` there).
+## Design values come from the web
+
+kakao-components exports every design value to `tokens.json`
+(`tools/export-tokens.js` there). This repo keeps a pinned copy in
+`tool/tokens.json` (where it came from: `tool/tokens.source`) and generates
+the Dart from it:
+
+    dart run tool/generate.dart
+
+That writes the themes (`kakao_colors.g.dart`), the shared tokens
+(`kakao_tokens.g.dart`) and one settings class per ported component
+(`lib/src/settings/`), built from each setting's chain of references so
+settings follow the theme live. `test/generated_test.dart` checks every
+generated setting against `tokens.json` in every theme and contrast mode.
+
+To take a new web release: copy its `tokens.json` to `tool/`, update
+`tool/tokens.source`, run the generator and the tests. To port a component:
+add it to `ported` in `tool/generate.dart`, generate, then write the widget
+on its settings class.
 
 ## Use
 

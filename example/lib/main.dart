@@ -161,6 +161,10 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
                 ],
               ),
             ),
+            const _Heading('Card'),
+            const _CardExamples(),
+            _Section(title: 'Dialog', child: const _DialogExamples()),
+            _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(
               title: 'About this build',
               child: Column(
@@ -184,8 +188,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
   }
 }
 
-/// Interim stand-in for a `<kakao-card>` with a header, as on the demo pages
-/// (card settings: padding 1.25rem, gap 0.75rem, radius lg, line border).
+/// A demo-page card: a `<kakao-card>` with the example's title in its header.
 class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});
 
@@ -195,22 +198,280 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20), // --kakao-card-padding
-      decoration: BoxDecoration(
-        color: theme.colors.bg,
-        borderRadius: BorderRadius.circular(theme.tokens.radiusLg),
-        border: Border.all(color: theme.colors.line),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: KakaoCard(
+        header: Text(title, style: theme.step(theme.tokens.textXl)),
+        children: [child],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.step(theme.tokens.textXl)),
-          const SizedBox(height: 12), // --kakao-card-gap
-          child,
-        ],
-      ),
+    );
+  }
+}
+
+/// A heading above examples that are cards themselves (they stay bare, as on
+/// the card's demo page).
+class _Heading extends StatelessWidget {
+  const _Heading(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 12),
+      child: Text(text, style: theme.step(theme.tokens.textXl)),
+    );
+  }
+}
+
+class _CardExamples extends StatefulWidget {
+  const _CardExamples();
+
+  @override
+  State<_CardExamples> createState() => _CardExamplesState();
+}
+
+class _CardExamplesState extends State<_CardExamples> {
+  bool _details = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    final soft = theme.text(color: theme.colors.textSoft, height: 1.5);
+    final title = theme.step(theme.tokens.textXl);
+    Widget gap() => const SizedBox(height: 16);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KakaoCard(
+          header: Text('Upgrade to Pro', style: title),
+          footer: [
+            KakaoButton(label: 'Upgrade', onPressed: () {}),
+            KakaoButton(label: 'Later', variant: KakaoButtonVariant.ghost, onPressed: () {}),
+          ],
+          children: [
+            Text('Unlimited projects and priority support. The main button gives the card its glow.', style: soft),
+          ],
+        ),
+        gap(),
+        KakaoCard(
+          header: Text('Delete project', style: title),
+          footer: [
+            KakaoButton(label: 'Delete', variant: KakaoButtonVariant.danger, onPressed: () {}),
+            KakaoButton(label: 'Cancel', variant: KakaoButtonVariant.ghost, onPressed: () {}),
+          ],
+          children: [Text('A danger button glows in the danger colour.', style: soft)],
+        ),
+        gap(),
+        KakaoCard(
+          header: Text('No glow', style: title),
+          footer: [KakaoButton(label: 'Dismiss', variant: KakaoButtonVariant.ghost, onPressed: () {})],
+          children: [Text('A ghost button has no colour of its own, so the card stays quiet.', style: soft)],
+        ),
+        gap(),
+        KakaoCard(
+          header: Text('Height changes', style: title),
+          footer: [
+            KakaoButton(
+              label: _details ? 'Fewer details' : 'More details',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => setState(() => _details = !_details),
+            ),
+          ],
+          children: [
+            Text('When content comes or goes, the card glides to its new height.', style: soft),
+            if (_details)
+              Text(
+                'This paragraph is new. The card took 280 ms on the resize curve to make room for it, '
+                'instead of jumping.',
+                style: soft,
+              ),
+          ],
+        ),
+        gap(),
+      ],
+    );
+  }
+}
+
+class _DialogExamples extends StatefulWidget {
+  const _DialogExamples();
+
+  @override
+  State<_DialogExamples> createState() => _DialogExamplesState();
+}
+
+class _DialogExamplesState extends State<_DialogExamples> {
+  String _last = 'none yet';
+
+  Future<void> _show(Future<String?> dialog) async {
+    final r = await dialog;
+    if (mounted) setState(() => _last = r ?? 'dismissed');
+  }
+
+  Widget _close(String label, String value, {KakaoButtonVariant variant = KakaoButtonVariant.primary}) => Builder(
+    builder: (c) => KakaoButton(label: label, variant: variant, onPressed: () => Navigator.pop(c, value)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    final soft = theme.text(color: theme.colors.textSoft, height: 1.5);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'Delete account',
+              variant: KakaoButtonVariant.danger,
+              onPressed: () => _show(
+                showKakaoDialog<String>(
+                  context,
+                  header: const Text('Delete account?'),
+                  footer: [
+                    _close('Keep it', 'cancel', variant: KakaoButtonVariant.secondary),
+                    _close('Delete', 'delete', variant: KakaoButtonVariant.danger),
+                  ],
+                  children: [Text('Your watch history and profiles will be gone.', style: soft)],
+                ),
+              ),
+            ),
+            KakaoButton(
+              label: 'Buttons left',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => _show(
+                showKakaoDialog<String>(
+                  context,
+                  header: const Text('Rename file'),
+                  buttonPosition: KakaoDialogButtonPosition.left,
+                  footer: [
+                    _close('Rename', 'rename'),
+                    _close('Cancel', 'cancel', variant: KakaoButtonVariant.ghost),
+                  ],
+                  children: [Text('On the left, the main button comes first and takes the corner.', style: soft)],
+                ),
+              ),
+            ),
+            KakaoButton(
+              label: 'Full width',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => _show(
+                showKakaoDialog<String>(
+                  context,
+                  header: const Text('Allow notifications?'),
+                  fullWidth: true,
+                  size: KakaoDialogSize.sm,
+                  footer: [
+                    _close('Not now', 'no', variant: KakaoButtonVariant.secondary),
+                    _close('Allow', 'yes'),
+                  ],
+                  children: [Text('The buttons share the width; both corners hold one.', style: soft)],
+                ),
+              ),
+            ),
+            KakaoButton(
+              label: 'No dismiss',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => _show(
+                showKakaoDialog<String>(
+                  context,
+                  header: const Text('Terms updated'),
+                  dismissible: false,
+                  footer: [_close('Accept', 'accepted')],
+                  children: [Text('A tap outside or Escape does nothing here: only the button ends it.', style: soft)],
+                ),
+              ),
+            ),
+            KakaoButton(
+              label: 'Long text',
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => _show(
+                showKakaoDialog<String>(
+                  context,
+                  header: const Text('Release notes'),
+                  footer: [_close('Close', 'close', variant: KakaoButtonVariant.secondary)],
+                  children: [
+                    for (var i = 1; i <= 12; i++)
+                      Text('Paragraph $i. Only the body scrolls; the title and the buttons stay put.', style: soft),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text('Last result: $_last', style: theme.text(color: theme.colors.muted, tabular: true)),
+      ],
+    );
+  }
+}
+
+class _ProgressExamples extends StatefulWidget {
+  const _ProgressExamples();
+
+  @override
+  State<_ProgressExamples> createState() => _ProgressExamplesState();
+}
+
+class _ProgressExamplesState extends State<_ProgressExamples> {
+  double _step = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    const gap = SizedBox(height: 20);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        KakaoProgress(value: _step, max: 4, label: 'Step ${_step.round()} of 4', showValue: true),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              icon: const Icon(Icons.remove),
+              semanticLabel: 'Back a step',
+              size: KakaoButtonSize.sm,
+              variant: KakaoButtonVariant.secondary,
+              onPressed: _step > 0 ? () => setState(() => _step--) : null,
+            ),
+            KakaoButton(
+              icon: const Icon(Icons.add),
+              semanticLabel: 'Next step',
+              size: KakaoButtonSize.sm,
+              variant: KakaoButtonVariant.secondary,
+              onPressed: _step < 4 ? () => setState(() => _step++) : null,
+            ),
+            KakaoButton(
+              label: 'Fill',
+              size: KakaoButtonSize.sm,
+              variant: KakaoButtonVariant.secondary,
+              onPressed: () => setState(() => _step = 4),
+            ),
+            KakaoButton(
+              label: 'Reset',
+              size: KakaoButtonSize.sm,
+              variant: KakaoButtonVariant.ghost,
+              onPressed: () => setState(() => _step = 0),
+            ),
+          ],
+        ),
+        gap,
+        const KakaoProgress(value: 0.62, segments: 1, label: 'Storage', showValue: true, valueText: '62 of 100 GB'),
+        gap,
+        const KakaoProgress(value: 3, max: 8, segments: 8, label: 'Uploading 3 of 8', size: KakaoProgressSize.sm),
+        gap,
+        const KakaoProgress(value: 0.75, label: 'Backup', tone: KakaoProgressTone.success, size: KakaoProgressSize.lg),
+        gap,
+        const KakaoProgress(value: 0.5, label: 'Disk almost full', tone: KakaoProgressTone.warning),
+        gap,
+        const KakaoProgress(value: 0.25, label: 'Sync failed', tone: KakaoProgressTone.danger),
+        gap,
+        const KakaoProgress(label: 'Loading'),
+      ],
     );
   }
 }

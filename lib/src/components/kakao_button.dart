@@ -25,6 +25,17 @@ class _Size {
   };
 }
 
+/// Makes the [KakaoButton]s below it fill the width they get (the dialog's
+/// full-width footer sets the inner button to width: 100% the same way).
+class KakaoButtonStretch extends InheritedWidget {
+  const KakaoButtonStretch({super.key, required super.child});
+
+  static bool of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<KakaoButtonStretch>() != null;
+
+  @override
+  bool updateShouldNotify(KakaoButtonStretch oldWidget) => false;
+}
+
 /// The CSS `transition: … ease` the button uses with its --kakao-button-transition.
 const _ease = Curves.ease;
 
@@ -298,7 +309,7 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
       duration: st.transition,
       curve: _ease,
       height: s.height,
-      width: iconOnly ? s.height : null,
+      width: iconOnly ? s.height : (KakaoButtonStretch.of(context) ? double.infinity : null),
       padding: EdgeInsets.symmetric(horizontal: iconOnly ? 0 : s.paddingX),
       decoration: BoxDecoration(
         color: _enabled && _hover ? hoverBg : bg,

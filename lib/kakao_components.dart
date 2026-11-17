@@ -4,6 +4,9 @@
 library;
 
 export 'src/components/kakao_button.dart';
+export 'src/components/kakao_card.dart';
+export 'src/components/kakao_dialog.dart';
+export 'src/components/kakao_progress.dart';
 export 'src/components/kakao_tooltip.dart';
 export 'src/theme/kakao_colors.g.dart';
 export 'src/settings/kakao_button_settings.g.dart';

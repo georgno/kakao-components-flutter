@@ -92,18 +92,13 @@ class _UpdaterState extends State<Updater> with WidgetsBindingObserver {
     final nav = widget.navigatorKey.currentState;
     if (nav == null) return;
     _open = true;
-    await showGeneralDialog<void>(
-      context: nav.context,
-      barrierDismissible: true,
-      barrierLabel: 'Close',
-      barrierColor: const Color(0x73000000), // --kakao-dialog-scrim: rgb(0 0 0 / .45)
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (context, _, _) => ShowcaseDialog(
-        title: title,
-        body: Text(text, style: KakaoTheme.of(context).text(color: KakaoTheme.of(context).colors.textSoft)),
-        actions: [KakaoButton(label: 'OK', onPressed: () => Navigator.of(context).pop())],
+    await showKakaoDialogWith<void>(
+      nav.context,
+      builder: (context) => KakaoDialog(
+        header: Text(title),
+        footer: [KakaoButton(label: 'OK', onPressed: () => Navigator.of(context).pop())],
+        children: [Text(text, style: KakaoTheme.of(context).text(color: KakaoTheme.of(context).colors.textSoft))],
       ),
-      transitionBuilder: _dialogTransition,
     );
     _open = false;
   }
@@ -112,26 +107,14 @@ class _UpdaterState extends State<Updater> with WidgetsBindingObserver {
     final nav = widget.navigatorKey.currentState;
     if (nav == null) return;
     _open = true;
-    final installed = await showGeneralDialog<bool>(
-      context: nav.context,
-      barrierDismissible: false,
-      barrierColor: const Color(0x73000000),
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (context, _, _) =>
-          _UpdateDialog(release: release, platform: _platform, current: widget.currentBuild),
-      transitionBuilder: _dialogTransition,
+    final installed = await showKakaoDialogWith<bool>(
+      nav.context,
+      dismissible: false,
+      builder: (context) => _UpdateDialog(release: release, platform: _platform, current: widget.currentBuild),
     );
     _open = false;
     if (installed != true) _dismissedBuild = release.build;
   }
-}
-
-Widget _dialogTransition(BuildContext context, Animation<double> a, Animation<double> _, Widget child) {
-  final t = CurvedAnimation(parent: a, curve: const KakaoTokens().easeStandard);
-  return FadeTransition(
-    opacity: t,
-    child: ScaleTransition(scale: Tween(begin: .96, end: 1.0).animate(t), child: child),
-  );
 }
 
 enum _Stage { offer, downloading, permission, installing, failed }
@@ -253,134 +236,14 @@ class _UpdateDialogState extends State<_UpdateDialog> with WidgetsBindingObserve
         ],
       ),
     };
-    return ShowcaseDialog(
-      title: 'Update available',
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(body, style: soft),
-          if (_stage == _Stage.downloading) ...[
-            const SizedBox(height: 12),
-            _Progress(label: 'Downloading build ${r.build}', value: _progress),
-          ],
-        ],
-      ),
-      actions: actions,
-    );
-  }
-}
-
-/// Interim stand-in for `<kakao-dialog>` (its settings block's values) until
-/// KakaoDialog lands in the library.
-class ShowcaseDialog extends StatelessWidget {
-  const ShowcaseDialog({super.key, required this.title, required this.body, required this.actions});
-
-  final String title;
-  final Widget body;
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = KakaoTheme.of(context);
-    final c = theme.colors;
-    // Nesting rule: the corner holding a filled footer button rounds to that
-    // button's radius + the dialog padding (md: 14 + 20 = 34); a ghost
-    // button has no shape at rest, so its corner keeps the dialog radius.
-    final last = actions.isEmpty ? null : actions.last;
-    final filledCorner = last is KakaoButton && last.variant != KakaoButtonVariant.ghost;
-    final buttonRadius = last is KakaoButton && last.size == KakaoButtonSize.sm ? 10.0 : 14.0;
-    final radius = Radius.circular(theme.tokens.radiusLg);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480), // --_width-md: 30rem
-          child: Container(
-            padding: const EdgeInsets.all(20), // --_padding: 1.25rem
-            decoration: BoxDecoration(
-              color: c.raised,
-              borderRadius: BorderRadius.only(
-                topLeft: radius,
-                topRight: radius,
-                bottomLeft: radius,
-                bottomRight: filledCorner ? Radius.circular(buttonRadius + 20) : radius,
-              ),
-              boxShadow: [
-                const BoxShadow(offset: Offset(0, 8), blurRadius: 24, color: Color(0x14000000)),
-                BoxShadow(spreadRadius: 1, color: c.text.withValues(alpha: .10)),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(title, style: theme.step(theme.tokens.textXl)), // --_title-size / -weight
-                const SizedBox(height: 12), // --_gap: 0.75rem
-                body,
-                const SizedBox(height: 20), // --_footer-spacing: 1.25rem
-                Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 8, // --_footer-gap: 0.5rem
-                  runSpacing: 8,
-                  children: actions,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Interim stand-in for `<kakao-progress>` with a label (its settings
-/// block's values): label 550 at 0.875rem, value muted with tabular figures,
-/// an 8px pill track that fills in 320 ms on the standard curve.
-class _Progress extends StatelessWidget {
-  const _Progress({required this.label, required this.value});
-  final String label;
-  final double value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = KakaoTheme.of(context);
-    final c = theme.colors;
-    final v = value.clamp(0.0, 1.0);
-    return Semantics(
-      label: label,
-      value: '${(v * 100).round()} %',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(label, style: theme.text(size: 14, weight: 550))),
-              Text('${(v * 100).round()} %', style: theme.text(size: 14, color: c.muted, tabular: true)),
-            ],
-          ),
-          const SizedBox(height: 6.4), // --kakao-progress-label-gap: 0.4rem
-          ClipRRect(
-            borderRadius: BorderRadius.circular(theme.tokens.radiusPill),
-            child: SizedBox(
-              height: 8, // --kakao-progress-height
-              child: ColoredBox(
-                color: c.subtleStrong, // --kakao-progress-track
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(end: v),
-                  duration: theme.tokens.motionDuration, // --kakao-progress-fill-duration
-                  curve: theme.tokens.easeStandard,
-                  builder: (context, w, _) => FractionallySizedBox(
-                    alignment: Alignment.centerLeft,
-                    widthFactor: w,
-                    child: ColoredBox(color: c.primary),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return KakaoDialog(
+      header: const Text('Update available'),
+      footer: actions,
+      children: [
+        Text(body, style: soft),
+        if (_stage == _Stage.downloading)
+          KakaoProgress(label: 'Downloading build ${r.build}', value: _progress, segments: 1, showValue: true),
+      ],
     );
   }
 }
