@@ -39,3 +39,13 @@ look at is the size difference, spacing, colours, radii and shadows.
 Add a case to `cases.json` (the demo page and a selector for one example)
 and a fixture of the same id with the same content. `example/test/
 lookalike_test.dart` fails when one has no partner.
+
+## Things that only show when opened
+
+A popover or menu is on screen only after a click. Give its case an `open`
+selector: the script clicks it, moves the pointer away and waits, then
+screenshots `selector` (the opened panel). The Flutter side gets `open=1`;
+the fixture checks `LookalikeApp.isOpen(context)`, opens itself after the
+first frame, and puts `LookalikeApp.subjectOf(context)` on a widget inside
+its panel. The reported box is the panel around that widget (the outermost
+box above it that is smaller than the screen).

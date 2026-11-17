@@ -2,6 +2,9 @@ import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 import 'package:kakao_components/kakao_components.dart';
 
+import '../demo_content.dart';
+import 'lookalike_app.dart';
+
 /// The Flutter side of each look-alike pair in tool/lookalike/cases.json: the
 /// same content as the web demo element of the same id. Text, values and
 /// layout follow the demo page; the layout literals name the demo CSS rule
@@ -20,15 +23,10 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     KakaoButton(label: 'Medium', onPressed: _noop),
     KakaoButton(label: 'Large', size: KakaoButtonSize.lg, onPressed: _noop),
   ]),
-  'card-primary': (c) => _card(
-    c,
-    'Upgrade to Pro',
-    'Unlimited projects, version history and priority support.',
-    [
-      KakaoButton(label: 'Upgrade', onPressed: _noop),
-      KakaoButton(label: 'Later', variant: KakaoButtonVariant.ghost, onPressed: _noop),
-    ],
-  ),
+  'card-primary': (c) => _card(c, 'Upgrade to Pro', 'Unlimited projects, version history and priority support.', [
+    KakaoButton(label: 'Upgrade', onPressed: _noop),
+    KakaoButton(label: 'Later', variant: KakaoButtonVariant.ghost, onPressed: _noop),
+  ]),
   'card-danger': (c) => _card(c, 'Delete project', 'This removes all files and cannot be undone.', [
     // fas fa-trash on the web.
     KakaoButton(label: 'Delete', variant: KakaoButtonVariant.danger, icon: const Icon(Icons.delete), onPressed: _noop),
@@ -60,9 +58,84 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     ),
     KakaoProgress(tone: KakaoProgressTone.danger, label: 'Danger', value: 0.3, showValue: true),
   ]),
+  'popover-click': (_) =>
+      _OpenPopover(header: const Text('Account'), content: const AccountDetails(), anchor: 'Account info'),
+  'popover-list': (_) => const _OpenPopover(
+    header: Text('Server status'),
+    placement: KakaoPopoverPlacement.right,
+    rows: [
+      KakaoPopoverRow('Region', 'us-east-1'),
+      KakaoPopoverRow('Status', 'Operational'),
+      KakaoPopoverRow('Latency', '42ms'),
+      KakaoPopoverRow('Uptime', '99.98%'),
+    ],
+    anchor: 'Server status',
+  ),
 };
 
 void _noop() {}
+
+/// popover/demo.html: a small secondary button and its popover, opened
+/// after the first frame when the case is an `open` one.
+class _OpenPopover extends StatefulWidget {
+  const _OpenPopover({
+    required this.header,
+    this.content,
+    this.rows,
+    this.placement = KakaoPopoverPlacement.bottom,
+    required this.anchor,
+  });
+
+  final Widget header;
+  final Widget? content;
+  final List<KakaoPopoverRow>? rows;
+  final KakaoPopoverPlacement placement;
+  final String anchor;
+
+  @override
+  State<_OpenPopover> createState() => _OpenPopoverState();
+}
+
+class _OpenPopoverState extends State<_OpenPopover> {
+  final _controller = KakaoPopoverController();
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started || !LookalikeApp.isOpen(context)) return;
+    _started = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) => _controller.open());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // The subject: the header, inside the panel.
+    final header = KeyedSubtree(key: LookalikeApp.subjectOf(context), child: widget.header);
+    return Align(
+      alignment: Alignment.topLeft,
+      child: KakaoPopover(
+        controller: _controller,
+        placement: widget.placement,
+        header: header,
+        content: widget.content,
+        rows: widget.rows,
+        anchorBuilder: (context, p) => KakaoButton(
+          label: widget.anchor,
+          variant: KakaoButtonVariant.secondary,
+          size: KakaoButtonSize.sm,
+          onPressed: p.toggle,
+        ),
+      ),
+    );
+  }
+}
 
 // demo.css `.row`: flex, wrap, gap 0.5rem, items centred.
 Widget _row(List<Widget> children) =>

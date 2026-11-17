@@ -22,6 +22,7 @@ const VIEWPORT = { width: 1280, height: 900 };
 const SCALE = 2; // device pixels per CSS pixel
 const SETTLE_MS = 1500; // glow fades, fills and pops finish well inside this
 const FLUTTER_MARGIN = 48; // LookalikeApp.margin
+const OPEN_MS = 600; // an opened panel's entry motion finishes well inside this
 
 function parseArgs(argv) {
   const args = { web: path.resolve(ROOT, '../kakao-components'), themes: ['light', 'dark'], contrast: false, only: null, build: true };
@@ -103,6 +104,12 @@ async function shootWeb(browser, base, c, run) {
   await page.goto(`${base}/${c.page}`, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(SETTLE_MS);
+  if (c.open) {
+    // Open it, then move the pointer away so nothing shows hover.
+    await page.locator(c.open).first().click();
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(OPEN_MS);
+  }
   const el = page.locator(c.selector).nth(c.nth ?? 0);
   await el.scrollIntoViewIfNeeded();
   const box = await el.boundingBox();
@@ -119,6 +126,7 @@ async function shootFlutter(browser, base, c, run, width, bg, shift) {
   const page = await context.newPage();
   const q = new URLSearchParams({ lookalike: c.id, theme: run.theme, w: String(width), bg, settle: String(SETTLE_MS) });
   if (run.contrast === 'more') q.set('contrast', 'more');
+  if (c.open) q.set('open', '1');
   await page.goto(`${base}/?${q}`);
   const box = await page.waitForFunction(() => window.lookalikeBox, null, { timeout: 60_000 }).then((h) => h.jsonValue());
   const png = PNG.sync.read(await page.screenshot({ clip: grow(box, Math.min(c.margin ?? 8, FLUTTER_MARGIN), shift) }));

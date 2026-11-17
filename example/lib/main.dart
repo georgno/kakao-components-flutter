@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:kakao_components/kakao_components.dart';
 
 import 'build_info.dart';
+import 'demo_content.dart';
 import 'lookalike/lookalike_app.dart';
 import 'updater/updater.dart';
 
@@ -169,6 +170,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             const _Heading('Card'),
             const _CardExamples(),
             _Section(title: 'Dialog', child: const _DialogExamples()),
+            _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(
               title: 'About this build',
@@ -476,6 +478,105 @@ class _ProgressExamplesState extends State<_ProgressExamples> {
         const KakaoProgress(value: 0.25, label: 'Sync failed', tone: KakaoProgressTone.danger),
         gap,
         const KakaoProgress(label: 'Loading'),
+      ],
+    );
+  }
+}
+
+/// popover/demo.html: click with a header and slotted content, hover on top,
+/// list-data on the right, disabled, and a manual one driven by buttons.
+class _PopoverExamples extends StatefulWidget {
+  const _PopoverExamples();
+
+  @override
+  State<_PopoverExamples> createState() => _PopoverExamplesState();
+}
+
+class _PopoverExamplesState extends State<_PopoverExamples> {
+  final _manual = KakaoPopoverController();
+  String _log = 'no events yet';
+
+  static const _rows = [
+    KakaoPopoverRow('Region', 'us-east-1'),
+    KakaoPopoverRow('Status', 'Operational'),
+    KakaoPopoverRow('Latency', '42ms'),
+    KakaoPopoverRow('Uptime', '99.98%'),
+  ];
+
+  @override
+  void dispose() {
+    _manual.dispose();
+    super.dispose();
+  }
+
+  void _note(String e) => setState(() => _log = e);
+
+  Widget _anchor(String label, KakaoPopoverController p) =>
+      KakaoButton(label: label, variant: KakaoButtonVariant.secondary, size: KakaoButtonSize.sm, onPressed: p.toggle);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoPopover(
+              header: const Text('Account'),
+              content: const AccountDetails(),
+              onOpen: () => _note('open · Account info'),
+              onClose: () => _note('close · Account info'),
+              anchorBuilder: (context, p) => _anchor('Account info', p),
+            ),
+            KakaoPopover(
+              trigger: KakaoPopoverTrigger.hover,
+              placement: KakaoPopoverPlacement.top,
+              content: const Text('This action can\u2019t be undone once confirmed.'),
+              anchorBuilder: (context, p) => _anchor('Hover for a tip', p),
+            ),
+            KakaoPopover(
+              header: const Text('Server status'),
+              placement: KakaoPopoverPlacement.right,
+              rows: _rows,
+              onSelect: (i, r) => _note('item-select · ${r.label}: ${r.value}'),
+              anchorBuilder: (context, p) => _anchor('Server status', p),
+            ),
+            KakaoPopover(
+              disabled: true,
+              content: const Text('You should never see this - the popover is disabled.'),
+              anchorBuilder: (context, p) => _anchor('Does nothing', p),
+            ),
+            KakaoPopover(
+              controller: _manual,
+              trigger: KakaoPopoverTrigger.manual,
+              header: const Text('Manual'),
+              content: const Text('Opened only via the controller.'),
+              anchorBuilder: (context, p) => KakaoButton(
+                label: 'Anchor (no auto trigger)',
+                variant: KakaoButtonVariant.secondary,
+                size: KakaoButtonSize.sm,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final (label, action) in [
+              ('open()', _manual.open),
+              ('close()', _manual.close),
+              ('toggle()', _manual.toggle),
+            ])
+              KakaoButton(label: label, variant: KakaoButtonVariant.ghost, size: KakaoButtonSize.sm, onPressed: action),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: theme.colors.textSoft)),
       ],
     );
   }

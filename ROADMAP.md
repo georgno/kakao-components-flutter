@@ -1,7 +1,7 @@
 # Roadmap
 
-Ported: button, tooltip, card, dialog, progress (plus theme-switch settings for
-the cross-fade). The order below follows shared building blocks: build a block
+Ported: button, tooltip, card, dialog, progress, popover (plus theme-switch
+settings for the cross-fade). The order below follows shared building blocks: build a block
 once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -15,14 +15,17 @@ block, so two widgets built on the same block can differ where the web ones do.
 elements next to showcase fixtures at the same width, theme and contrast,
 diffed into `build/lookalike/report.html`. Runs locally, not in Actions.
 Every component after this gets cases in `tool/lookalike/cases.json` and a
-pass of it. Cases so far: button, card, progress.
+pass of it. Cases so far: button, card, progress, popover (opened first).
 
 ## 1. Anchored panel and option list
 
-- Internal: an anchored panel (position next to an anchor, flip when there is
-  no room, open and close motion) and an option list (rows, check mark,
-  keyboard and pointer highlight, groups).
-- Then: `popover`, `menu`, the button's menu mode (with its chevron) and
+- Internal: an anchored panel (done: `lib/src/internal/kakao_anchored_panel.dart`,
+  `KakaoAnchoredPanel`; position next to an anchor or a point, flip rules of
+  popover.js and menu.js / select.js, start / centre / end alignment, height
+  capped by the room, keep-side, anchor width, entry motion, outside tap,
+  Escape, focus return) and an option list (rows, check mark, keyboard and
+  pointer highlight, groups).
+- Then: `popover` (done), `menu`, the button's menu mode (with its chevron) and
   segmented group, `select`, `combobox`, `multi-dropdown`, `command-palette`.
 
 ## 2. Fields
@@ -59,6 +62,14 @@ pass of it. Cases so far: button, card, progress.
   only animates height).
 - Dialog: `contained` mode.
 - Progress: the percentage is always English-style ("40%"), not formatted for the locale.
+- Popover: the anchor is built by `anchorBuilder` and wires `toggle` itself
+  (no `for` id); no `setData` busy state; the hover popover has no tooltip
+  semantics role (Flutter has none yet), it is a live region; Escape from a
+  hover popover does not reopen it when focus returns (the web one can);
+  the ✕ is drawn in a fallback font on both sides, so it differs slightly;
+  the panel is placed in left-to-right terms (no RTL mirroring of
+  start / end yet). In the look-alike web build the ✕ can show a focus ring
+  after the page itself takes focus (Flutter web moves focus on view focus).
 
 - Text: Flutter rounds every line box to whole pixels (14 px at 1.4 is
   20 px tall, not 19.6), so text with a fractional line height runs up to
