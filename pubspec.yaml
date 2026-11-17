@@ -1,0 +1,27 @@
+name: kakao_components
+description: "Flutter twins of the kakao-components web components: same tokens, themes, look and motion."
+version: 0.0.1
+homepage: https://github.com/georgno/kakao-components-flutter
+publish_to: none
+
+environment:
+  sdk: ^3.13.7
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  fonts:
+    # Inter Tight, variable weight 100-900 (SIL OFL 1.1, fonts/OFL.txt).
+    - family: Inter Tight
+      fonts:
+        - asset: fonts/InterTight-Variable.ttf
+        - asset: fonts/InterTight-Italic-Variable.ttf
+          style: italic

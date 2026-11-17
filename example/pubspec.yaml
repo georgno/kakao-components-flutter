@@ -1,0 +1,22 @@
+name: kakao_showcase
+description: "Showcase app for kakao_components: every component, every theme, with an in-app updater for the rolling debug build."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  kakao_components:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
