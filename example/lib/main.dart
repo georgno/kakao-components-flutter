@@ -64,8 +64,6 @@ class ShowcaseHome extends StatefulWidget {
 }
 
 class _ShowcaseHomeState extends State<ShowcaseHome> {
-  bool _loading = false;
-
   @override
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
@@ -143,11 +141,14 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
                   ),
                   KakaoButton(
                     label: 'Save',
-                    loading: _loading,
-                    onPressed: () async {
-                      setState(() => _loading = true);
-                      await Future<void>.delayed(const Duration(seconds: 2));
-                      if (mounted) setState(() => _loading = false);
+                    onPressedAsync: () => Future<void>.delayed(const Duration(milliseconds: 1500)),
+                  ),
+                  KakaoButton(
+                    label: 'Save (fails)',
+                    variant: KakaoButtonVariant.secondary,
+                    onPressedAsync: () async {
+                      await Future<void>.delayed(const Duration(milliseconds: 1500));
+                      throw StateError('demo failure');
                     },
                   ),
                   const KakaoButton(label: 'Disabled'),

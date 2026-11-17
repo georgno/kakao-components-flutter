@@ -55,6 +55,7 @@ class KakaoThemeValues {
     fontVariations: [FontVariation.weight(weight)],
     color: color ?? colors.text,
     height: height,
+    decoration: TextDecoration.none,
   );
 }
 
@@ -79,9 +80,12 @@ class KakaoTheme extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final more = MediaQuery.maybeHighContrastOf(context) ?? false;
+    final values = KakaoThemeValues(data: data, colors: more ? data.highContrast : data.colors);
+    // A base text style, so text below never falls back to Flutter's
+    // missing-style look (yellow double underline) outside a Material.
     return _KakaoThemeScope(
-      values: KakaoThemeValues(data: data, colors: more ? data.highContrast : data.colors),
-      child: child,
+      values: values,
+      child: DefaultTextStyle(style: values.text(), child: child),
     );
   }
 }

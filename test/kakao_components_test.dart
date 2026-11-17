@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kakao_components/kakao_components.dart';
@@ -71,6 +73,77 @@ void main() {
       await tester.pumpWidget(_host(KakaoButton(label: 'Busy', loading: true, onPressed: () => taps++)));
       await tester.tap(find.text('Busy'), warnIfMissed: false);
       expect(taps, 0);
+    });
+
+    testWidgets('hugs its label instead of filling the row', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          SizedBox(
+            width: 400,
+            child: Wrap(
+              children: [KakaoButton(label: 'Hi', onPressed: () {})],
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(AnimatedContainer)).width, lessThan(120));
+    });
+
+    testWidgets('text has no fallback underline', (tester) async {
+      await tester.pumpWidget(_host(KakaoButton(label: 'Plain', onPressed: () {})));
+      final style = tester
+          .widget<RichText>(find.descendant(of: find.text('Plain'), matching: find.byType(RichText)))
+          .text
+          .style!;
+      expect(style.decoration, TextDecoration.none);
+      final base = tester.widget<DefaultTextStyle>(find.byType(DefaultTextStyle).first).style;
+      expect(base.decoration, TextDecoration.none);
+    });
+
+    testWidgets('squashes to 0.94 while pressed and springs back', (tester) async {
+      await tester.pumpWidget(_host(KakaoButton(label: 'Press', onPressed: () {})));
+      ScaleTransition scale() => tester.widget<ScaleTransition>(find.byType(ScaleTransition));
+      final gesture = await tester.startGesture(tester.getCenter(find.text('Press')));
+      await tester.pumpAndSettle();
+      expect(scale().scale.value, closeTo(.94, .001));
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(scale().scale.value, greaterThan(.94));
+      await tester.pumpAndSettle();
+      expect(scale().scale.value, closeTo(1, .001));
+    });
+
+    testWidgets('async press: spinner, then the check, then the label', (tester) async {
+      final done = Completer<void>();
+      await tester.pumpWidget(_host(KakaoButton(label: 'Run', onPressedAsync: () => done.future)));
+      await tester.tap(find.text('Run'));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(RotationTransition), findsOneWidget); // spinner
+      done.complete();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(RotationTransition), findsNothing);
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter.runtimeType.toString() == '_CheckPainter'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(milliseconds: 900));
+      await tester.pumpAndSettle();
+      final label = tester.widget<Opacity>(find.ancestor(of: find.text('Run'), matching: find.byType(Opacity)).first);
+      expect(label.opacity, 1);
+    });
+
+    testWidgets('a failing async press goes straight back to the label', (tester) async {
+      await tester.pumpWidget(_host(KakaoButton(label: 'Fail', onPressedAsync: () async => throw StateError('x'))));
+      await tester.tap(find.text('Fail'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byWidgetPredicate((w) => w is CustomPaint && w.painter.runtimeType.toString() == '_CheckPainter'),
+        findsNothing,
+      );
+      final label = tester.widget<Opacity>(find.ancestor(of: find.text('Fail'), matching: find.byType(Opacity)).first);
+      expect(label.opacity, 1);
     });
   });
 }
