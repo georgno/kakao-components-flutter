@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../settings/kakao_button_settings.g.dart';
 import '../theme/kakao_theme.dart';
+import 'kakao_corner_scope.dart';
 import 'kakao_tooltip.dart';
 
 /// `<kakao-button variant>`.
@@ -110,6 +111,7 @@ class KakaoButton extends StatefulWidget {
 enum _Overlay { none, spinner, check }
 
 class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin {
+  KakaoCornerRegistry? _corners;
   bool _hover = false;
   bool _focusVisible = false;
   bool _running = false; // onPressedAsync in flight or showing its result
@@ -147,6 +149,7 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
 
   @override
   void dispose() {
+    _corners?.remove(this);
     for (final t in _timers) {
       t.cancel();
     }
@@ -330,6 +333,18 @@ class _KakaoButtonState extends State<KakaoButton> with TickerProviderStateMixin
       duration: st.transition,
       curve: _ease,
       child: box,
+    );
+
+    // In a dialog footer: tell the dialog where this button is and how round
+    // its corners are, so a corner it sits in can follow it (nesting rule).
+    _corners = KakaoCornerScope.maybeOf(context);
+    _corners?.put(
+      this,
+      KakaoCornerEntry(
+        context: context,
+        filled: widget.variant != KakaoButtonVariant.ghost,
+        radius: iconOnly ? s.height / 2 : s.radius,
+      ),
     );
 
     final tip = widget.tooltip ?? (iconOnly ? widget.semanticLabel : null);

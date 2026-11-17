@@ -1,10 +1,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import '../settings/kakao_button_settings.g.dart';
 import '../settings/kakao_dialog_settings.g.dart';
 import '../theme/kakao_theme.dart';
 import 'kakao_button.dart';
+import 'kakao_corner_scope.dart';
 
 /// `<kakao-dialog size>`: the panel's max width.
 enum KakaoDialogSize { sm, md, lg }
@@ -89,13 +89,18 @@ Future<T?> showKakaoDialogWith<T>(
 /// Flutter twin of `<kakao-dialog>`'s panel; show it with [showKakaoDialog].
 ///
 /// The header is the title (18 px, 600, −0.01em, as `slot="header"`); only
-/// the body scrolls, so header and footer stay put. Footer rule: the main
-/// (filled) button sits in the corner, last for [KakaoDialogButtonPosition.right]
-/// and first for left; that corner then rounds to the button's radius + the
-/// padding, so the two curves sit concentric. A ghost button has no shape at
-/// rest and doesn't count. With [fullWidth] the buttons share the width and
-/// both bottom corners can hold one.
-class KakaoDialog extends StatelessWidget {
+/// the body scrolls, so header and footer stay put.
+///
+/// Footer rule: put the main (filled) button in the corner, last for
+/// [KakaoDialogButtonPosition.right] and first for left. The nesting rule
+/// then rounds a bottom corner to (button radius + padding) when a filled
+/// footer button sits right in it, so the two curves are concentric. As in
+/// dialog.js this is measured after layout, not read from the footer list:
+/// it follows the buttons' sizes, wrappers around them, the alignment,
+/// wrapping and [fullWidth] (where both corners can hold one). A ghost
+/// button has no shape at rest and never counts; centred buttons sit in no
+/// corner. While the dialog closes the corners keep their shape.
+class KakaoDialog extends StatefulWidget {
   const KakaoDialog({
     super.key,
     this.header,
@@ -117,73 +122,103 @@ class KakaoDialog extends StatelessWidget {
   final KakaoDialogButtonPosition buttonPosition;
   final bool fullWidth;
 
-  /// The radius a bottom corner takes when [w] (a footer widget) sits in it:
-  /// a filled button's radius + the dialog padding, else null.
-  static double? cornerFor(Widget? w, KakaoButtonSettings buttons, double padding) {
-    if (w is! KakaoButton || w.variant == KakaoButtonVariant.ghost) return null;
-    final r = switch (w.size) {
-      KakaoButtonSize.sm => buttons.smRadius,
-      KakaoButtonSize.md => buttons.mdRadius,
-      KakaoButtonSize.lg => buttons.lgRadius,
-    };
-    return r + padding;
+  @override
+  State<KakaoDialog> createState() => _KakaoDialogState();
+}
+
+class _KakaoDialogState extends State<KakaoDialog> {
+  final _panel = GlobalKey();
+  late final _registry = KakaoCornerRegistry(onChange: _scheduleFit);
+  bool _fitScheduled = false;
+
+  /// Measured bottom corner radii (null: the dialog radius).
+  double? _bl;
+  double? _br;
+
+  void _scheduleFit() {
+    if (_fitScheduled) return;
+    _fitScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitScheduled = false;
+      if (mounted) _fitCorners();
+    });
+  }
+
+  /// dialog.js `_fitCorners`: a corner follows a filled footer button whose
+  /// face sits right in it (within 1.5 px of the padding on both sides).
+  void _fitCorners() {
+    // Only while open: closing is often a tap on a footer button, and the
+    // corners keep their shape through the exit animation.
+    final status = ModalRoute.of(context)?.animation?.status;
+    if (status == AnimationStatus.reverse || status == AnimationStatus.dismissed) return;
+    final panel = _panel.currentContext?.findRenderObject();
+    if (panel is! RenderBox || !panel.hasSize) return;
+    final pad = KakaoDialogSettings.of(KakaoTheme.of(context).colors).padding;
+    bool near(double a, double b) => (a - b).abs() <= 1.5;
+    double? bl;
+    double? br;
+    for (final e in _registry.entries) {
+      if (!e.filled) continue;
+      final box = e.context.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize || box.size.width == 0) continue;
+      final r = box.localToGlobal(Offset.zero, ancestor: panel) & box.size;
+      if (!near(panel.size.height - r.bottom, pad)) continue;
+      if (near(panel.size.width - r.right, pad)) br = e.radius + pad;
+      if (near(r.left, pad)) bl = e.radius + pad;
+    }
+    if (bl != _bl || br != _br) {
+      setState(() {
+        _bl = bl;
+        _br = br;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = KakaoTheme.of(context);
     final st = KakaoDialogSettings.of(theme.colors);
-    final buttons = KakaoButtonSettings.of(theme.colors);
+    final w = widget;
+    _scheduleFit();
 
-    final maxWidth = switch (size) {
+    final maxWidth = switch (w.size) {
       KakaoDialogSize.sm => st.widthSm,
       KakaoDialogSize.md => st.widthMd,
       KakaoDialogSize.lg => st.widthLg,
     };
-
-    // Which bottom corners hold a filled button.
-    double? bl;
-    double? br;
-    if (footer.isNotEmpty) {
-      if (fullWidth) {
-        bl = cornerFor(footer.first, buttons, st.padding);
-        br = cornerFor(footer.last, buttons, st.padding);
-      } else if (buttonPosition == KakaoDialogButtonPosition.right) {
-        br = cornerFor(footer.last, buttons, st.padding);
-      } else if (buttonPosition == KakaoDialogButtonPosition.left) {
-        bl = cornerFor(footer.first, buttons, st.padding);
-      }
-    }
     final r = Radius.circular(st.radius);
 
-    final title = header == null
+    final title = w.header == null
         ? null
         : DefaultTextStyle.merge(
             style: theme.text(size: st.titleSize, weight: st.titleWeight, tracking: -0.01, height: 1.3, color: st.text),
-            child: header!,
+            child: w.header!,
           );
 
-    final footerRow = footer.isEmpty
+    final footerRow = w.footer.isEmpty
         ? null
-        : fullWidth
-        ? Row(
-            children: [
-              for (var i = 0; i < footer.length; i++) ...[
-                if (i > 0) SizedBox(width: st.footerGap),
-                Expanded(child: KakaoButtonStretch(child: footer[i])),
-              ],
-            ],
-          )
-        : Wrap(
-            alignment: switch (buttonPosition) {
-              KakaoDialogButtonPosition.left => WrapAlignment.start,
-              KakaoDialogButtonPosition.center => WrapAlignment.center,
-              KakaoDialogButtonPosition.right => WrapAlignment.end,
-            },
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: st.footerGap,
-            runSpacing: st.footerGap,
-            children: footer,
+        : KakaoCornerScope(
+            registry: _registry,
+            child: w.fullWidth
+                ? Row(
+                    children: [
+                      for (var i = 0; i < w.footer.length; i++) ...[
+                        if (i > 0) SizedBox(width: st.footerGap),
+                        Expanded(child: KakaoButtonStretch(child: w.footer[i])),
+                      ],
+                    ],
+                  )
+                : Wrap(
+                    alignment: switch (w.buttonPosition) {
+                      KakaoDialogButtonPosition.left => WrapAlignment.start,
+                      KakaoDialogButtonPosition.center => WrapAlignment.center,
+                      KakaoDialogButtonPosition.right => WrapAlignment.end,
+                    },
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: st.footerGap,
+                    runSpacing: st.footerGap,
+                    children: w.footer,
+                  ),
           );
 
     // The panel takes focus when it opens (dialog.js), so Tab starts here and
@@ -194,7 +229,7 @@ class KakaoDialog extends StatelessWidget {
         scopesRoute: true,
         namesRoute: true,
         explicitChildNodes: true,
-        label: header == null ? label : null,
+        label: w.header == null ? w.label : null,
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(16), // the host's 1rem inset
@@ -203,6 +238,7 @@ class KakaoDialog extends StatelessWidget {
               child: DefaultTextStyle.merge(
                 style: TextStyle(color: st.text),
                 child: Container(
+                  key: _panel,
                   padding: EdgeInsets.all(st.padding),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
@@ -210,8 +246,8 @@ class KakaoDialog extends StatelessWidget {
                     borderRadius: BorderRadius.only(
                       topLeft: r,
                       topRight: r,
-                      bottomLeft: bl == null ? r : Radius.circular(bl),
-                      bottomRight: br == null ? r : Radius.circular(br),
+                      bottomLeft: _bl == null ? r : Radius.circular(_bl!),
+                      bottomRight: _br == null ? r : Radius.circular(_br!),
                     ),
                     boxShadow: st.shadow,
                   ),
@@ -225,9 +261,9 @@ class KakaoDialog extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              for (var i = 0; i < children.length; i++) ...[
+                              for (var i = 0; i < w.children.length; i++) ...[
                                 if (i > 0) SizedBox(height: st.gap),
-                                children[i],
+                                w.children[i],
                               ],
                             ],
                           ),

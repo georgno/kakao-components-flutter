@@ -172,15 +172,71 @@ void main() {
       expect(radius.bottomLeft, const Radius.circular(14));
     });
 
-    testWidgets('a ghost button in the corner keeps the dialog radius', (tester) async {
-      expect(
-        KakaoDialog.cornerFor(
-          KakaoButton(label: 'x', variant: KakaoButtonVariant.ghost, onPressed: () {}),
-          KakaoButtonSettings.of(KakaoThemeData.light.colors),
-          20,
-        ),
-        isNull,
+    // The showcase wraps footer buttons (Builder, for Navigator.pop): the rule
+    // must follow where the buttons are, not what the footer list holds.
+    Future<BorderRadius> cornersFor(
+      WidgetTester tester, {
+      required List<KakaoButton> buttons,
+      KakaoDialogButtonPosition position = KakaoDialogButtonPosition.right,
+      bool fullWidth = false,
+    }) async {
+      await tester.pumpWidget(navigatorApp());
+      showKakaoDialog<void>(
+        _home.currentContext!,
+        header: const Text('Corners'),
+        buttonPosition: position,
+        fullWidth: fullWidth,
+        footer: [for (final b in buttons) Builder(builder: (_) => b)],
+        children: const [Text('Body')],
       );
+      await tester.pumpAndSettle();
+      final box = tester.widget<Container>(
+        find.descendant(of: find.byType(KakaoDialog), matching: find.byType(Container)).first,
+      );
+      return (box.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+    }
+
+    KakaoButton b(
+      String l, [
+      KakaoButtonVariant v = KakaoButtonVariant.primary,
+      KakaoButtonSize s = KakaoButtonSize.md,
+    ]) => KakaoButton(label: l, variant: v, size: s, onPressed: () {});
+
+    testWidgets('right: the last, filled button rounds the bottom-right corner (14 + 20)', (tester) async {
+      final r = await cornersFor(
+        tester,
+        buttons: [b('Keep', KakaoButtonVariant.secondary), b('Delete', KakaoButtonVariant.danger)],
+      );
+      expect(r.bottomRight, const Radius.circular(34));
+      expect(r.bottomLeft, const Radius.circular(14));
+    });
+
+    testWidgets('left: the first button takes the bottom-left corner', (tester) async {
+      final r = await cornersFor(
+        tester,
+        position: KakaoDialogButtonPosition.left,
+        buttons: [b('Rename'), b('Cancel', KakaoButtonVariant.ghost)],
+      );
+      expect(r.bottomLeft, const Radius.circular(34));
+      expect(r.bottomRight, const Radius.circular(14));
+    });
+
+    testWidgets('full width: both corners hold a button', (tester) async {
+      final r = await cornersFor(tester, fullWidth: true, buttons: [b('No', KakaoButtonVariant.secondary), b('Yes')]);
+      expect(r.bottomLeft, const Radius.circular(34));
+      expect(r.bottomRight, const Radius.circular(34));
+    });
+
+    testWidgets('centred buttons sit in no corner; a ghost in the corner does not count', (tester) async {
+      var r = await cornersFor(tester, position: KakaoDialogButtonPosition.center, buttons: [b('OK')]);
+      expect([r.bottomLeft, r.bottomRight], [const Radius.circular(14), const Radius.circular(14)]);
+      r = await cornersFor(tester, buttons: [b('Save'), b('Later', KakaoButtonVariant.ghost)]);
+      expect(r.bottomRight, const Radius.circular(14));
+    });
+
+    testWidgets('a small button gives a small corner (10 + 20)', (tester) async {
+      final r = await cornersFor(tester, buttons: [b('OK', KakaoButtonVariant.primary, KakaoButtonSize.sm)]);
+      expect(r.bottomRight, const Radius.circular(30));
     });
   });
 
