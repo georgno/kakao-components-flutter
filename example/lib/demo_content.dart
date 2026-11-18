@@ -280,3 +280,38 @@ final comboProducts = () {
       ),
   ];
 }();
+
+// multi-dropdown/demo.html "Product variant" and "Time · hh:mm" segments.
+const variantSegments = [
+  KakaoMultiDropdownSegment(
+    name: 'size',
+    label: 'Size',
+    options: [
+      KakaoMultiDropdownOption('XS'),
+      KakaoMultiDropdownOption('S'),
+      KakaoMultiDropdownOption('M'),
+      KakaoMultiDropdownOption('L'),
+      KakaoMultiDropdownOption('XL'),
+    ],
+  ),
+  KakaoMultiDropdownSegment(
+    name: 'color',
+    label: 'Colour',
+    options: [KakaoMultiDropdownOption('black'), KakaoMultiDropdownOption('white'), KakaoMultiDropdownOption('sand')],
+  ),
+];
+
+final timeSegments = [
+  KakaoMultiDropdownSegment(
+    name: 'hour',
+    label: 'Hour',
+    placeholder: 'hh',
+    options: [for (var h = 0; h < 24; h++) KakaoMultiDropdownOption('$h'.padLeft(2, '0'))],
+  ),
+  KakaoMultiDropdownSegment(
+    name: 'minute',
+    label: 'Minute',
+    placeholder: 'mm',
+    options: [for (var m = 0; m < 60; m += 5) KakaoMultiDropdownOption('$m'.padLeft(2, '0'))],
+  ),
+];

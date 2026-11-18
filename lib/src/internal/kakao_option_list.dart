@@ -34,6 +34,8 @@ class KakaoOption extends KakaoOptionEntry {
     this.color,
     this.role,
     this.expanded,
+    this.textStyle,
+    this.selected,
   });
 
   /// The text, also what type-ahead matches.
@@ -63,6 +65,15 @@ class KakaoOption extends KakaoOptionEntry {
   /// Not null: the row opens something (a submenu), open when true. An open
   /// row keeps the highlight background (menu.js `[aria-expanded="true"]`).
   final bool? expanded;
+
+  /// Merged over the row's text style (and the checked weight): the
+  /// selected or "Unknown" option of a multi dropdown (accent and weight,
+  /// italic), a struck-through disabled day.
+  final TextStyle? textStyle;
+
+  /// Selected in semantics without a lead column (a listbox option's
+  /// `aria-selected`, multi-dropdown.js); null: from [checked].
+  final bool? selected;
 }
 
 /// Rows under an optional heading (`role="group"`).
@@ -335,6 +346,9 @@ class KakaoOptionListController extends ChangeNotifier {
 ///   content when its height is capped.
 /// - The lead column (check mark or icon) shows when any row has one
 ///   (menu.js `.panel.has-lead`).
+/// - [initial] is highlighted from the first frame (no fade) and scrolled to
+///   the middle of the list (multi-dropdown.js `_openSeg`: "Centre the
+///   current value in the list on open").
 ///
 /// [rowWrapper] wraps a row (without the list padding), for a submenu
 /// panel anchored to it.
@@ -353,6 +367,7 @@ class KakaoOptionList extends StatefulWidget {
     this.rowWrapper,
     this.semanticsRole,
     this.semanticsLabel,
+    this.initial,
   });
 
   final List<KakaoOptionEntry> entries;
@@ -370,6 +385,10 @@ class KakaoOptionList extends StatefulWidget {
   final SemanticsRole? semanticsRole;
   final String? semanticsLabel;
 
+  /// The row highlighted (by neither keys nor pointer) and centred when the
+  /// list is first shown.
+  final int? initial;
+
   @override
   State<KakaoOptionList> createState() => _KakaoOptionListState();
 }
@@ -383,6 +402,26 @@ class _KakaoOptionListState extends State<KakaoOptionList> {
   void initState() {
     super.initState();
     widget.controller.addListener(_changed);
+    final i = widget.initial;
+    if (i != null) {
+      final c = widget.controller.._attach(kakaoOptionRows(widget.entries), widget.onActivate);
+      if (i >= 0 && i < c._rows.length && !c._rows[i].disabled) {
+        c
+          .._highlighted = i
+          .._keyboard = false;
+        _shown = i;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _centre(i));
+      }
+    }
+  }
+
+  void _centre(int i) {
+    final box = _rowKeys[i]?.currentContext?.findRenderObject();
+    if (!mounted || box == null || !_scroll.hasClients) return;
+    final viewport = RenderAbstractViewport.maybeOf(box);
+    if (viewport == null) return;
+    final p = _scroll.position;
+    _scroll.jumpTo(viewport.getOffsetToReveal(box, .5).offset.clamp(p.minScrollExtent, p.maxScrollExtent));
   }
 
   @override
@@ -574,6 +613,7 @@ class _Row extends StatelessWidget {
         fontVariations: [FontVariation.weight(weight)],
       );
     }
+    if (o.textStyle case final extra?) text = text.merge(extra);
     final radius = BorderRadius.circular(s.rowRadius);
 
     Widget? leadBox;
@@ -623,7 +663,7 @@ class _Row extends StatelessWidget {
       container: true,
       enabled: !o.disabled,
       checked: o.checked,
-      selected: o.role == null && o.checked != null ? checked : null,
+      selected: o.selected ?? (o.role == null && o.checked != null ? checked : null),
       expanded: o.expanded,
       button: o.role == null && o.checked == null,
       label: o.label,

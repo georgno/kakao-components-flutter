@@ -1,26 +1,143 @@
 {
   "_doc": "Look-alike pairs: an element on a web demo page and the showcase fixture of the same id (example/lib/lookalike/fixtures.dart). selector is a Playwright selector (it pierces open shadow roots); nth picks among its matches (default 0). margin is the room around the element in the crop, in CSS pixels (default 8; more for a card's shadow and glow). open (optional) is a selector clicked first, for elements that only show when opened (the Flutter fixture gets open=1 and opens itself); type (optional) is text typed after that click (the Flutter fixture types the same itself). See README.md.",
   "cases": [
-    { "id": "button-variants", "page": "components/button/demo.html", "selector": "main > kakao-card .row[data-demo-wrap]" },
-    { "id": "button-sizes", "page": "components/button/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) .row" },
-    { "id": "button-menu", "page": "components/button/demo.html", "selector": "kakao-button#sort" },
-    { "id": "button-menu-open", "page": "components/button/demo.html", "open": "#sort .kakao-button-inner", "selector": "kakao-button#sort .kakao-button-menu" },
-    { "id": "button-segment", "page": "components/button/demo.html", "selector": "#segment" },
-    { "id": "card-primary", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 0, "margin": 14 },
-    { "id": "card-danger", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 1, "margin": 14 },
-    { "id": "card-single-button", "page": "components/card/demo.html", "selector": "[data-example] > kakao-card", "nth": 2, "margin": 14 },
-    { "id": "combobox-closed", "page": "components/combobox/demo.html", "selector": "kakao-card:has(> h3:text-is('Strict · only listed values')) kakao-combobox" },
-    { "id": "combobox-open", "page": "components/combobox/demo.html", "open": "kakao-combobox#c1 input", "type": "ch", "selector": "kakao-combobox#c1 .panel" },
-    { "id": "combobox-states", "page": "components/combobox/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div" },
-    { "id": "menu-icons", "page": "components/menu/demo.html", "open": "#file-actions", "selector": "kakao-menu#file-menu .panel[data-depth='0']" },
-    { "id": "menu-groups", "page": "components/menu/demo.html", "open": "#account", "selector": "kakao-menu[for='account'] .panel[data-depth='0']" },
-    { "id": "popover-click", "page": "components/popover/demo.html", "open": "#anchor-click", "selector": "kakao-popover[for='anchor-click'] .surface" },
-    { "id": "popover-list", "page": "components/popover/demo.html", "open": "#anchor-list", "selector": "kakao-popover[for='anchor-list'] .surface" },
-    { "id": "progress-segments", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 0 },
-    { "id": "progress-sizes", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 2 },
-    { "id": "progress-tones", "page": "components/progress/demo.html", "selector": ".bars[data-demo-wrap]", "nth": 3 },
-    { "id": "select-closed", "page": "components/select/demo.html", "selector": "kakao-select#s1" },
-    { "id": "select-open", "page": "components/select/demo.html", "open": "kakao-select#s1 .trigger", "selector": "kakao-select#s1 .panel" },
-    { "id": "select-states", "page": "components/select/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div" }
+    {
+      "id": "button-variants",
+      "page": "components/button/demo.html",
+      "selector": "main > kakao-card .row[data-demo-wrap]"
+    },
+    {
+      "id": "button-sizes",
+      "page": "components/button/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Sizes')) .row"
+    },
+    {
+      "id": "button-menu",
+      "page": "components/button/demo.html",
+      "selector": "kakao-button#sort"
+    },
+    {
+      "id": "button-menu-open",
+      "page": "components/button/demo.html",
+      "open": "#sort .kakao-button-inner",
+      "selector": "kakao-button#sort .kakao-button-menu"
+    },
+    {
+      "id": "button-segment",
+      "page": "components/button/demo.html",
+      "selector": "#segment"
+    },
+    {
+      "id": "card-primary",
+      "page": "components/card/demo.html",
+      "selector": "[data-example] > kakao-card",
+      "nth": 0,
+      "margin": 14
+    },
+    {
+      "id": "card-danger",
+      "page": "components/card/demo.html",
+      "selector": "[data-example] > kakao-card",
+      "nth": 1,
+      "margin": 14
+    },
+    {
+      "id": "card-single-button",
+      "page": "components/card/demo.html",
+      "selector": "[data-example] > kakao-card",
+      "nth": 2,
+      "margin": 14
+    },
+    {
+      "id": "combobox-closed",
+      "page": "components/combobox/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Strict · only listed values')) kakao-combobox"
+    },
+    {
+      "id": "combobox-open",
+      "page": "components/combobox/demo.html",
+      "open": "kakao-combobox#c1 input",
+      "type": "ch",
+      "selector": "kakao-combobox#c1 .panel"
+    },
+    {
+      "id": "combobox-states",
+      "page": "components/combobox/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div"
+    },
+    {
+      "id": "menu-icons",
+      "page": "components/menu/demo.html",
+      "open": "#file-actions",
+      "selector": "kakao-menu#file-menu .panel[data-depth='0']"
+    },
+    {
+      "id": "menu-groups",
+      "page": "components/menu/demo.html",
+      "open": "#account",
+      "selector": "kakao-menu[for='account'] .panel[data-depth='0']"
+    },
+    {
+      "id": "popover-click",
+      "page": "components/popover/demo.html",
+      "open": "#anchor-click",
+      "selector": "kakao-popover[for='anchor-click'] .surface"
+    },
+    {
+      "id": "popover-list",
+      "page": "components/popover/demo.html",
+      "open": "#anchor-list",
+      "selector": "kakao-popover[for='anchor-list'] .surface"
+    },
+    {
+      "id": "progress-segments",
+      "page": "components/progress/demo.html",
+      "selector": ".bars[data-demo-wrap]",
+      "nth": 0
+    },
+    {
+      "id": "progress-sizes",
+      "page": "components/progress/demo.html",
+      "selector": ".bars[data-demo-wrap]",
+      "nth": 2
+    },
+    {
+      "id": "progress-tones",
+      "page": "components/progress/demo.html",
+      "selector": ".bars[data-demo-wrap]",
+      "nth": 3
+    },
+    {
+      "id": "select-closed",
+      "page": "components/select/demo.html",
+      "selector": "kakao-select#s1"
+    },
+    {
+      "id": "select-open",
+      "page": "components/select/demo.html",
+      "open": "kakao-select#s1 .trigger",
+      "selector": "kakao-select#s1 .panel"
+    },
+    {
+      "id": "select-states",
+      "page": "components/select/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div"
+    },
+    {
+      "id": "multi-dropdown-closed",
+      "page": "components/multi-dropdown/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Known date · year range')) kakao-multi-dropdown"
+    },
+    {
+      "id": "multi-dropdown-open",
+      "page": "components/multi-dropdown/demo.html",
+      "open": "kakao-multi-dropdown#dob .trigger[data-seg='month']",
+      "selector": "kakao-multi-dropdown#dob .popup:not([hidden])"
+    },
+    {
+      "id": "multi-dropdown-disabled",
+      "page": "components/multi-dropdown/demo.html",
+      "selector": "kakao-card:has(> h3:text-is('Disabled')) kakao-multi-dropdown"
+    }
   ]
 }

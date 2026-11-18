@@ -1,7 +1,7 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu, select, combobox (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select, combobox, multi-dropdown (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -18,7 +18,8 @@ Every component after this gets cases in `tool/lookalike/cases.json` and a
 pass of it. Cases so far: button (with the dropdown closed and opened, and the segment), card, progress,
 popover and menu (opened first), select (closed, opened, disabled and error), combobox
 (closed with a value, opened while filtering — the case types after its `open` click —,
-disabled and error).
+disabled and error), multi-dropdown (closed with every part set, its month list opened,
+disabled).
 
 ## 1. Anchored panel and option list
 
@@ -30,7 +31,7 @@ disabled and error).
   `lib/src/internal/kakao_option_list.dart`, `KakaoOptionList`; rows, check mark,
   keyboard and pointer highlight, type-ahead, groups, separators).
 - Then: `popover` (done), `menu` (done), the button's menu mode (with its chevron) and
-  segmented group (done), `select` (done), `combobox` (done), `multi-dropdown`, `command-palette`.
+  segmented group (done), `select` (done), `combobox` (done), `multi-dropdown` (done), `command-palette`.
 
 ## 2. Fields
 
@@ -136,3 +137,13 @@ disabled and error).
 - `tokens.json` compact format (formatVersion 2).
 - Browser fixtures in kakao-components re-recorded in Firefox.
 - iOS builds.
+- Multi dropdown: no form participation (`name`, `required`, reset, validity): the owner keeps
+  the value; no `setData` (the owner passes new `segments`); events are callbacks; no listbox /
+  option roles or `aria-activedescendant` (the boxes are buttons named "<segment>, <value>",
+  the list a list with selected rows); the list stays 8 px inside the screen (the web one is
+  plain `position: absolute` and may run off it); a pointer over a disabled option clears the
+  highlight; a keyboard move scrolls the row to the list's edge, not 4 px past it; the cramped
+  check compares the shrunk box with its long placeholder (the web measures the rendered
+  span), and a box never shrinks below its padding and chevron (the group can then be wider
+  than its room); boxes are sized from Flutter's text metrics, so they can differ by a
+  fraction of a pixel; focus that leaves to nowhere (a window blur) does not close the list.

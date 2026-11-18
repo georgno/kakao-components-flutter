@@ -66,3 +66,13 @@
 - Shared tokens, Inter Tight variable font.
 - `KakaoButton`.
 - Showcase app with an in-app updater fed by the rolling `debug` release.
+- `KakaoMultiDropdown` (`<kakao-multi-dropdown>`): several dropdowns joined into one input group
+  holding one value; the date preset (`KakaoMultiDropdown.date`: dd.mm.yyyy, impossible days
+  disabled, a clamped day comes back) and custom segments with a separator; "Unknown" parts
+  (`allowUnknown`, per segment `unknown`), shown as "–"; boxes as wide as their widest label,
+  short placeholders when cramped, ellipsis when tight; shared borders, raised open / focused
+  box with the focus outline; centred current value on open; keys (step, open, move between
+  boxes, type-ahead that moves on, Delete) and pointer (hover highlight); controller with
+  `value`, `parts`, `setPart`, `clear`, `open`. It is not a multiple select: no checkboxes,
+  search or "Select all". Option list: `KakaoOption.textStyle` and `selected`,
+  `KakaoOptionList.initial` (highlighted from the start and centred).

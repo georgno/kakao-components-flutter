@@ -87,6 +87,13 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     ],
     anchor: 'Server status',
   ),
+  // multi-dropdown/demo.html "Known date · year range", closed with every part set.
+  'multi-dropdown-closed': (_) =>
+      const KakaoMultiDropdown.date(label: 'Appointment', minYear: 2026, maxYear: 2030, value: '30.10.2026'),
+  // multi-dropdown/demo.html `#dob` with its month list open.
+  'multi-dropdown-open': (c) => _Dob(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
+  // multi-dropdown/demo.html "Disabled".
+  'multi-dropdown-disabled': (_) => const KakaoMultiDropdown.date(label: 'Locked', value: '01.01.2000', disabled: true),
   // select/demo.html "Single · child options": #s1, closed and opened.
   'select-closed': (_) => const _Countries(),
   'select-open': (c) => _Countries(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
@@ -199,6 +206,40 @@ class _ComboCountriesState extends State<_ComboCountries> {
     hint: '“osterr” finds Österreich. Any other text is kept too.',
     options: comboCountries,
     focusNode: _focus,
+    panelKey: widget.panelKey,
+  );
+}
+
+/// multi-dropdown/demo.html `#dob`; when [open], its month list opens after
+/// the first frame, as the case's click does.
+class _Dob extends StatefulWidget {
+  const _Dob({this.open = false, this.panelKey});
+
+  final bool open;
+  final Key? panelKey;
+
+  @override
+  State<_Dob> createState() => _DobState();
+}
+
+class _DobState extends State<_Dob> {
+  final _controller = KakaoMultiDropdownController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.open) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 200), () => _controller.open('month'));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => KakaoMultiDropdown.date(
+    label: 'Date of birth',
+    allowUnknown: const {'day', 'month'},
+    value: '00.00.1990',
+    controller: _controller,
     panelKey: widget.panelKey,
   );
 }

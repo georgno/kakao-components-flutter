@@ -186,6 +186,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Combobox', child: const _ComboboxExamples()),
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
+            _Section(title: 'Multi dropdown', child: const _MultiDropdownExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(title: 'Select', child: const _SelectExamples()),
@@ -424,6 +425,105 @@ class _SelectExamplesState extends State<_SelectExamples> {
                 options: [KakaoSelectOption('Free'), KakaoSelectOption('Pro'), KakaoSelectOption('Team')],
               ),
             ]),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(_log, style: theme.text(color: theme.colors.textSoft)),
+      ],
+    );
+  }
+}
+
+/// multi-dropdown/demo.html: dates (unknown parts, every part unknown, a
+/// year range, disabled), custom segments (variant, time) and the playground.
+class _MultiDropdownExamples extends StatefulWidget {
+  const _MultiDropdownExamples();
+
+  @override
+  State<_MultiDropdownExamples> createState() => _MultiDropdownExamplesState();
+}
+
+class _MultiDropdownExamplesState extends State<_MultiDropdownExamples> {
+  final _dob = KakaoMultiDropdownController();
+  String _log = 'Pick a part';
+
+  void _change(KakaoMultiDropdownChange e) => setState(
+    () => _log =
+        'dropdown-change · ${e.complete ? e.value : '(incomplete)'}'
+        '${e.unknown.isEmpty ? '' : ' · unknown: ${e.unknown.join(', ')}'}',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 32,
+          runSpacing: 24,
+          children: [
+            KakaoMultiDropdown.date(
+              label: 'Date of birth',
+              allowUnknown: const {'day', 'month'},
+              value: '00.00.1990',
+              controller: _dob,
+              onChanged: _change,
+            ),
+            KakaoMultiDropdown.date(label: 'First visit', allowUnknown: const {}, onChanged: _change),
+            KakaoMultiDropdown.date(
+              label: 'Appointment',
+              minYear: 2026,
+              maxYear: 2030,
+              value: '30.10.2026',
+              onChanged: _change,
+            ),
+            const KakaoMultiDropdown.date(label: 'Locked', value: '01.01.2000', disabled: true),
+            KakaoMultiDropdown(
+              label: 'Variant',
+              separator: ' / ',
+              allowUnknown: const {'color'},
+              segments: variantSegments,
+              onChanged: _change,
+            ),
+            KakaoMultiDropdown(
+              label: 'Reminder',
+              separator: ':',
+              segments: timeSegments,
+              value: '09:30',
+              onChanged: _change,
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'value = "29.02.2024"',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => setState(() => _dob.value = '29.02.2024'),
+            ),
+            KakaoButton(
+              label: 'setPart("month", "04")',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _dob.setPart('month', '04'),
+            ),
+            KakaoButton(
+              label: 'setPart("day", "00")',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _dob.setPart('day', '00'),
+            ),
+            KakaoButton(
+              label: 'clear()',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: _dob.clear,
+            ),
           ],
         ),
         const SizedBox(height: 8),
