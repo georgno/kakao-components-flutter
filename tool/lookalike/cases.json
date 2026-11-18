@@ -37,6 +37,12 @@
     { "id": "textarea-counter", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Bio']" },
     { "id": "textarea-autosize", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Notes']" },
     { "id": "textarea-error", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Reason']" },
-    { "id": "textarea-sizes", "page": "components/textarea/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes · resize')) > div" }
+    { "id": "textarea-sizes", "page": "components/textarea/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes · resize')) > div" },
+    { "id": "password-input-basic", "page": "components/password-input/demo.html", "selector": "kakao-password-input[placeholder='Your password']" },
+    { "id": "password-input-hint-error", "page": "components/password-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Hint · error')) > div" },
+    { "id": "password-input-sizes", "page": "components/password-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "password-input-states", "page": "components/password-input/demo.html", "selector": "kakao-card:has(kakao-password-input[hide-toggle]) > div" },
+    { "id": "password-input-requirements", "page": "components/password-input/demo.html", "selector": "kakao-password-input#p1" },
+    { "id": "password-input-list-data", "page": "components/password-input/demo.html", "selector": "kakao-password-input[label='Passphrase']" }
   ]
 }

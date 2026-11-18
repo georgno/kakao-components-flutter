@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -28,6 +29,7 @@ class KakaoField extends StatelessWidget {
     required this.child,
     this.counter,
     this.counterGap = 0,
+    this.messageMinWidth,
   });
 
   final String? label;
@@ -53,6 +55,13 @@ class KakaoField extends StatelessWidget {
   /// semantics as it is.
   final Widget? counter;
   final double counterGap;
+
+  /// Not null: the [counter] keeps to the end (password-input.js
+  /// `.messages`: a wrapping flex row, the message `flex: 1 1 <basis>`, the
+  /// end part `margin-inline-start: auto`). Beside the message while the
+  /// message keeps at least this width, else on its own line under it,
+  /// [messageGap] lower; alone, at the end.
+  final double? messageMinWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +104,11 @@ class KakaoField extends StatelessWidget {
             child: Text(message, style: messageStyle.copyWith(color: messageColor)),
           );
     if (counter == null) return text!;
+    final minWidth = messageMinWidth;
+    if (minWidth != null) {
+      if (text == null) return Align(alignment: AlignmentDirectional.centerEnd, child: counter);
+      return _MessageRow(gap: counterGap, minWidth: minWidth, runGap: messageGap, message: text, end: counter);
+    }
     if (text == null) return Align(alignment: AlignmentDirectional.centerStart, child: counter);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,6 +118,147 @@ class KakaoField extends StatelessWidget {
         counter,
       ],
     );
+  }
+}
+
+enum _MessageSlot { message, end }
+
+/// The message and an end part on one line, or the end part on the next
+/// line when the message would get less than [minWidth] (a wrapping flex
+/// row: `flex-wrap: wrap; align-items: flex-start`, the message
+/// `flex: 1 1 minWidth`, the end part `flex: none; margin-inline-start: auto`).
+class _MessageRow extends SlottedMultiChildRenderObjectWidget<_MessageSlot, RenderBox> {
+  const _MessageRow({
+    required this.gap,
+    required this.minWidth,
+    required this.runGap,
+    required this.message,
+    required this.end,
+  });
+
+  final double gap;
+  final double minWidth;
+  final double runGap;
+  final Widget message;
+  final Widget end;
+
+  @override
+  Iterable<_MessageSlot> get slots => _MessageSlot.values;
+
+  @override
+  Widget? childForSlot(_MessageSlot slot) => switch (slot) {
+    _MessageSlot.message => message,
+    _MessageSlot.end => end,
+  };
+
+  @override
+  _RenderMessageRow createRenderObject(BuildContext context) =>
+      _RenderMessageRow(gap, minWidth, runGap, Directionality.of(context));
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderMessageRow renderObject) {
+    renderObject
+      ..gap = gap
+      ..minWidth = minWidth
+      ..runGap = runGap
+      ..textDirection = Directionality.of(context);
+  }
+}
+
+class _RenderMessageRow extends RenderBox with SlottedContainerRenderObjectMixin<_MessageSlot, RenderBox> {
+  _RenderMessageRow(this._gap, this._minWidth, this._runGap, this._textDirection);
+
+  double _gap;
+  set gap(double v) {
+    if (v == _gap) return;
+    _gap = v;
+    markNeedsLayout();
+  }
+
+  double _minWidth;
+  set minWidth(double v) {
+    if (v == _minWidth) return;
+    _minWidth = v;
+    markNeedsLayout();
+  }
+
+  double _runGap;
+  set runGap(double v) {
+    if (v == _runGap) return;
+    _runGap = v;
+    markNeedsLayout();
+  }
+
+  TextDirection _textDirection;
+  set textDirection(TextDirection v) {
+    if (v == _textDirection) return;
+    _textDirection = v;
+    markNeedsLayout();
+  }
+
+  RenderBox get _message => childForSlot(_MessageSlot.message)!;
+  RenderBox get _end => childForSlot(_MessageSlot.end)!;
+
+  @override
+  Iterable<RenderBox> get children => [?childForSlot(_MessageSlot.message), ?childForSlot(_MessageSlot.end)];
+
+  @override
+  void performLayout() {
+    final width = constraints.maxWidth;
+    _end.layout(BoxConstraints(maxWidth: width), parentUsesSize: true);
+    final endSize = _end.size;
+    final room = width - endSize.width - _gap;
+    final oneLine = room >= _minWidth;
+    _message.layout(BoxConstraints.tightFor(width: oneLine ? room : width), parentUsesSize: true);
+    final rtl = _textDirection == TextDirection.rtl;
+    (_message.parentData! as BoxParentData).offset = Offset(rtl ? width - _message.size.width : 0, 0);
+    final endY = oneLine ? 0.0 : _message.size.height + _runGap;
+    (_end.parentData! as BoxParentData).offset = Offset(rtl ? 0 : width - endSize.width, endY);
+    final height = oneLine
+        ? (_message.size.height > endSize.height ? _message.size.height : endSize.height)
+        : endY + endSize.height;
+    size = constraints.constrain(Size(width, height));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    for (final child in children) {
+      context.paintChild(child, offset + (child.parentData! as BoxParentData).offset);
+    }
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    for (final child in children) {
+      final offset = (child.parentData! as BoxParentData).offset;
+      final hit = result.addWithPaintOffset(
+        offset: offset,
+        position: position,
+        hitTest: (result, transformed) => child.hitTest(result, position: transformed),
+      );
+      if (hit) return true;
+    }
+    return false;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _end.getMinIntrinsicWidth(height);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      _message.getMaxIntrinsicWidth(height) + _gap + _end.getMaxIntrinsicWidth(height);
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final width = constraints.maxWidth;
+    final endSize = _end.getDryLayout(BoxConstraints(maxWidth: width));
+    final room = width - endSize.width - _gap;
+    final oneLine = room >= _minWidth;
+    final messageSize = _message.getDryLayout(BoxConstraints.tightFor(width: oneLine ? room : width));
+    final height = oneLine
+        ? (messageSize.height > endSize.height ? messageSize.height : endSize.height)
+        : messageSize.height + _runGap + endSize.height;
+    return constraints.constrain(Size(width, height));
   }
 }
 
@@ -179,26 +334,29 @@ class KakaoRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = this.color;
-    if (color == null) return child;
     final out = -(offset + width);
+    // Always a Stack: the child keeps its place (and its state) when the
+    // outline comes and goes, with the constraints it would get alone.
     return Stack(
       clipBehavior: Clip.none,
+      fit: StackFit.passthrough,
       children: [
         child,
-        Positioned(
-          left: out,
-          top: out,
-          right: out,
-          bottom: out,
-          child: IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(color: color, width: width),
-                borderRadius: BorderRadius.circular(radius + offset + width),
+        if (color != null)
+          Positioned(
+            left: out,
+            top: out,
+            right: out,
+            bottom: out,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: Border.all(color: color, width: width),
+                  borderRadius: BorderRadius.circular(radius + offset + width),
+                ),
               ),
             ),
           ),
-        ),
       ],
     );
   }

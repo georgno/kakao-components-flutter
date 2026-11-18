@@ -188,6 +188,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Multi dropdown', child: const _MultiDropdownExamples()),
+            _Section(title: 'Password input', child: const _PasswordInputExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(title: 'Select', child: const _SelectExamples()),
@@ -906,6 +907,172 @@ class _TextareaExamplesState extends State<_TextareaExamples> {
           _log.isEmpty ? 'Type in the message field to see its events.' : _log.join('\n'),
           style: theme.text(size: 14, color: theme.colors.muted),
         ),
+      ],
+    );
+  }
+}
+
+/// password-input/demo.html: show / hide, hint and error, sizes, disabled,
+/// read only and no toggle; the default requirements with the event log, own
+/// requirements, the length from minLength, requirements set by script; a
+/// sign-up form blocked by required strength (the owner sets the error); and
+/// the playground's script calls.
+class _PasswordInputExamples extends StatefulWidget {
+  const _PasswordInputExamples();
+
+  @override
+  State<_PasswordInputExamples> createState() => _PasswordInputExamplesState();
+}
+
+class _PasswordInputExamplesState extends State<_PasswordInputExamples> {
+  final _log = <String>[];
+  final _password = TextEditingController();
+  String? _passwordError;
+  String _submitted = 'Submit to see the result.';
+  String _play = '';
+  bool? _playVisible;
+  final _playLog = <String>[];
+
+  void _event(List<String> log, String e) => setState(() {
+    log.insert(0, e);
+    if (log.length > 6) log.removeLast();
+  });
+
+  String _requirements(KakaoPasswordRequirements r) => 'password-input-requirements · ${r.met} of ${r.total}';
+
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final v = _password.text;
+    final check = KakaoPasswordInput.evaluate(v, requiredStrength: 4);
+    setState(() {
+      // required and required-strength: the owner checks (no form participation).
+      _passwordError = v.isEmpty ? 'Please fill in this field.' : check.strengthMessage;
+      if (_passwordError == null) _submitted = 'Submitted: user="ana", password of ${v.length} characters';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    final muted = theme.text(size: 14, color: theme.colors.muted);
+    Widget column(List<Widget> children) => SizedBox(
+      width: 340,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 16), children[i]],
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            column([
+              const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
+              const KakaoPasswordInput(label: 'Password', hint: 'Case sensitive.'),
+              const KakaoPasswordInput(label: 'Password', value: 'hunter2', error: 'That password is not right.'),
+              const KakaoPasswordInput(size: KakaoPasswordInputSize.sm, label: 'Small', value: '36px tall'),
+              const KakaoPasswordInput(label: 'Medium', value: '44px tall'),
+              const KakaoPasswordInput(size: KakaoPasswordInputSize.lg, label: 'Large', value: '52px tall'),
+              const KakaoPasswordInput(disabled: true, label: 'Disabled', value: 'secret'),
+              const KakaoPasswordInput(readOnly: true, label: 'Read only', value: 'secret'),
+              const KakaoPasswordInput(hideToggle: true, label: 'No toggle', value: 'secret'),
+            ]),
+            column([
+              KakaoPasswordInput(
+                label: 'New password',
+                requirements: true,
+                onRequirementsChanged: (r) => _event(_log, _requirements(r)),
+                onToggled: (v) => _event(_log, 'password-input-toggle · visible $v'),
+                onCommitted: (v) => _event(_log, 'change · ${v.length} characters'),
+              ),
+              Text(_log.isEmpty ? 'Type a password to see its events.' : _log.join('\n'), style: muted),
+              KakaoPasswordInput(label: 'Passphrase', requirements: true, requirementList: passphraseRequirements),
+              const KakaoPasswordInput(label: 'Admin password', requirements: true, minLength: 12),
+              KakaoPasswordInput(label: 'Account password', requirements: true, requirementList: accountRequirements),
+            ]),
+            column([
+              const KakaoTextInput(label: 'Username', value: 'ana', autofillHints: [AutofillHints.username]),
+              KakaoPasswordInput(
+                controller: _password,
+                label: 'Password',
+                requiredStrength: 4,
+                hint: 'Meet at least 4 of the 5.',
+                error: _passwordError,
+                onChanged: (_) {
+                  if (_passwordError != null) setState(() => _passwordError = null);
+                },
+                onSubmitted: (_) => _submit(),
+              ),
+              Row(
+                children: [KakaoButton(label: 'Create account', onPressed: _submit)],
+              ),
+              Text(_submitted, style: muted),
+            ]),
+          ],
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          width: 420,
+          child: KakaoPasswordInput(
+            label: 'Password',
+            value: _play,
+            visible: _playVisible,
+            requirements: true,
+            requiredStrength: KakaoPasswordInput.allRequirements,
+            onChanged: (v) => _play = v,
+            onToggled: (v) {
+              _playVisible = v;
+              _event(_playLog, 'password-input-toggle · visible $v');
+            },
+            onRequirementsChanged: (r) => _event(_playLog, _requirements(r)),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'value = "Tr0ub4dor"',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => setState(() => _play = 'Tr0ub4dor'),
+            ),
+            KakaoButton(
+              label: 'value = ""',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => setState(() => _play = ''),
+            ),
+            KakaoButton(
+              label: 'toggle visible',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => setState(() => _playVisible = !(_playVisible ?? false)),
+            ),
+            KakaoButton(
+              label: 'check strength',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () {
+                final message = KakaoPasswordInput.evaluate(_play, requiredStrength: 0).strengthMessage;
+                _event(_playLog, 'valid ${message == null}${message == null ? '' : ' · $message'}');
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(_playLog.isEmpty ? 'Use the buttons or type to see events.' : _playLog.join('\n'), style: muted),
       ],
     );
   }

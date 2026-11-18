@@ -1,7 +1,8 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
+password-input (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -21,7 +22,8 @@ popover and menu (opened first), select (closed, opened, disabled and error), co
 disabled and error), multi-dropdown (closed with every part set, its month list opened,
 disabled), command-palette (opened with all commands, opened while filtering by "fi", and the
 empty state), text-input (label and hint, search with icon and clear button, error, sizes,
-disabled and read only), textarea (label, counter, auto-growing, error, sizes).
+disabled and read only), textarea (label, counter, auto-growing, error, sizes), password-input (basic, hint and error, sizes,
+disabled / read only / no toggle, default requirements, own requirements).
 
 ## 1. Anchored panel and option list (done)
 
@@ -66,7 +68,17 @@ disabled and read only), textarea (label, counter, auto-growing, error, sizes).
   start: the `.below` flex row); `KakaoTextarea` puts its own padding inside a `KakaoFieldBox`
   with `paddingX: 0` (the textarea's padding scrolls with it on the web) and is the model for a
   field that grows with its content.
-- Then: `text-input` (done), `textarea` (done), `password-input`, `number-input`,
+  For password-input (done) `KakaoField` took `messageMinWidth`: the `counter` slot then keeps to
+  the end, beside the message while the message keeps that width, else on its own line under it
+  (password-input.js `.messages`, the Caps Lock warning). `KakaoRing` now always builds its Stack
+  (passthrough constraints), so what is inside a field box keeps its state when the outline comes
+  and goes (focus moving from the input to a button in the box rebuilt it before).
+  `KakaoPasswordInput` puts its own side padding in the row (`paddingX: 0` on the box) to end
+  with a focusable button inside the box (its private `_Toggle`: radius, hover fill, own outline,
+  in the field's tap region group); number-input's steppers can follow it. It is also the model
+  for a field with content under its messages (the strength bar and requirement list, outside
+  `KakaoField`, with the disabled opacity over all).
+- Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input`,
   `date-input` and `time-input` (date picker on the anchored panel),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
@@ -190,6 +202,24 @@ disabled and read only), textarea (label, counter, auto-growing, error, sizes).
   not a live `alert` region; the field's text selection colour is the focus colour at 25 %; the
   label and message lines round up, so a field with a label and a message is 1 px taller
   (139.4 → 140, look-alike check; see Text).
+
+- Password input: no form participation (`name`, `required`, `minlength` / `maxlength` validity,
+  reset, state restore, `validity` / `checkValidity`): the owner checks; `required-strength` gives
+  `KakaoPasswordRequirements.strengthMessage` (from `onRequirementsChanged` or
+  `KakaoPasswordInput.evaluate`) for the owner to show as `error` or to block its form, and Enter
+  calls `onSubmitted` instead of submitting a form; `maxLength` only limits typing; no `list-data`
+  JSON: requirements are `KakaoPasswordRequirement` objects (`.pattern` uses Dart's `RegExp`, which
+  follows JavaScript's; the `v` flag counts as `u`); `password-input-requirements` is not reported
+  for the first build (the web fires it on connect); Caps Lock is read from
+  `HardwareKeyboard.lockModesEnabled` on keys and pointer downs in the field (a soft keyboard has
+  none, so it never shows there); the toggle reports `toggled` in semantics (Flutter has no
+  pressed state); the announcements are a live region, so the same words twice in a row are not
+  announced again (the web empties it first), and their wording is English in code (`texts` has
+  the names); the error is not a live `alert` region; no `forced-colors` rules; no `data-*`
+  mirroring; mobile platforms show the last typed character for a moment (Flutter's
+  `obscureText`); the field's text selection colour is the focus colour at 25 %; labelled fields
+  are 1 px shorter (line box rounding, see Text; look-alike check: 0.1-0.5 %, the error case 1.9 %
+  from that 1 px shift).
 
 ## Seen on the web side
 

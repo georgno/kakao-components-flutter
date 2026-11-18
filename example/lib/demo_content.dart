@@ -395,3 +395,16 @@ class _SearchPainter extends CustomPainter {
   @override
   bool shouldRepaint(_SearchPainter old) => old.color != color;
 }
+
+/// password-input/demo.html "Own requirements · list-data".
+final passphraseRequirements = [
+  KakaoPasswordRequirement.pattern('At least 16 characters', '.{16,}'),
+  KakaoPasswordRequirement.pattern('Four words or more', r'(\S+\s+){3,}\S+'),
+  KakaoPasswordRequirement.pattern('No word repeated', r'^(?!.*\b(\w+)\b.*\b\1\b)'),
+];
+
+/// password-input/demo.html "Set by script · requirements property".
+final accountRequirements = [
+  KakaoPasswordRequirement.pattern('At least 10 characters', '.{10,}'),
+  KakaoPasswordRequirement(label: 'Not your username', test: (v) => v.toLowerCase() != 'ana'),
+];

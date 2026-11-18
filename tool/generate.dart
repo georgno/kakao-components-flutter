@@ -22,7 +22,7 @@ import 'dart:convert';
 import 'dart:io';
 
 /// Components with a Flutter twin: their settings classes are generated.
-const ported = ['button', 'card', 'combobox', 'command-palette', 'dialog', 'menu', 'multi-dropdown', 'popover', 'progress', 'select', 'text-input', 'textarea', 'theme-switch', 'tooltip'];
+const ported = ['button', 'card', 'combobox', 'command-palette', 'dialog', 'menu', 'multi-dropdown', 'password-input', 'popover', 'progress', 'select', 'text-input', 'textarea', 'theme-switch', 'tooltip'];
 
 late Map<String, dynamic> tokens;
 

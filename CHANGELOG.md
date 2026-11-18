@@ -108,3 +108,15 @@
   / lg (padding and font of textarea.js), `disabled`, `readOnly`; `onChanged` on every edit,
   `onCommitted` on blur when the text changed, Enter a new line. `KakaoField.counter`. Settings
   generated for textarea, also checked against tokens.json.
+- `KakaoPasswordInput` (`<kakao-password-input>`): the text input's look (label, hint, error, sizes
+  sm / md / lg with password-input.js's literals), a show / hide button at the end of the field
+  (focusable, its own outline, "Show password" toggled in semantics; a tap keeps focus and the
+  caret in the field; `hideToggle`, `visible`, `onToggled`), a Caps Lock warning at the end of the
+  hint line (below a narrow hint) while the field has focus, announced once; opt-in `requirements`:
+  a `KakaoProgress` with one segment per requirement (success tone when all are met) and the list
+  in auto-fill columns (check or open circle, met / not met in words), changes announced once
+  typing pauses for a second; `requirementList` (`KakaoPasswordRequirement`, `.pattern`,
+  `.defaults` following `minLength`), `requiredStrength` and `KakaoPasswordInput.evaluate` with
+  the web's validation messages; `onChanged`, `onCommitted`, `onSubmitted`,
+  `onRequirementsChanged`. `KakaoField.messageMinWidth`; `KakaoRing` keeps its child's state when
+  the outline toggles. Settings generated for password-input, also checked against tokens.json.

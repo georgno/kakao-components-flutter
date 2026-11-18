@@ -202,6 +202,28 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       semanticLabel: 'Large text area',
     ),
   ]),
+  // password-input/demo.html "Basic · show / hide".
+  'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
+  // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·
+  // hide-toggle": .stack, display grid, gap .6rem.
+  'password-input-hint-error': (_) => _fields(const [
+    KakaoPasswordInput(label: 'Password', hint: 'Case sensitive.'),
+    KakaoPasswordInput(label: 'Password', value: 'hunter2', error: 'That password is not right.'),
+  ]),
+  'password-input-sizes': (_) => _fields(const [
+    KakaoPasswordInput(size: KakaoPasswordInputSize.sm, label: 'Small', value: '36px tall'),
+    KakaoPasswordInput(label: 'Medium', value: '44px tall'),
+    KakaoPasswordInput(size: KakaoPasswordInputSize.lg, label: 'Large', value: '52px tall'),
+  ]),
+  'password-input-states': (_) => _fields(const [
+    KakaoPasswordInput(disabled: true, label: 'Disabled', value: 'secret'),
+    KakaoPasswordInput(readOnly: true, label: 'Read only', value: 'secret'),
+    KakaoPasswordInput(hideToggle: true, label: 'No toggle', value: 'secret'),
+  ]),
+  // password-input/demo.html "Default requirements" (#p1), "Own requirements".
+  'password-input-requirements': (_) => const KakaoPasswordInput(label: 'New password', requirements: true),
+  'password-input-list-data': (_) =>
+      KakaoPasswordInput(label: 'Passphrase', requirements: true, requirementList: passphraseRequirements),
 };
 
 /// Fields in a column with the demo's `gap: .6rem`.
