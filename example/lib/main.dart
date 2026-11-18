@@ -194,6 +194,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(title: 'Select', child: const _SelectExamples()),
+            _Section(title: 'Tag input', child: const _TagInputExamples()),
             _Section(title: 'Text input', child: const _TextInputExamples()),
             _Section(title: 'Textarea', child: const _TextareaExamples()),
             _Section(title: 'Time input', child: const _TimeInputExamples()),
@@ -1387,6 +1388,199 @@ class _TimeInputExamplesState extends State<_TimeInputExamples> {
         ),
         const SizedBox(height: 8),
         for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted, tabular: true)),
+      ],
+    );
+  }
+}
+
+/// tag-input/demo.html: Basic, States, In a form (as a values readout) and
+/// the playground with its API buttons and event log.
+class _TagInputExamples extends StatefulWidget {
+  const _TagInputExamples();
+
+  @override
+  State<_TagInputExamples> createState() => _TagInputExamplesState();
+}
+
+class _TagInputExamplesState extends State<_TagInputExamples> {
+  final _play = KakaoTagInputController();
+  bool _disabled = false;
+  var _form = (tags: const ['news', 'berlin'], cc: const <String>[]);
+  final _log = <String>[];
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget example(String caption, Widget child) => SizedBox(
+      width: 320,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(caption, style: theme.text(size: 14, weight: 600)),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+    Widget stack(List<Widget> children) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+      ],
+    );
+    Widget button(String label, VoidCallback onPressed, {bool? pressed}) => KakaoButton(
+      label: label,
+      variant: KakaoButtonVariant.secondary,
+      size: KakaoButtonSize.sm,
+      toggle: pressed != null,
+      pressed: pressed ?? false,
+      onPressed: onPressed,
+    );
+    String entries(String name, List<String> values) => values.map((v) => '$name=$v').join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Enter or comma',
+              KakaoTagInput(
+                label: 'Keywords',
+                values: KakaoTagInput.parse('design, tokens, theming'),
+                placeholder: 'Add a keyword',
+                hint: 'Enter or a comma adds the text. Paste “a, b, c” to add three.',
+              ),
+            ),
+            example(
+              'Suggestions',
+              const KakaoTagInput(
+                label: 'Labels',
+                placeholder: 'Type to see suggestions',
+                hint: 'Matching labels open below the field; any other text works too.',
+                suggestions: tagSuggestions,
+              ),
+            ),
+            example(
+              'Delimiters ",; "',
+              const KakaoTagInput(
+                label: 'Recipients',
+                delimiters: ',; ',
+                placeholder: 'name@example.com',
+                hint: 'Comma, semicolon or space ends a tag.',
+              ),
+            ),
+            example(
+              'Limit · maxTags 3',
+              const KakaoTagInput(
+                label: 'Top three skills',
+                maxTags: 3,
+                values: ['CSS', 'JavaScript'],
+                hint: 'Up to three. Adding “css” again flashes the existing tag.',
+              ),
+            ),
+            example(
+              'Duplicates allowed · tags with commas',
+              KakaoTagInput(
+                label: 'Authors',
+                allowDuplicates: true,
+                delimiters: ';',
+                values: KakaoTagInput.parse('["Smith, J.", "Doe, A.", "Smith, J."]'),
+                hint: 'Semicolon ends a tag, so names keep their comma.',
+              ),
+            ),
+            example(
+              'Many tags · wraps',
+              KakaoTagInput(
+                label: 'Ingredients',
+                values: KakaoTagInput.parse(
+                  'Flour, Sugar, Butter, Eggs, Milk, Vanilla extract, Baking powder, Salt, Lemon zest, Cinnamon',
+                ),
+              ),
+            ),
+            example(
+              'Sizes',
+              stack(const [
+                KakaoTagInput(size: KakaoTagInputSize.sm, label: 'Small', values: ['36px', 'sm']),
+                KakaoTagInput(label: 'Medium', values: ['44px', 'md']),
+                KakaoTagInput(size: KakaoTagInputSize.lg, label: 'Large', values: ['52px', 'lg']),
+              ]),
+            ),
+            example(
+              'Disabled · read-only · error',
+              stack(const [
+                KakaoTagInput(disabled: true, label: 'Disabled', values: ['One', 'Two']),
+                KakaoTagInput(readOnly: true, label: 'Read-only', values: ['Locked', 'Shown']),
+                KakaoTagInput(label: 'Topics', error: 'Add at least one topic.', placeholder: 'Add a topic'),
+              ]),
+            ),
+            example(
+              'In a form',
+              stack([
+                KakaoTagInput(
+                  label: 'Tags',
+                  placeholder: 'Add a tag',
+                  values: _form.tags,
+                  onChanged: (v) => setState(() => _form = (tags: v, cc: _form.cc)),
+                ),
+                KakaoTagInput(
+                  label: 'Cc',
+                  delimiters: ',; ',
+                  placeholder: 'name@example.com',
+                  values: _form.cc,
+                  onChanged: (v) => setState(() => _form = (tags: _form.tags, cc: v)),
+                ),
+                Text(
+                  'Entries: ${[entries('tags', _form.tags), entries('cc', _form.cc)].where((e) => e.isNotEmpty).join(' · ')}',
+                  style: theme.text(size: 13, color: theme.colors.muted),
+                ),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Playground', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 320,
+          child: KakaoTagInput(
+            label: 'Playground',
+            values: const ['alpha', 'beta'],
+            placeholder: 'Add a tag',
+            hint: 'Tags starting with “x” are refused by an onTagAdd listener.',
+            disabled: _disabled,
+            controller: _play,
+            onTagAdd: (v) {
+              final ok = !v.toLowerCase().startsWith('x');
+              _event('tag-add · $v${ok ? '' : ' (refused)'}');
+              return ok;
+            },
+            onTagRemove: (v) {
+              _event('tag-remove · $v');
+              return true;
+            },
+            onChanged: (v) => _event('change · ${KakaoTagInput.join(v)}'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            button('add("gamma")', () => setState(() => _play.add('gamma'))),
+            button('values = ["one", "two"]', () => setState(() => _play.values = ['one', 'two'])),
+            button('clear()', () => setState(_play.clear)),
+            button('disabled', () => setState(() => _disabled = !_disabled), pressed: _disabled),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted)),
       ],
     );
   }

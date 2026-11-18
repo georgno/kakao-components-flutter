@@ -315,6 +315,32 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     KakaoTimeInput(readOnly: true, now: true, label: 'Read only', value: '14:30'),
     KakaoTimeInput(label: 'Check-in', error: 'Check-in starts at 15:00.', value: '11:00'),
   ]),
+  // tag-input/demo.html "Enter or comma", "Many tags · wraps".
+  'tag-input-basic': (_) => KakaoTagInput(
+    label: 'Keywords',
+    values: KakaoTagInput.parse('design, tokens, theming'),
+    placeholder: 'Add a keyword',
+    hint: 'Enter or a comma adds the text. Paste “a, b, c” to add three.',
+  ),
+  'tag-input-wraps': (_) => KakaoTagInput(
+    label: 'Ingredients',
+    values: KakaoTagInput.parse(
+      'Flour, Sugar, Butter, Eggs, Milk, Vanilla extract, Baking powder, Salt, Lemon zest, Cinnamon',
+    ),
+  ),
+  // tag-input/demo.html "Suggestions", typed "e": the open panel.
+  'tag-input-open': (c) => _TagLabels(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
+  // tag-input/demo.html "Sizes", "Disabled · read-only · error": display grid, gap .6rem.
+  'tag-input-sizes': (_) => _fields(const [
+    KakaoTagInput(size: KakaoTagInputSize.sm, label: 'Small', values: ['36px', 'sm']),
+    KakaoTagInput(label: 'Medium', values: ['44px', 'md']),
+    KakaoTagInput(size: KakaoTagInputSize.lg, label: 'Large', values: ['52px', 'lg']),
+  ]),
+  'tag-input-states': (_) => _fields(const [
+    KakaoTagInput(disabled: true, label: 'Disabled', values: ['One', 'Two']),
+    KakaoTagInput(readOnly: true, label: 'Read-only', values: ['Locked', 'Shown']),
+    KakaoTagInput(label: 'Topics', error: 'Add at least one topic.', placeholder: 'Add a topic'),
+  ]),
   // password-input/demo.html "Basic · show / hide".
   'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
   // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·
@@ -718,5 +744,62 @@ Widget _card(BuildContext context, String title, String text, List<Widget> foote
     header: Text(title, style: theme.text(size: 16.8, weight: 700, tracking: -0.01, height: 1.5)),
     footer: footer,
     children: [Text(text, style: theme.text(size: 16, color: theme.colors.muted, height: 1.5))],
+  );
+}
+
+/// tag-input/demo.html "Suggestions"; [open] focuses it and types "e".
+class _TagLabels extends StatefulWidget {
+  const _TagLabels({this.open = false, this.panelKey});
+
+  final bool open;
+  final Key? panelKey;
+
+  @override
+  State<_TagLabels> createState() => _TagLabelsState();
+}
+
+class _TagLabelsState extends State<_TagLabels> {
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.open) return;
+    // As _ComboCountries: focus first, then type through the editing state.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focus.requestFocus();
+      Future<void>.delayed(const Duration(milliseconds: 200), _type);
+    });
+  }
+
+  void _type() {
+    if (!mounted) return;
+    EditableTextState? editable;
+    void visit(Element e) {
+      if (e is StatefulElement && e.state is EditableTextState) editable = e.state as EditableTextState;
+      if (editable == null) e.visitChildren(visit);
+    }
+
+    context.visitChildElements(visit);
+    editable?.userUpdateTextEditingValue(
+      const TextEditingValue(text: 'e', selection: TextSelection.collapsed(offset: 1)),
+      SelectionChangedCause.keyboard,
+    );
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => KakaoTagInput(
+    label: 'Labels',
+    placeholder: 'Type to see suggestions',
+    hint: 'Matching labels open below the field; any other text works too.',
+    suggestions: tagSuggestions,
+    focusNode: _focus,
+    panelKey: widget.panelKey,
   );
 }

@@ -96,6 +96,17 @@
   PM rows that `min` / `max` leave out (time, and datetime-local on the bound's day), in
   `KakaoDateInput` too. The picker icon and the today tag moved to
   `lib/src/internal/kakao_date_parts.dart` (`KakaoPickerIcon`, `KakaoTodayTag`).
+- `KakaoTagInput` (`<kakao-tag-input>`): free text that becomes tags on Enter or a delimiter
+  (`delimiters`, a comma by default), pasted lists (Ctrl / Cmd+V splits lines and tabs too),
+  `maxTags`, duplicates refused with the existing chip flashing (or `allowDuplicates`),
+  cancelable `onTagAdd` / `onTagRemove`, `onChanged` once per action; the chips wrap in the text
+  input's field and the text takes the rest of the last line; Backspace / Left select the last
+  tag (ink, outline on its ✕), arrows, Home / End, Backspace / Delete remove and move on,
+  typing returns to the text; suggestions on the combobox's panel (filtered, tags left out,
+  Down / Up / Enter, tap, Escape); label, hint, error, sizes 36 / 44 / 52, disabled, read only;
+  new tags grow in; `KakaoTagInputController` (`add`, `remove`, `clear`, `values`, `text`),
+  `KakaoTagInput.parse` / `join`. Chip settings are generated (`KakaoChipSettings`) and drawn
+  by the internal `lib/src/internal/kakao_chip.dart` (`KakaoChipView`) until chip is ported.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

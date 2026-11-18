@@ -2,7 +2,8 @@
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
 popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
-password-input, number-input, date-input, time-input (plus theme-switch settings for the cross-fade). The order below follows
+password-input, number-input, date-input, time-input, tag-input (plus theme-switch settings for the cross-fade
+and chip settings for the tags). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -27,7 +28,8 @@ disabled / read only / no toggle, default requirements, own requirements), numbe
 sm, the touch layout grouped right and left, split, plus only, disabled), date-input (date,
 time, datetime-local, month, week, the today tag, sizes, disabled / read only / error; the
 picker is the browser's own on the web, so it has no pair), time-input (time, step 900, seconds, over
-midnight, the now tag, sizes, disabled / read only / error).
+midnight, the now tag, sizes, disabled / read only / error), tag-input (keywords, wrapping tags, the
+suggestions opened while typing "e", sizes, disabled / read-only / error).
 
 ## 1. Anchored panel and option list (done)
 
@@ -107,7 +109,7 @@ midnight, the now tag, sizes, disabled / read only / error).
   bound's day). `KakaoTimeInput` is `KakaoDateInput` fixed to time with its own settings block.
 - Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input` (done),
   `date-input` (done), `time-input` (done),
-  `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
+  `tag-input` (done), `code-input`, `color-code`, `color-picker`, `file-upload`.
 
 ## 3. Toggles and ranges
 
@@ -300,6 +302,28 @@ midnight, the now tag, sizes, disabled / read only / error).
   where Chromium's picker (which the web uses) shows its own list; labelled fields are 1 px
   shorter (line box rounding, see Text; look-alike check: 0.2-0.7 %, states 1.3-1.4 % from
   that shift and the 2 px it adds over three fields).
+
+- Tag input: no form participation (`name`, `required`, reset, state restore, validity and its
+  messages): the owner checks the tags and sets `error`; `value` / `list-data` attributes are
+  lists here (`KakaoTagInput.parse` / `join` read and write the web's string form); events are
+  callbacks (`onTagAdd` / `onTagRemove` return false to cancel); the tags are not a list of list
+  items in semantics (each chip is a node named after its tag, selected while it has focus, with
+  its "Remove <tag>" button), and the text is a text field that reports expanded while
+  suggestions are open (no combobox role, no `aria-activedescendant`); the status is a live
+  region with English words (`KakaoTagInput.texts`); Ctrl / Cmd+V reads the clipboard itself
+  (lines and tabs split as on the web), but a paste from the context menu or a soft keyboard
+  goes through the one-line field, which drops line breaks first (only the delimiters split it),
+  and any edit that inserts several characters holding a delimiter counts as a paste (every part
+  becomes a tag); a character typed on a selected tag is inserted by the widget (hardware keys,
+  no IME composition); the ✕ outline shows on a tag selected by keys, not on one selected by a
+  tap or after a tap on a ✕ (Chromium's `:focus-visible` guess); Escape on a selected tag stops
+  there (the web lets it bubble); a disabled field's tags cannot take focus; the ✕ tap target is
+  the chip's height by 21 px (the web widens it to 24 × 24); a pointer of any kind highlights a
+  suggestion (the web: the mouse only); the chip is the internal `KakaoChipView` (chip is not
+  ported: no swatch, icon, meta, link or action); no `forced-colors` rules; no `data-*`
+  mirroring; the text selection colour is the focus colour at 25 %; labelled fields are 1 px
+  shorter (line box rounding, see Text; look-alike check: 0.1-0.5 %, the open panel 1.7-1.9 %
+  from text, the states case 1.0 % from that shift over three fields).
 
 ## Seen on the web side
 

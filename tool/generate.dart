@@ -26,6 +26,7 @@ import 'dart:io';
 const ported = [
   'button',
   'card',
+  'chip',
   'combobox',
   'command-palette',
   'date-input',
@@ -37,6 +38,7 @@ const ported = [
   'popover',
   'progress',
   'select',
+  'tag-input',
   'text-input',
   'textarea',
   'theme-switch',

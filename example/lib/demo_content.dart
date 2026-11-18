@@ -408,3 +408,6 @@ final accountRequirements = [
   KakaoPasswordRequirement.pattern('At least 10 characters', '.{10,}'),
   KakaoPasswordRequirement(label: 'Not your username', test: (v) => v.toLowerCase() != 'ana'),
 ];
+
+/// tag-input/demo.html "Suggestions": its `list-data`.
+const tagSuggestions = ['Bug', 'Feature', 'Docs', 'Design', 'Performance', 'Security', 'Accessibility', 'Refactoring'];

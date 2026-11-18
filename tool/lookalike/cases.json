@@ -65,6 +65,11 @@
     { "id": "time-input-midnight", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Night shift starts']" },
     { "id": "time-input-now", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Logged at']" },
     { "id": "time-input-sizes", "page": "components/time-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
-    { "id": "time-input-states", "page": "components/time-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" }
+    { "id": "time-input-states", "page": "components/time-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" },
+    { "id": "tag-input-basic", "page": "components/tag-input/demo.html", "selector": "kakao-tag-input#t1" },
+    { "id": "tag-input-wraps", "page": "components/tag-input/demo.html", "selector": "kakao-tag-input[label='Ingredients']" },
+    { "id": "tag-input-open", "page": "components/tag-input/demo.html", "open": "kakao-tag-input[label='Labels'] input", "type": "e", "selector": "kakao-tag-input[label='Labels'] .panel" },
+    { "id": "tag-input-sizes", "page": "components/tag-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "tag-input-states", "page": "components/tag-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read-only · error')) > div" }
   ]
 }
