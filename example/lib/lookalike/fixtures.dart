@@ -341,6 +341,34 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     KakaoTagInput(readOnly: true, label: 'Read-only', values: ['Locked', 'Shown']),
     KakaoTagInput(label: 'Topics', error: 'Add at least one topic.', placeholder: 'Add a topic'),
   ]),
+  // code-input/demo.html "Verification code", "Grouped", "PIN", "Letters too", "Error".
+  'code-input-basic': (_) =>
+      const KakaoCodeInput(label: 'Verification code', hint: 'We sent a 6-digit code to +43 660 ··· 12.'),
+  'code-input-grouped': (_) => const KakaoCodeInput(label: 'Sign-in code', separator: '3', value: '482'),
+  'code-input-pin': (_) =>
+      const KakaoCodeInput(label: 'Card PIN', length: 4, mask: true, autofillHints: [], value: '12'),
+  'code-input-alnum': (_) => const KakaoCodeInput(
+    label: 'Backup code',
+    type: KakaoCodeInputType.alphanumeric,
+    length: 8,
+    separator: '4',
+    hint: 'Letters and digits, as printed on your backup sheet.',
+  ),
+  'code-input-error': (_) => const KakaoCodeInput(
+    label: 'Verification code',
+    value: '123456',
+    error: 'That code has expired. We sent you a new one.',
+  ),
+  // code-input/demo.html "Sizes", "Disabled · read only": display grid, gap .75rem.
+  'code-input-sizes': (_) => _fields(const [
+    KakaoCodeInput(size: KakaoCodeInputSize.sm, label: 'Small', length: 4, value: '36'),
+    KakaoCodeInput(label: 'Medium', length: 4, value: '44'),
+    KakaoCodeInput(size: KakaoCodeInputSize.lg, label: 'Large', length: 4, value: '52'),
+  ], gap: 12),
+  'code-input-states': (_) => _fields(const [
+    KakaoCodeInput(disabled: true, label: 'Disabled', length: 4, value: '1234'),
+    KakaoCodeInput(readOnly: true, label: 'Read only', length: 4, value: '5678'),
+  ], gap: 12),
   // password-input/demo.html "Basic · show / hide".
   'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
   // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·
@@ -366,11 +394,11 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
 };
 
 /// Fields in a column with the demo's `gap: .6rem`.
-Widget _fields(List<Widget> children) => Column(
+Widget _fields(List<Widget> children, {double gap = 9.6}) => Column(
   mainAxisSize: MainAxisSize.min,
   crossAxisAlignment: CrossAxisAlignment.stretch,
   children: [
-    for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 9.6), children[i]],
+    for (var i = 0; i < children.length; i++) ...[if (i > 0) SizedBox(height: gap), children[i]],
   ],
 );
 

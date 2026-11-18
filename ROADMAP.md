@@ -2,7 +2,7 @@
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
 popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
-password-input, number-input, date-input, time-input, tag-input (plus theme-switch settings for the cross-fade
+password-input, number-input, date-input, time-input, tag-input, code-input (plus theme-switch settings for the cross-fade
 and chip settings for the tags). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
@@ -29,7 +29,8 @@ sm, the touch layout grouped right and left, split, plus only, disabled), date-i
 time, datetime-local, month, week, the today tag, sizes, disabled / read only / error; the
 picker is the browser's own on the web, so it has no pair), time-input (time, step 900, seconds, over
 midnight, the now tag, sizes, disabled / read only / error), tag-input (keywords, wrapping tags, the
-suggestions opened while typing "e", sizes, disabled / read-only / error).
+suggestions opened while typing "e", sizes, disabled / read-only / error), code-input (basic, grouped,
+PIN, alphanumeric with separator, error, sizes, disabled / read only).
 
 ## 1. Anchored panel and option list (done)
 
@@ -107,9 +108,17 @@ suggestions opened while typing "e", sizes, disabled / read-only / error).
   date-input; `kakaoTimeSeconds` in the values; the picker's time columns take an `enabled` rule
   and dim / skip rows outside `min` / `max` (time, over midnight, and datetime-local on the
   bound's day). `KakaoTimeInput` is `KakaoDateInput` fixed to time with its own settings block.
+  For code-input (done) nothing new in `kakao_field.dart`: `KakaoField`, `KakaoChangeTracker`
+  and `KakaoFieldBox` (one per drawn box, `paddingX: 0`, its `ring` on the current box) as they
+  are. It is the model for a field drawn over a hidden real one: a bare transparent
+  `EditableText` under the drawn row (not `KakaoFieldText`: its caret, placeholder and selection
+  gestures would show), a `TextInputFormatter` that sees every user edit (old and new value) and
+  rewrites it, the controller's selection kept on the current part, a `Focus` above it for the
+  keys it moves by itself, and the row in a `TapRegion` of the field's group so a tap on it keeps
+  the editing going.
 - Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input` (done),
   `date-input` (done), `time-input` (done),
-  `tag-input` (done), `code-input`, `color-code`, `color-picker`, `file-upload`.
+  `tag-input` (done), `code-input` (done), `color-code`, `color-picker`, `file-upload`.
 
 ## 3. Toggles and ranges
 
@@ -324,6 +333,24 @@ suggestions opened while typing "e", sizes, disabled / read-only / error).
   mirroring; the text selection colour is the focus colour at 25 %; labelled fields are 1 px
   shorter (line box rounding, see Text; look-alike check: 0.1-0.5 %, the open panel 1.7-1.9 %
   from text, the states case 1.0 % from that shift over three fields).
+
+- Code input: no form participation (`name`, `required`, validity with its tooShort /
+  valueMissing messages, reset, state restore, `form`): the owner checks the code and sets `error`
+  (`onCompleted` / `onSubmitted` stand for the demo's `requestSubmit`); no `:state(complete)`
+  (the owner compares the length); `value` / `length` / `clear()` / `focus()` are the
+  controller, `length` and the focus node; a focus from outside (Tab, the focus node) lands on the
+  first empty box as `focus()` does (Chrome's select-all on Tab puts the web one on the first
+  box); a user insert of more than one character counts as a paste (a whole code replaces the
+  value), so an IME committing several characters at once does too; no long-press paste menu on
+  touch platforms (the hidden field has no selection gestures or toolbar; paste goes through the
+  keyboard's clipboard suggestion or Ctrl / Cmd+V); no drop of dragged text; a tap places the box
+  on release (the web focuses on press); the drawn boxes ignore a drag across them (no mouse
+  selection: select all with Ctrl / Cmd+A tints the boxes); `pattern` uses Dart's `RegExp`
+  (JavaScript's rules, the `u` flag); the count read with the field ("6 digits") is English
+  (`KakaoCodeInput.texts`) and joined to the hint and error as one semantics hint; the error is not
+  a live `alert` region; the caret blinks on a timer (Flutter's own caret stays hidden); no
+  `forced-colors` rules; no `data-*` mirroring; labelled fields are 1 px shorter (line box
+  rounding, see Text; look-alike check: 0.0-0.4 %, the error case 1.5 % from that shift).
 
 ## Seen on the web side
 

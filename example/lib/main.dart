@@ -183,6 +183,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Button · toggle and segment', child: const _ToggleExamples()),
             const _Heading('Card'),
             const _CardExamples(),
+            _Section(title: 'Code input', child: const _CodeInputExamples()),
             _Section(title: 'Combobox', child: const _ComboboxExamples()),
             _Section(title: 'Command palette', child: const _CommandPaletteExamples()),
             _Section(title: 'Date input', child: const _DateInputExamples()),
@@ -1388,6 +1389,202 @@ class _TimeInputExamplesState extends State<_TimeInputExamples> {
         ),
         const SizedBox(height: 8),
         for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted, tabular: true)),
+      ],
+    );
+  }
+}
+
+/// code-input/demo.html: Basic, In a form (completing submits) and the
+/// playground with its API buttons and event log.
+class _CodeInputExamples extends StatefulWidget {
+  const _CodeInputExamples();
+
+  @override
+  State<_CodeInputExamples> createState() => _CodeInputExamplesState();
+}
+
+class _CodeInputExamplesState extends State<_CodeInputExamples> {
+  final _play = TextEditingController();
+  final _playFocus = FocusNode();
+  final _form = TextEditingController();
+  int _length = 6;
+  bool _error = false;
+  String _formOut = 'Submit to see the entries. A half-filled code does not submit.';
+  final _log = <String>[];
+
+  @override
+  void dispose() {
+    _play.dispose();
+    _playFocus.dispose();
+    _form.dispose();
+    super.dispose();
+  }
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  void _submit() => setState(() {
+    final v = _form.text;
+    _formOut = v.isEmpty
+        ? 'Please fill in this field.'
+        : v.length < 6
+        ? 'Please enter all 6 digits.'
+        : 'Submitted: otp=$v';
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget example(String caption, Widget child) => SizedBox(
+      width: 380,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(caption, style: theme.text(size: 14, weight: 600)),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+    Widget stack(List<Widget> children) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 12), children[i]],
+      ],
+    );
+    Widget button(String label, VoidCallback onPressed, {bool? pressed, bool secondary = true}) => KakaoButton(
+      label: label,
+      variant: secondary ? KakaoButtonVariant.secondary : KakaoButtonVariant.primary,
+      size: KakaoButtonSize.sm,
+      toggle: pressed != null,
+      pressed: pressed ?? false,
+      onPressed: onPressed,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Verification code',
+              const KakaoCodeInput(label: 'Verification code', hint: 'We sent a 6-digit code to +43 660 ··· 12.'),
+            ),
+            example(
+              'Grouped · separator "3"',
+              const KakaoCodeInput(label: 'Sign-in code', separator: '3', value: '482'),
+            ),
+            example(
+              'PIN · length 4, mask',
+              const KakaoCodeInput(label: 'Card PIN', length: 4, mask: true, autofillHints: [], value: '12'),
+            ),
+            example(
+              'Letters too · alphanumeric',
+              const KakaoCodeInput(
+                label: 'Backup code',
+                type: KakaoCodeInputType.alphanumeric,
+                length: 8,
+                separator: '4',
+                hint: 'Letters and digits, as printed on your backup sheet.',
+              ),
+            ),
+            example(
+              'Own character set · pattern',
+              const KakaoCodeInput(
+                label: 'Pairing code (hex)',
+                type: KakaoCodeInputType.alphanumeric,
+                pattern: '[0-9A-F]',
+                length: 4,
+                hint: '0–9 and A–F; letters are capitalised as you type.',
+              ),
+            ),
+            example(
+              'Error',
+              const KakaoCodeInput(
+                label: 'Verification code',
+                value: '123456',
+                error: 'That code has expired. We sent you a new one.',
+              ),
+            ),
+            example(
+              'Sizes',
+              stack(const [
+                KakaoCodeInput(size: KakaoCodeInputSize.sm, label: 'Small', length: 4, value: '36'),
+                KakaoCodeInput(label: 'Medium', length: 4, value: '44'),
+                KakaoCodeInput(size: KakaoCodeInputSize.lg, label: 'Large', length: 4, value: '52'),
+              ]),
+            ),
+            example(
+              'Disabled · read only',
+              stack(const [
+                KakaoCodeInput(disabled: true, label: 'Disabled', length: 4, value: '1234'),
+                KakaoCodeInput(readOnly: true, label: 'Read only', length: 4, value: '5678'),
+              ]),
+            ),
+            example(
+              'In a form',
+              stack([
+                KakaoCodeInput(
+                  label: 'Verification code',
+                  hint: 'Completing the code submits the form.',
+                  controller: _form,
+                  onCompleted: (_) => _submit(),
+                  onSubmitted: (_) => _submit(),
+                ),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    button('Verify', _submit, secondary: false),
+                    button(
+                      'Reset',
+                      () => setState(() {
+                        _form.clear();
+                        _formOut = 'Reset to the initial value.';
+                      }),
+                    ),
+                  ],
+                ),
+                Text(_formOut, style: theme.text(size: 13, color: theme.colors.muted)),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Playground', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 380,
+          child: KakaoCodeInput(
+            label: 'Playground',
+            length: _length,
+            error: _error ? 'That code is not right.' : null,
+            controller: _play,
+            focusNode: _playFocus,
+            onChanged: (v) => _event('input · $v'),
+            onCommitted: (v) => _event('change · $v'),
+            onCompleted: (v) => _event('code-complete · $v'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            button('value = "908172"', () => _play.text = '908172'),
+            button('clear()', _play.clear),
+            button('focus()', _playFocus.requestFocus),
+            button('next length', () {
+              setState(() => _length = _length >= 8 ? 4 : _length + 1);
+              _event('length · $_length');
+            }),
+            button('error', () => setState(() => _error = !_error), pressed: _error),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted)),
       ],
     );
   }

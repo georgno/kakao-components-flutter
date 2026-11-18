@@ -91,6 +91,7 @@ final Map<String, Map<String, Object> Function(KakaoColors)> generated = {
   'button': (c) => KakaoButtonSettings.of(c).toMap(),
   'card': (c) => KakaoCardSettings.of(c).toMap(),
   'chip': (c) => KakaoChipSettings.of(c).toMap(),
+  'code-input': (c) => KakaoCodeInputSettings.of(c).toMap(),
   'date-input': (c) => KakaoDateInputSettings.of(c).toMap(),
   'dialog': (c) => KakaoDialogSettings.of(c).toMap(),
   'multi-dropdown': (c) => KakaoMultiDropdownSettings.of(c).toMap(),

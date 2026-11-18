@@ -107,6 +107,16 @@
   new tags grow in; `KakaoTagInputController` (`add`, `remove`, `clear`, `values`, `text`),
   `KakaoTagInput.parse` / `join`. Chip settings are generated (`KakaoChipSettings`) and drawn
   by the internal `lib/src/internal/kakao_chip.dart` (`KakaoChipView`) until chip is ported.
+- `KakaoCodeInput` (`<kakao-code-input>`): a one-time code or PIN, one drawn box per character
+  (`length` 4-8, default 6) over one hidden real text field (SMS autofill as one-time code, paste,
+  IME, one semantics node with "6 digits"); typing fills and moves on, overwrites a filled box,
+  ignores characters `type` (numeric / alphanumeric) or `pattern` does not allow and switches a
+  letter's case when only the other is allowed; Backspace / Delete, arrows, Home / End, a tap on a
+  box; a pasted whole code replaces the value, a shorter piece fills from the current box; `mask`
+  dots, `separator` dashes between groups ("3", "2-3-3"), boxes shrink to fit; the current box's
+  focus border and outline, a blinking caret in an empty one, tinted boxes for select all; label,
+  hint, error, sizes 36 / 44 / 52, disabled, read only; `onChanged`, `onCompleted`
+  (code-complete), `onCommitted` (change), `onSubmitted`; `KakaoCodeInput.clean` / `groups`.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

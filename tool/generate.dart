@@ -27,6 +27,7 @@ const ported = [
   'button',
   'card',
   'chip',
+  'code-input',
   'combobox',
   'command-palette',
   'date-input',

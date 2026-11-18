@@ -70,6 +70,13 @@
     { "id": "tag-input-wraps", "page": "components/tag-input/demo.html", "selector": "kakao-tag-input[label='Ingredients']" },
     { "id": "tag-input-open", "page": "components/tag-input/demo.html", "open": "kakao-tag-input[label='Labels'] input", "type": "e", "selector": "kakao-tag-input[label='Labels'] .panel" },
     { "id": "tag-input-sizes", "page": "components/tag-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
-    { "id": "tag-input-states", "page": "components/tag-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read-only · error')) > div" }
+    { "id": "tag-input-states", "page": "components/tag-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read-only · error')) > div" },
+    { "id": "code-input-basic", "page": "components/code-input/demo.html", "selector": "kakao-code-input[name='otp']:not([id])" },
+    { "id": "code-input-grouped", "page": "components/code-input/demo.html", "selector": "kakao-code-input[label='Sign-in code']" },
+    { "id": "code-input-pin", "page": "components/code-input/demo.html", "selector": "kakao-code-input[label='Card PIN']" },
+    { "id": "code-input-alnum", "page": "components/code-input/demo.html", "selector": "kakao-code-input[label='Backup code']" },
+    { "id": "code-input-error", "page": "components/code-input/demo.html", "selector": "kakao-code-input[error]" },
+    { "id": "code-input-sizes", "page": "components/code-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "code-input-states", "page": "components/code-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only')) > div" }
   ]
 }

@@ -5,6 +5,7 @@ library;
 
 export 'src/components/kakao_button.dart';
 export 'src/components/kakao_card.dart';
+export 'src/components/kakao_code_input.dart';
 export 'src/components/kakao_combobox.dart';
 export 'src/components/kakao_command_palette.dart';
 export 'src/components/kakao_date_input.dart';
@@ -25,6 +26,7 @@ export 'src/theme/kakao_colors.g.dart';
 export 'src/settings/kakao_button_settings.g.dart';
 export 'src/settings/kakao_card_settings.g.dart';
 export 'src/settings/kakao_chip_settings.g.dart';
+export 'src/settings/kakao_code_input_settings.g.dart';
 export 'src/settings/kakao_combobox_settings.g.dart';
 export 'src/settings/kakao_command_palette_settings.g.dart';
 export 'src/settings/kakao_date_input_settings.g.dart';
