@@ -608,6 +608,59 @@ class _KakaoDatePickerState extends State<KakaoDatePicker> {
 
   /* ---- time ------------------------------------------------------------- */
 
+  /// The seconds of the day min and max allow in the time columns: both for
+  /// time (lo after hi: over midnight), and for datetime-local the bound
+  /// whose day is the picked day. Null: open.
+  (int?, int?) get _timeBounds {
+    if (_kind == KakaoDateKind.time) return (kakaoTimeSeconds(widget.min), kakaoTimeSeconds(widget.max));
+    final f = widget.fields;
+    if (_kind != KakaoDateKind.dateTimeLocal || f.year == null || f.month == null || f.day == null) {
+      return (null, null);
+    }
+    final day = _iso(DateTime.utc(f.year!, f.month!, f.day!));
+    int? on(String? v) => v != null && v.startsWith(day) ? kakaoTimeSeconds(v) : null;
+    return (on(widget.min), on(widget.max));
+  }
+
+  /// Whether a time row can be picked: some second it stands for (the given
+  /// [hours] of a 24-hour day, with the field's minute where [minutes] is
+  /// null and the minute column is not the one asked, and so on) lies
+  /// within min and max, as Chromium's picker greys the rest.
+  bool _timeAllowed(Iterable<int> hours, Iterable<int>? minutes, int? second) {
+    final (lo, hi) = _timeBounds;
+    if (lo == null && hi == null) return true;
+    final wrap = lo != null && hi != null && lo > hi;
+    bool span(int from, int to) {
+      if (wrap) return to >= lo || from <= hi;
+      return (lo == null || to >= lo) && (hi == null || from <= hi);
+    }
+
+    for (final h in hours) {
+      if (minutes == null) {
+        if (span(h * 3600, h * 3600 + 3599)) return true;
+        continue;
+      }
+      for (final m in minutes) {
+        final at = h * 3600 + m * 60;
+        if (second == null ? span(at, at + 59) : span(at + second, at + second)) return true;
+      }
+    }
+    return false;
+  }
+
+  /// The 24-hour hours the field's hour part (or [hour] on the field's
+  /// clock) can stand for, given its AM / PM ([pm] overrides).
+  List<int> _hours24({int? hour, bool? pm}) {
+    final f = widget.fields;
+    final h = hour ?? f.hour;
+    final p = pm ?? f.pm;
+    if (!_hour12) return h == null ? [for (var i = 0; i < 24; i++) i] : [h];
+    final base = h == null ? [for (var i = 0; i < 12; i++) i] : [h % 12];
+    return [
+      for (final b in base) ...[if (p != true) b, if (p != false) b + 12],
+    ];
+  }
+
   Widget _timeColumns(KakaoPickerStyle st, bool beside) {
     final f = widget.fields;
     final t = widget.texts;
@@ -625,6 +678,7 @@ class _KakaoDatePickerState extends State<KakaoDatePicker> {
         values: hours,
         selected: f.hour,
         label: (v) => v.toString().padLeft(2, '0'),
+        enabled: (v) => _timeAllowed(_hours24(hour: v), null, null),
         onPick: (v) => _pickTime(KakaoSegment.hour, v),
         onDone: widget.onClose,
       ),
@@ -634,6 +688,7 @@ class _KakaoDatePickerState extends State<KakaoDatePicker> {
         values: [for (var m = 0; m < 60; m += minuteStep) m],
         selected: f.minute,
         label: (v) => v.toString().padLeft(2, '0'),
+        enabled: (v) => _timeAllowed(_hours24(), [v], null),
         onPick: (v) => _pickTime(KakaoSegment.minute, v),
         onDone: widget.onClose,
       ),
@@ -644,6 +699,8 @@ class _KakaoDatePickerState extends State<KakaoDatePicker> {
           values: [for (var s = 0; s < 60; s += secondStep) s],
           selected: f.second,
           label: (v) => v.toString().padLeft(2, '0'),
+          enabled: (v) =>
+              _timeAllowed(_hours24(), f.minute == null ? [for (var m = 0; m < 60; m++) m] : [f.minute!], v),
           onPick: (v) => _pickTime(KakaoSegment.second, v),
           onDone: widget.onClose,
         ),
@@ -654,6 +711,7 @@ class _KakaoDatePickerState extends State<KakaoDatePicker> {
           values: const [0, 1],
           selected: f.pm == null ? null : (f.pm! ? 1 : 0),
           label: (v) => v == 1 ? widget.dayPeriods.$2 : widget.dayPeriods.$1,
+          enabled: (v) => _timeAllowed(_hours24(pm: v == 1), f.minute == null ? null : [f.minute!], null),
           onPick: (v) => _pickTime(KakaoSegment.dayPeriod, v),
           onDone: widget.onClose,
         ),
@@ -834,6 +892,7 @@ class _TimeColumn extends StatefulWidget {
     required this.label,
     required this.onPick,
     required this.onDone,
+    this.enabled,
     this.focusNode,
   });
 
@@ -842,6 +901,10 @@ class _TimeColumn extends StatefulWidget {
   final List<int> values;
   final int? selected;
   final String Function(int) label;
+
+  /// Whether a row can be picked (null: all); the rest are dimmed and
+  /// skipped by Up / Down.
+  final bool Function(int)? enabled;
   final ValueChanged<int> onPick;
   final VoidCallback onDone;
   final FocusNode? focusNode;
@@ -862,6 +925,8 @@ class _TimeColumnState extends State<_TimeColumn> {
     _scroll?.dispose();
     super.dispose();
   }
+
+  bool _enabled(int v) => widget.enabled?.call(v) ?? true;
 
   void _reveal(int index, double viewport) {
     final c = _scroll;
@@ -884,7 +949,12 @@ class _TimeColumnState extends State<_TimeColumn> {
     if (key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.arrowDown) {
       final i = widget.selected == null ? -1 : values.indexOf(widget.selected!);
       final up = key == LogicalKeyboardKey.arrowUp;
-      final next = i < 0 ? (up ? values.length - 1 : 0) : (i + (up ? -1 : 1) + values.length) % values.length;
+      var next = i < 0 ? (up ? values.length - 1 : 0) : (i + (up ? -1 : 1) + values.length) % values.length;
+      // Past the rows that cannot be picked; none: stay.
+      for (var n = 0; n < values.length && !_enabled(values[next]); n++) {
+        next = (next + (up ? -1 : 1) + values.length) % values.length;
+      }
+      if (!_enabled(values[next])) return KeyEventResult.handled;
       widget.onPick(values[next]);
       _reveal(next, viewport);
       return KeyEventResult.handled;
@@ -942,21 +1012,23 @@ class _TimeColumnState extends State<_TimeColumn> {
                   itemBuilder: (context, i) {
                     final v = values[i];
                     final selected = i == sel;
+                    final enabled = _enabled(v);
                     return Semantics(
                       button: true,
+                      enabled: enabled,
                       selected: selected,
                       label: widget.label(v),
-                      onTap: () => widget.onPick(v),
+                      onTap: enabled ? () => widget.onPick(v) : null,
                       excludeSemantics: true,
                       child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
+                        cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
                         onEnter: (_) => setState(() => _hover = i),
                         onExit: (_) => setState(() => _hover = null),
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
                             _focus.requestFocus();
-                            widget.onPick(v);
+                            if (enabled) widget.onPick(v);
                           },
                           child: Padding(
                             padding: EdgeInsets.symmetric(horizontal: st.padding),
@@ -965,15 +1037,19 @@ class _TimeColumnState extends State<_TimeColumn> {
                               decoration: BoxDecoration(
                                 color: selected
                                     ? st.selected
-                                    : _hover == i
+                                    : _hover == i && enabled
                                     ? st.hover
                                     : null,
                                 border: keyboard && selected ? Border.all(color: st.focus, width: st.focusWidth) : null,
                                 borderRadius: BorderRadius.circular(st.cellRadius),
                               ),
-                              child: Text(
-                                widget.label(v),
-                                style: st.text.copyWith(color: selected ? st.onSelected : st.textColor),
+                              child: Opacity(
+                                // As a disabled day: disabled-opacity.
+                                opacity: enabled ? 1 : st.disabledOpacity,
+                                child: Text(
+                                  widget.label(v),
+                                  style: st.text.copyWith(color: selected ? st.onSelected : st.textColor),
+                                ),
                               ),
                             ),
                           ),

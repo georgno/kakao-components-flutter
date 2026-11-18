@@ -2,7 +2,7 @@
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
 popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
-password-input, number-input, date-input (plus theme-switch settings for the cross-fade). The order below follows
+password-input, number-input, date-input, time-input (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -26,7 +26,8 @@ disabled and read only), textarea (label, counter, auto-growing, error, sizes), 
 disabled / read only / no toggle, default requirements, own requirements), number-input (default,
 sm, the touch layout grouped right and left, split, plus only, disabled), date-input (date,
 time, datetime-local, month, week, the today tag, sizes, disabled / read only / error; the
-picker is the browser's own on the web, so it has no pair).
+picker is the browser's own on the web, so it has no pair), time-input (time, step 900, seconds, over
+midnight, the now tag, sizes, disabled / read only / error).
 
 ## 1. Anchored panel and option list (done)
 
@@ -98,8 +99,14 @@ picker is the browser's own on the web, so it has no pair).
   year of months, time columns; `kind: time` is the time picker alone). `KakaoDateInput` is the
   model: the picker's chrome from the select's panel settings (the web has none: the browser
   draws its picker), the today tag in `KakaoField`'s `counter` slot with `messageMinWidth: 0`.
+  For time-input (done) the date blocks as they were, plus `kakao_date_parts.dart`
+  (`KakaoPickerIcon`: the redrawn picker indicator with the calendar / clock glyph, a tab stop;
+  `KakaoTodayTag`: the today / now tag as a button, disabled with a reason), moved out of
+  date-input; `kakaoTimeSeconds` in the values; the picker's time columns take an `enabled` rule
+  and dim / skip rows outside `min` / `max` (time, over midnight, and datetime-local on the
+  bound's day). `KakaoTimeInput` is `KakaoDateInput` fixed to time with its own settings block.
 - Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input` (done),
-  `date-input` (done) and `time-input` (on the date blocks above),
+  `date-input` (done), `time-input` (done),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
 ## 3. Toggles and ranges
@@ -268,7 +275,8 @@ picker is the browser's own on the web, so it has no pair).
   en, de, fr, es, it (else English); no form participation (`name`, `required`, validity and its
   messages, reset, state restore): the owner checks and sets `error`; no Firefox / Safari text
   fallback (YYYY-MM) and no millisecond part (a value's milliseconds are dropped); the time
-  columns do not disable times outside `min` / `max`; typing goes through hardware keys only (no
+  columns dim rows outside `min` / `max` but not rows off `step` (a minute column only lists
+  step values where the step divides the hour); typing goes through hardware keys only (no
   soft keyboard: on touch platforms a tap opens the picker, as Chrome on Android opens its
   dialog); a part counts digits as Chromium does, so each year digit reports a value (0002, 0020,
   0202, 2026); the field is one node in semantics (its name, value and hint), not a spin button per
@@ -277,6 +285,21 @@ picker is the browser's own on the web, so it has no pair).
   `data-*` mirroring; the focused part is filled with the focus colour at 25 % (the browser's
   `Highlight`); labelled fields are 1 px shorter (line box rounding, see Text; look-alike check:
   0.1-0.4 %, the states case 1.4 % from that shift).
+
+- Time input: the same field and picker as date-input's time type (see Date input: the field
+  drawn after Chromium's, the picker ours, a built-in locale table, hardware keys only, one
+  semantics node, no `forced-colors`, no `data-*`, the focus colour at 25 % for the focused
+  part); no Firefox clock button or its `moz-nudge` (the setting is generated but unused) and no
+  ISO text fallback (`HH:MM` with a pattern) for a browser without a time field; no form
+  participation (`name`, `required`, validity and its messages, reset, state restore): the owner
+  checks and sets `error`; no `locale` following a `lang` change elsewhere (it follows
+  `Localizations`); `valueAsNumber` returns null for the web's NaN, and the field drops a
+  value's milliseconds; the now label is known for en, de, fr, es, it (else English); the
+  disabled tag's reason is a semantics hint, not a `title` tooltip, and its tap target is the
+  drawn 20 px tag (the web widens it to 24 px); time columns grey out rows outside `min` / `max`
+  where Chromium's picker (which the web uses) shows its own list; labelled fields are 1 px
+  shorter (line box rounding, see Text; look-alike check: 0.2-0.7 %, states 1.3-1.4 % from
+  that shift and the 2 px it adds over three fields).
 
 ## Seen on the web side
 

@@ -58,6 +58,13 @@
     { "id": "date-input-week", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Sprint week'][value]" },
     { "id": "date-input-today", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Entry date']" },
     { "id": "date-input-sizes", "page": "components/date-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
-    { "id": "date-input-states", "page": "components/date-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" }
+    { "id": "date-input-states", "page": "components/date-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" },
+    { "id": "time-input-time", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Start time']" },
+    { "id": "time-input-step", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Slot']" },
+    { "id": "time-input-seconds", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Lap time']" },
+    { "id": "time-input-midnight", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Night shift starts']" },
+    { "id": "time-input-now", "page": "components/time-input/demo.html", "selector": "kakao-time-input[label='Logged at']" },
+    { "id": "time-input-sizes", "page": "components/time-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "time-input-states", "page": "components/time-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" }
   ]
 }

@@ -280,6 +280,41 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       value: '11:00',
     ),
   ]),
+  // time-input/demo.html "Basics" and "Now shortcut" (Chromium draws the
+  // field in en-US in the look-alike run).
+  'time-input-time': (_) =>
+      const KakaoTimeInput(label: 'Start time', value: '14:30', hint: 'Value 14:30, drawn as 2:30 PM or 14:30'),
+  'time-input-step': (_) => const KakaoTimeInput(
+    label: 'Slot',
+    value: '09:15',
+    step: 900,
+    hint: '15-minute steps: arrow keys and the picker (Chromium)',
+  ),
+  'time-input-seconds': (_) => const KakaoTimeInput(
+    label: 'Lap time',
+    value: '00:01:30',
+    step: 1,
+    hint: 'A step under a minute adds the seconds segment',
+  ),
+  'time-input-midnight': (_) => const KakaoTimeInput(
+    label: 'Night shift starts',
+    min: '22:00',
+    max: '06:00',
+    value: '23:30',
+    hint: 'From 22:00 to 06:00',
+  ),
+  'time-input-now': (_) => const KakaoTimeInput(now: true, label: 'Logged at', hint: 'Now in one click'),
+  // time-input/demo.html "Sizes", "Disabled · read only · error": .stack, gap .6rem.
+  'time-input-sizes': (_) => _fields(const [
+    KakaoTimeInput(size: KakaoTimeInputSize.sm, label: 'Small', value: '14:30'),
+    KakaoTimeInput(label: 'Medium', value: '14:30'),
+    KakaoTimeInput(size: KakaoTimeInputSize.lg, label: 'Large', value: '14:30'),
+  ]),
+  'time-input-states': (_) => _fields(const [
+    KakaoTimeInput(disabled: true, now: true, label: 'Disabled', value: '14:30'),
+    KakaoTimeInput(readOnly: true, now: true, label: 'Read only', value: '14:30'),
+    KakaoTimeInput(label: 'Check-in', error: 'Check-in starts at 15:00.', value: '11:00'),
+  ]),
   // password-input/demo.html "Basic · show / hide".
   'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
   // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·

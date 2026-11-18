@@ -40,6 +40,7 @@ const ported = [
   'text-input',
   'textarea',
   'theme-switch',
+  'time-input',
   'tooltip',
 ];
 

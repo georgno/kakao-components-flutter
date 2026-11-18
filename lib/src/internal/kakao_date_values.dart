@@ -265,6 +265,16 @@ bool kakaoInRange(KakaoDateKind kind, String v, String? min, String? max) {
   return (lo == null || val.compareTo(lo) >= 0) && (hi == null || val.compareTo(hi) <= 0);
 }
 
+/// time-input.js `timeSeconds`: seconds since midnight of an ISO time (or
+/// of a date-time's time), or null.
+int? kakaoTimeSeconds(String? v) {
+  if (v == null) return null;
+  final t = v.contains('T') ? v.substring(v.indexOf('T') + 1) : v;
+  final m = RegExp(r'^(\d{2}):(\d{2})(?::(\d{2}))?').firstMatch(t);
+  if (m == null) return null;
+  return int.parse(m.group(1)!) * 3600 + int.parse(m.group(2)!) * 60 + int.parse(m.group(3) ?? '0');
+}
+
 double _snap(double n, double base, double step, double Function(double) mode) => base + mode((n - base) / step) * step;
 
 /// date-input.js `todayValues`: the value for "now" in [kind] (today, the

@@ -86,6 +86,16 @@
   blocks for time-input: `kakao_date_values.dart` (ISO values, ISO weeks, formats per locale,
   the today rules), `kakao_segment_field.dart` (`KakaoSegmentField`) and
   `kakao_date_picker.dart` (`KakaoDatePicker`: calendar, year of months, time columns).
+- `KakaoTimeInput` (`<kakao-time-input>`): the time field on the date blocks with its own
+  settings: 12 or 24 hours by locale, seconds when `step` is under a minute, the ISO 24-hour
+  value; label, hint, error, sizes 36 / 44 / 52, disabled, read only (no clock icon on either);
+  the clock icon opens time columns on the anchored panel; the `now` tag (`nowLabel`, the time
+  snapped to `step` from `min`, disabled out of range with the reason in semantics, over-midnight
+  ranges); `KakaoTimeInputController` (`showPicker()`), `KakaoTimeInput.valueAsNumber` /
+  `valueAsDate`. The picker's time columns now dim and skip the hours, minutes, seconds and AM /
+  PM rows that `min` / `max` leave out (time, and datetime-local on the bound's day), in
+  `KakaoDateInput` too. The picker icon and the today tag moved to
+  `lib/src/internal/kakao_date_parts.dart` (`KakaoPickerIcon`, `KakaoTodayTag`).
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

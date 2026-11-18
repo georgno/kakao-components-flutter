@@ -196,6 +196,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Select', child: const _SelectExamples()),
             _Section(title: 'Text input', child: const _TextInputExamples()),
             _Section(title: 'Textarea', child: const _TextareaExamples()),
+            _Section(title: 'Time input', child: const _TimeInputExamples()),
             _Section(
               title: 'About this build',
               child: Column(
@@ -1157,6 +1158,231 @@ class _DateInputExamplesState extends State<_DateInputExamples> {
             }),
             button('disabled', () => setState(() => _disabled = !_disabled), pressed: _disabled),
             button('today', () => setState(() => _today = !_today), pressed: _today),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted, tabular: true)),
+      ],
+    );
+  }
+}
+
+class _TimeInputExamples extends StatefulWidget {
+  const _TimeInputExamples();
+
+  @override
+  State<_TimeInputExamples> createState() => _TimeInputExamplesState();
+}
+
+class _TimeInputExamplesState extends State<_TimeInputExamples> {
+  final _picker = KakaoTimeInputController();
+  var _value = '14:30';
+  bool _seconds = false;
+  bool _disabled = false;
+  bool _now = false;
+  final _log = <String>[];
+
+  /// A one-hour window starting two hours from now, so the tag is always off
+  /// (the demo's script).
+  final _window = () {
+    final h = (DateTime.now().hour + 2) % 24;
+    String at(int x) => '${(x % 24).toString().padLeft(2, '0')}:00';
+    return (min: at(h), max: at(h + 1));
+  }();
+
+  @override
+  void dispose() {
+    _picker.dispose();
+    super.dispose();
+  }
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget example(String caption, Widget child) => SizedBox(
+      width: 280,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(caption, style: theme.text(size: 14, weight: 600)),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+    Widget stack(List<Widget> children) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+      ],
+    );
+    Widget button(String label, VoidCallback onPressed, {bool? pressed}) => KakaoButton(
+      label: label,
+      variant: KakaoButtonVariant.secondary,
+      size: KakaoButtonSize.sm,
+      toggle: pressed != null,
+      pressed: pressed ?? false,
+      onPressed: onPressed,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Time',
+              const KakaoTimeInput(label: 'Start time', value: '14:30', hint: 'Value 14:30, drawn as 2:30 PM or 14:30'),
+            ),
+            example(
+              'Step · step 900',
+              const KakaoTimeInput(
+                label: 'Slot',
+                value: '09:15',
+                step: 900,
+                hint: '15-minute steps: arrow keys and the picker',
+              ),
+            ),
+            example(
+              'Seconds · step 1',
+              const KakaoTimeInput(
+                label: 'Lap time',
+                value: '00:01:30',
+                step: 1,
+                hint: 'A step under a minute adds the seconds segment',
+              ),
+            ),
+            example(
+              'Min · max',
+              const KakaoTimeInput(
+                label: 'Check-in',
+                min: '15:00',
+                max: '22:00',
+                value: '11:00',
+                hint: 'Between 15:00 and 22:00',
+              ),
+            ),
+            example(
+              'Over midnight · min after max',
+              const KakaoTimeInput(
+                label: 'Night shift starts',
+                min: '22:00',
+                max: '06:00',
+                value: '23:30',
+                hint: 'From 22:00 to 06:00',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Now shortcut · now', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example('To the minute', const KakaoTimeInput(now: true, label: 'Logged at', hint: 'Now in one click')),
+            example(
+              'Quarter hours · step 900',
+              const KakaoTimeInput(now: true, step: 900, label: 'Started at', hint: 'Now, to the nearest quarter hour'),
+            ),
+            example('Seconds · step 1', const KakaoTimeInput(now: true, step: 1, label: 'Stamp')),
+            example(
+              'Out of range · disabled tag',
+              KakaoTimeInput(
+                now: true,
+                min: _window.min,
+                max: _window.max,
+                label: 'Delivery window',
+                hint: 'Always a window that excludes now',
+              ),
+            ),
+            example(
+              'Locale · now-label',
+              stack(const [
+                KakaoTimeInput(now: true, locale: Locale('de', 'AT'), label: 'Uhrzeit'),
+                KakaoTimeInput(now: true, nowLabel: 'Use current time', label: 'Custom label'),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Beside the other fields',
+              stack(const [
+                KakaoSelect(
+                  label: 'Room',
+                  values: ['b'],
+                  options: [
+                    KakaoSelectOption('a', label: 'Room A'),
+                    KakaoSelectOption('b', label: 'Room B'),
+                  ],
+                ),
+                KakaoDateInput(label: 'Day', value: '2026-03-04'),
+                KakaoTimeInput(label: 'Time', value: '14:30'),
+              ]),
+            ),
+            example(
+              '12 or 24 hours',
+              stack(const [
+                KakaoTimeInput(locale: Locale('en', 'US'), label: 'en-US', value: '14:30'),
+                KakaoTimeInput(locale: Locale('de', 'AT'), label: 'de-AT', value: '14:30'),
+              ]),
+            ),
+            example(
+              'Sizes',
+              stack(const [
+                KakaoTimeInput(size: KakaoTimeInputSize.sm, label: 'Small', value: '14:30'),
+                KakaoTimeInput(label: 'Medium', value: '14:30'),
+                KakaoTimeInput(size: KakaoTimeInputSize.lg, label: 'Large', value: '14:30'),
+              ]),
+            ),
+            example(
+              'Disabled · read only · error',
+              stack(const [
+                KakaoTimeInput(disabled: true, now: true, label: 'Disabled', value: '14:30'),
+                KakaoTimeInput(readOnly: true, now: true, label: 'Read only', value: '14:30'),
+                KakaoTimeInput(label: 'Check-in', error: 'Check-in starts at 15:00.', value: '11:00'),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Playground', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 320,
+          child: KakaoTimeInput(
+            label: 'Playground',
+            value: _value,
+            step: _seconds ? 1 : null,
+            disabled: _disabled,
+            now: _now,
+            controller: _picker,
+            onChanged: (v) => _event('input · ${v.isEmpty ? '""' : v}'),
+            onCommitted: (v) => _event('change · ${v.isEmpty ? '""' : v}'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            button('value = "08:45"', () => setState(() => _value = '08:45')),
+            button('showPicker()', _picker.open),
+            button('step = 1', () => setState(() => _seconds = !_seconds), pressed: _seconds),
+            button('disabled', () => setState(() => _disabled = !_disabled), pressed: _disabled),
+            button('now', () => setState(() => _now = !_now), pressed: _now),
           ],
         ),
         const SizedBox(height: 8),
