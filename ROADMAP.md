@@ -1,7 +1,7 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu, select, combobox, multi-dropdown (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select, combobox, multi-dropdown, command-palette (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -19,9 +19,10 @@ pass of it. Cases so far: button (with the dropdown closed and opened, and the s
 popover and menu (opened first), select (closed, opened, disabled and error), combobox
 (closed with a value, opened while filtering — the case types after its `open` click —,
 disabled and error), multi-dropdown (closed with every part set, its month list opened,
-disabled).
+disabled), command-palette (opened with all commands, opened while filtering by "fi", and the
+empty state).
 
-## 1. Anchored panel and option list
+## 1. Anchored panel and option list (done)
 
 - Internal: an anchored panel (done: `lib/src/internal/kakao_anchored_panel.dart`,
   `KakaoAnchoredPanel`; position next to an anchor or a point, flip rules of
@@ -31,7 +32,17 @@ disabled).
   `lib/src/internal/kakao_option_list.dart`, `KakaoOptionList`; rows, check mark,
   keyboard and pointer highlight, type-ahead, groups, separators).
 - Then: `popover` (done), `menu` (done), the button's menu mode (with its chevron) and
-  segmented group (done), `select` (done), `combobox` (done), `multi-dropdown` (done), `command-palette`.
+  segmented group (done), `select` (done), `combobox` (done), `multi-dropdown` (done),
+  `command-palette` (done).
+- What step 2 can reuse: `lib/src/internal/kakao_field.dart` (`KakaoField` for label / hint /
+  error / disabled, `KakaoFieldBox` + `KakaoRing` for the bordered box and focus outline,
+  `KakaoFieldText` for the bare one-line text field with gestures, placeholder, tap region
+  group and `selectAllOnFocus`, `KakaoChevronPainter`, `kakaoFold`); the anchored panel for
+  the date and time pickers and the colour picker; the option list (with `labelSpans` for
+  marked matches) for tag-input suggestions. `KakaoCombobox` is the model for a text field
+  that handles its own keys, `KakaoSelect` for a field that opens a panel, and
+  `KakaoCommandPalette` for a modal on the root navigator with its own route (scrim, entry
+  motion, no exit motion).
 
 ## 2. Fields
 
@@ -126,6 +137,19 @@ disabled).
 - Button: the label sits about 1 px higher than on the web (look-alike
   check, every size); `line-height: normal` instead of `height: 1` did not
   fix it.
+
+- Command palette: shortcuts and key hints are plain text ("Mod+N", "↑ ↓", "↵", "Esc"), the
+  web fallback without `<kakao-kbd>`; the demo loads kbd, so its keycaps (Ctrl + N) make the
+  web hint row about 5 px taller (look-alike check); no `href` / `target` commands (navigate in
+  `onSelect`, which cannot be cancelled); icons are widgets, not SVG markup; no `list-data`
+  JSON, `open` attribute or `commands` getter (the owner passes `commands` and uses the
+  controller); no combobox / listbox / option roles or `aria-activedescendant` (the field is a
+  text field reporting expanded, the list a list of buttons, the active row is not announced);
+  a pointer over a disabled row clears the highlight; the hotkey listens through
+  `HardwareKeyboard` while the widget is mounted (a key another handler already used still
+  toggles it); the system back gesture closes it as a route (the web has none); scroll lock is
+  the modal route's barrier; recent ids live as long as the widget's state; `pointer: coarse`
+  is the platform (Android, iOS, Fuchsia), as in the menu.
 
 ## Seen on the web side
 

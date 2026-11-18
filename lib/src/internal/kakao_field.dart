@@ -203,6 +203,7 @@ class KakaoFieldText extends StatefulWidget {
     this.onChanged,
     this.onTap,
     this.groupId = EditableText,
+    this.selectAllOnFocus,
   });
 
   final TextEditingController controller;
@@ -219,6 +220,11 @@ class KakaoFieldText extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
   final Object groupId;
+
+  /// Whether focus selects all the text; null: the platform's way (all on
+  /// web and desktop, as a tab into an `<input>` does). False keeps the
+  /// caret where it is, as `input.focus()` from script does.
+  final bool? selectAllOnFocus;
 
   /// The browser's text caret width.
   static const caretWidth = 1.0;
@@ -289,6 +295,7 @@ class _KakaoFieldTextState extends State<KakaoFieldText> implements TextSelectio
       textInputAction: TextInputAction.done,
       inputFormatters: widget.inputFormatters,
       groupId: widget.groupId,
+      selectAllOnFocus: widget.selectAllOnFocus,
       onTapOutside: (_) => widget.focusNode.unfocus(),
       onChanged: widget.onChanged,
     );

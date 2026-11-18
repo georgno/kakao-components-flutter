@@ -184,6 +184,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             const _Heading('Card'),
             const _CardExamples(),
             _Section(title: 'Combobox', child: const _ComboboxExamples()),
+            _Section(title: 'Command palette', child: const _CommandPaletteExamples()),
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Multi dropdown', child: const _MultiDropdownExamples()),
@@ -535,6 +536,105 @@ class _MultiDropdownExamplesState extends State<_MultiDropdownExamples> {
 
 /// combobox/demo.html: suggestions, groups, free text with the "Use" row,
 /// inline completion, strict, a long list, sizes, disabled and error.
+class _CommandPaletteExamples extends StatefulWidget {
+  const _CommandPaletteExamples();
+
+  @override
+  State<_CommandPaletteExamples> createState() => _CommandPaletteExamplesState();
+}
+
+class _CommandPaletteExamplesState extends State<_CommandPaletteExamples> {
+  final _main = KakaoCommandPaletteController();
+  final _admin = KakaoCommandPaletteController();
+  String _log = 'Press Ctrl+K (Command+K on a Mac) anywhere, or a button';
+
+  void _say(String text) => setState(() => _log = text);
+
+  void _select(KakaoCommandSelect e) => _say('command-select · ${e.id} (value ${e.value})');
+
+  @override
+  void dispose() {
+    _main.dispose();
+    _admin.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    final soft = theme.text(color: theme.colors.textSoft, height: 1.5);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Groups, keywords, shortcuts and recent commands. Try “nwf” (letters in order), '
+          '“logout” (a keyword) or “théme” (accents are ignored).',
+          style: soft,
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            // The hotkey palette: Mod+K, remembers the last five commands.
+            KakaoCommandPalette(
+              commands: paletteCommands,
+              controller: _main,
+              recent: 5,
+              onSelect: _select,
+              onOpen: () => _say('command-palette-open'),
+              child: KakaoButton(label: 'Open palette', variant: KakaoButtonVariant.secondary, onPressed: _main.open),
+            ),
+            // Another key: Mod+Shift+P, its own label and placeholder.
+            KakaoCommandPalette(
+              commands: paletteEditorCommands,
+              hotkey: 'Mod+Shift+P',
+              label: 'Editor commands',
+              placeholder: 'Run an editor command…',
+              onSelect: _select,
+              child: Text('Ctrl+Shift+P: editor commands', style: soft),
+            ),
+            // From script: icons, open(query), no hotkey.
+            KakaoCommandPalette(
+              commands: paletteAdminCommands,
+              controller: _admin,
+              hotkey: null,
+              label: 'Admin',
+              onSelect: _select,
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  KakaoButton(label: 'open()', variant: KakaoButtonVariant.secondary, onPressed: _admin.open),
+                  KakaoButton(
+                    label: "open('user')",
+                    variant: KakaoButtonVariant.secondary,
+                    onPressed: () => _admin.open('user'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Text('Inline: always open, no scrim and no hotkey; Esc clears the field.', style: soft),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 480,
+          child: KakaoCommandPalette(
+            inline: true,
+            commands: paletteInlineCommands,
+            emptyText: 'Nothing found, try “copy”',
+            onSelect: _select,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(_log, style: theme.text(size: 14, color: theme.colors.muted)),
+      ],
+    );
+  }
+}
+
 class _ComboboxExamples extends StatefulWidget {
   const _ComboboxExamples();
 

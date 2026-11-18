@@ -36,10 +36,15 @@ class KakaoOption extends KakaoOptionEntry {
     this.expanded,
     this.textStyle,
     this.selected,
+    this.labelSpans,
   });
 
   /// The text, also what type-ahead matches.
   final String label;
+
+  /// Drawn instead of [label] (which stays the row's accessible name): a
+  /// label with its matched letters marked (command-palette.js `<mark>`).
+  final List<InlineSpan>? labelSpans;
 
   /// Shown dimmed, skipped by the keys, not activated.
   final bool disabled;
@@ -130,6 +135,7 @@ class KakaoOptionListStyle {
     this.focus,
     this.focusWidth = 0,
     this.checkBuilder,
+    this.groupGap = 0,
   });
 
   /// The row text (size, weight, colour, line height).
@@ -184,6 +190,11 @@ class KakaoOptionListStyle {
   /// The lead of a checkable row instead of the check mark (a multiple
   /// select's checkbox, select.js `.box`), for checked and unchecked rows.
   final Widget Function(bool checked)? checkBuilder;
+
+  /// Space between a group and the entry before or after it
+  /// (command-palette.js `.group + .group, .group + .option, .option + .group
+  /// { margin-top: padding }`).
+  final double groupGap;
 }
 
 /// The highlighted row of a [KakaoOptionList] and the keys that move it.
@@ -368,6 +379,7 @@ class KakaoOptionList extends StatefulWidget {
     this.semanticsRole,
     this.semanticsLabel,
     this.initial,
+    this.revealStart = false,
   });
 
   final List<KakaoOptionEntry> entries;
@@ -388,6 +400,11 @@ class KakaoOptionList extends StatefulWidget {
   /// The row highlighted (by neither keys nor pointer) and centred when the
   /// list is first shown.
   final int? initial;
+
+  /// A keyboard move to the first enabled row scrolls the list to its
+  /// start, so the heading above that row shows too (command-palette.js
+  /// `_setActive`: "The group heading of the first row scrolls in with it").
+  final bool revealStart;
 
   @override
   State<KakaoOptionList> createState() => _KakaoOptionListState();
@@ -447,7 +464,12 @@ class _KakaoOptionListState extends State<KakaoOptionList> {
     final i = c.highlighted;
     if (i != _shown && i != null && c.keyboard) {
       // Keep the row in view inside the list, without moving the page.
+      final start = widget.revealStart && i == c.rows.indexWhere((r) => !r.disabled);
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (start) {
+          if (_scroll.hasClients) _scroll.jumpTo(0);
+          return;
+        }
         final ctx = _rowKeys[i]?.currentContext;
         final box = ctx?.findRenderObject();
         if (ctx == null || box == null || !_scroll.hasClients) return;
@@ -515,7 +537,12 @@ class _KakaoOptionListState extends State<KakaoOptionList> {
     );
 
     final children = <Widget>[];
+    KakaoOptionEntry? previous;
     for (final e in widget.entries) {
+      if (s.groupGap > 0 && previous != null && previous is! KakaoOptionSeparator && e is! KakaoOptionSeparator) {
+        if (previous is KakaoOptionGroup || e is KakaoOptionGroup) children.add(SizedBox(height: s.groupGap));
+      }
+      previous = e;
       switch (e) {
         case KakaoOption():
           children.add(row(e));
@@ -634,7 +661,11 @@ class _Row extends StatelessWidget {
     Widget content = Row(
       children: [
         if (leadBox != null) ...[leadBox, SizedBox(width: s.gap)],
-        Expanded(child: Text(o.label, style: text)),
+        Expanded(
+          child: o.labelSpans == null
+              ? Text(o.label, style: text)
+              : Text.rich(TextSpan(style: text, children: o.labelSpans)),
+        ),
         if (o.trailing != null) ...[SizedBox(width: s.trailingGap), o.trailing!],
       ],
     );

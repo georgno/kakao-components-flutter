@@ -315,3 +315,45 @@ final timeSegments = [
     options: [for (var m = 0; m < 60; m += 5) KakaoMultiDropdownOption('$m'.padLeft(2, '0'))],
   ),
 ];
+
+// command-palette/demo.html `#main-palette` (the hotkey palette).
+const paletteCommands = [
+  KakaoCommand('New file', id: 'new-file', group: 'File', shortcut: 'Mod+N'),
+  KakaoCommand('Open file…', id: 'open-file', group: 'File', shortcut: 'Mod+O'),
+  KakaoCommand('Save', id: 'save', group: 'File', shortcut: 'Mod+S'),
+  KakaoCommand('Export as PDF', id: 'export', group: 'File', keywords: ['download', 'print']),
+  KakaoCommand('Share with team', id: 'share', group: 'File', disabled: true),
+  KakaoCommand('Go to components', id: 'components', group: 'Navigation'),
+  KakaoCommand('Go to style guide', id: 'styleguide', group: 'Navigation'),
+  KakaoCommand('Change theme', id: 'theme', group: 'Preferences', keywords: ['dark', 'light', 'colours']),
+  KakaoCommand('Change language', id: 'language', group: 'Preferences', keywords: ['locale']),
+  KakaoCommand('Edit profile', id: 'profile', group: 'Account'),
+  KakaoCommand('Sign out', id: 'sign-out', group: 'Account', keywords: ['logout', 'exit']),
+];
+
+// command-palette/demo.html "Another key · hotkey": plain strings.
+const paletteEditorCommands = [
+  KakaoCommand('Format document'),
+  KakaoCommand('Toggle word wrap'),
+  KakaoCommand('Fold all'),
+  KakaoCommand('Unfold all'),
+  KakaoCommand('Sort lines'),
+  KakaoCommand('Join lines'),
+];
+
+// command-palette/demo.html "From script": Material icons stand in for the
+// demo's inline SVG icons.
+const paletteAdminCommands = [
+  KakaoCommand('Add user', id: 'user-add', group: 'Users', icon: Icon(Icons.add)),
+  KakaoCommand('List users', id: 'user-list', group: 'Users', icon: Icon(Icons.person_outline)),
+  KakaoCommand('Rebuild search index', id: 'reindex', group: 'Maintenance', icon: Icon(Icons.refresh)),
+  KakaoCommand('Clear cache', id: 'cache', group: 'Maintenance', value: 'all', icon: Icon(Icons.delete_outline)),
+];
+
+// command-palette/demo.html "Inline".
+const paletteInlineCommands = [
+  KakaoCommand('Copy link', id: 'copy', group: 'Share', shortcut: 'Mod+Shift+C'),
+  KakaoCommand('Send by email', id: 'email', group: 'Share', keywords: ['mail']),
+  KakaoCommand('Rename', id: 'rename', group: 'Edit', shortcut: 'F2'),
+  KakaoCommand('Duplicate', id: 'duplicate', group: 'Edit', shortcut: 'Mod+D'),
+];

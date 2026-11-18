@@ -76,3 +76,16 @@
   `value`, `parts`, `setPart`, `clear`, `open`. It is not a multiple select: no checkboxes,
   search or "Select all". Option list: `KakaoOption.textStyle` and `selected`,
   `KakaoOptionList.initial` (highlighted from the start and centred).
+- `KakaoCommandPalette` (`<kakao-command-palette>`): a modal search over the app's actions
+  (`KakaoCommand`: label, id, value, group, keywords, shortcut, icon, disabled), opened with a
+  hotkey (`Mod+K` by default, any combination, "none"; a key without Ctrl / Meta / Alt is
+  ignored while a text field has focus) or `KakaoCommandPaletteController.open(query)`; on the
+  root navigator over the scrim, fading in while it drops 6 px and grows from 99 %, closing at
+  once; focus in the field, given back on close; a full-width sheet at the top below 640 px.
+  Search as command-palette.js (case and accents ignored, every word on the label as a piece
+  or as letters in order from a word start, or on a keyword), matched letters marked, groups
+  ordered by their best match, an empty text, a polite count; `recent` commands first under
+  "Recent"; keys (arrows wrap, Home / End, Page Up / Down eight on, disabled skipped, Enter
+  runs, Tab stays, Escape closes), pointer hover and tap; key hints row (not on touch);
+  `inline` mode; `onSelect` after closing, `onOpen`, `onClose`. Option list: `labelSpans`,
+  `groupGap`, `revealStart`; `KakaoFieldText.selectAllOnFocus`.

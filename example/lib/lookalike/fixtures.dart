@@ -145,9 +145,70 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       ),
     ],
   ),
+  // command-palette/demo.html `#main-palette`, opened from its button: with
+  // all commands, after typing "fi", and after typing "xyz" (nothing found).
+  'command-palette-open': (c) => _Palette(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c)),
+  'command-palette-filter': (c) =>
+      _Palette(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c), query: 'fi'),
+  'command-palette-empty': (c) =>
+      _Palette(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c), query: 'xyz'),
 };
 
 void _noop() {}
+
+/// The demo's hotkey palette on a page of its own (a navigator over the whole
+/// screen, as the web palette covers the viewport); when [open], opened after
+/// the first frame with [query] in the field, as the case's `open` click and
+/// `type` do on the web.
+class _Palette extends StatefulWidget {
+  const _Palette({this.open = false, this.panelKey, this.query = ''});
+
+  final bool open;
+  final Key? panelKey;
+  final String query;
+
+  @override
+  State<_Palette> createState() => _PaletteState();
+}
+
+class _PaletteState extends State<_Palette> {
+  final _overlay = OverlayPortalController()..show();
+  final _palette = KakaoCommandPaletteController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.open) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _palette.open(widget.query));
+    }
+  }
+
+  @override
+  void dispose() {
+    _palette.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => OverlayPortal(
+    controller: _overlay,
+    overlayChildBuilder: (context) => Navigator(
+      onGenerateRoute: (_) => PageRouteBuilder<void>(
+        pageBuilder: (context, _, _) => ColoredBox(
+          color: KakaoTheme.of(context).colors.page,
+          child: KakaoCommandPalette(
+            commands: paletteCommands,
+            controller: _palette,
+            recent: 5,
+            panelKey: widget.panelKey,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      ),
+    ),
+    child: const SizedBox(height: 1),
+  );
+}
 
 /// combobox/demo.html `#c1`; when [open], focused after the first frame and
 /// "ch" typed into it, as the case's `open` click and `type` do on the web.
