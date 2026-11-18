@@ -61,6 +61,16 @@
   `lib/src/internal/kakao_field.dart` (`KakaoField`, `KakaoFieldBox`, `KakaoRing`,
   `KakaoChevronPainter`, `kakaoFold`) with a new `KakaoFieldText` (a bare one-line text field
   with pointer gestures and a placeholder). Look-alike cases can `type` after opening.
+- `KakaoNumberInput` (`<kakao-number-input>`): a number field with its own steppers: the
+  stacked ▲ / ▼ strip with a mouse (hover and pressed fills, `sm` size), 44 px − / + buttons
+  on touch platforms or with `touchSteppers` (`plus` / `minus` sides or none, `grouped`,
+  `groupPosition`, dividers, `touch-radius`, at least 44 px tall); press steps at once and
+  repeats every 70 ms after 400 ms, wheel over the steppers and Arrow Up / Down step; step
+  clamps to `min` / `max` and rounds to the decimals of `step`; `onChanged` (input) and
+  `onCommitted` (change); focus border and outline; disabled and read-only; increase /
+  decrease in semantics.
+- The generator emits `EdgeInsets` for padding settings (1-4 lengths); `KakaoTextarea` and
+  `KakaoMultiDropdown` read their padding from the generated settings instead of literals.
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

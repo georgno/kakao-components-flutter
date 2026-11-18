@@ -16,10 +16,6 @@ enum KakaoTextareaSize { sm, md, lg }
 enum KakaoTextareaResize { vertical, none }
 
 // textarea.js values outside the settings block.
-const _mdPadding = EdgeInsets.symmetric(
-  vertical: 10,
-  horizontal: 12,
-); // --kakao-textarea-padding: 10px 12px (a list, not generated)
 const _smSize = (
   padding: EdgeInsets.symmetric(vertical: 7, horizontal: 10),
   font: 14.0,
@@ -264,7 +260,7 @@ class _KakaoTextareaState extends State<KakaoTextarea> {
     final st = KakaoTextareaSettings.of(theme.colors);
     final (padding, fontSize) = switch (widget.size) {
       KakaoTextareaSize.sm => (_smSize.padding, _smSize.font),
-      KakaoTextareaSize.md => (_mdPadding, st.font.size),
+      KakaoTextareaSize.md => (st.padding, st.font.size),
       KakaoTextareaSize.lg => (_lgSize.padding, _lgSize.font),
     };
     final error = widget.error?.isNotEmpty ?? false ? widget.error : null;

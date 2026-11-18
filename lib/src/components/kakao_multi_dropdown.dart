@@ -140,10 +140,6 @@ class KakaoMultiDropdownController {
 }
 
 // multi-dropdown.js values outside the settings block.
-// --kakao-multi-dropdown-padding: 0.45rem 0.55rem 0.45rem 0.75rem (a list, not generated).
-const _padding = EdgeInsets.fromLTRB(12, 7.2, 8.8, 7.2);
-// --kakao-multi-dropdown-option-padding: 0.35rem 0.6rem (a list, not generated).
-const _optionPadding = EdgeInsets.symmetric(vertical: 5.6, horizontal: 9.6);
 const _labelWeight = 600.0; // .label font-weight: 600
 const _bgFade = Duration(milliseconds: 120); // .trigger transition: background-color 120ms ease
 const _borderFade = Duration(milliseconds: 150); // .trigger transition: border-color 150ms ease
@@ -847,7 +843,7 @@ class _KakaoMultiDropdownState extends State<KakaoMultiDropdown> {
     final scaler = MediaQuery.textScalerOf(context);
     final chevron = st.chevronSize.of(size);
     // Everything in a box but its text: padding, chevron and gap, border.
-    final chrome = _padding.horizontal + st.chevronGap + chevron + 2;
+    final chrome = st.padding.horizontal + st.chevronGap + chevron + 2;
 
     double measure(String s) {
       final p = TextPainter(
@@ -1036,7 +1032,7 @@ class _KakaoMultiDropdownState extends State<KakaoMultiDropdown> {
       child: AnimatedContainer(
         duration: reduce ? Duration.zero : _bgFade,
         curve: Curves.ease,
-        padding: _padding + const EdgeInsets.all(1),
+        padding: st.padding + const EdgeInsets.all(1),
         decoration: BoxDecoration(color: _hover == seg.name && !_off ? st.hoverBg : st.bg, borderRadius: radius),
         child: content,
       ),
@@ -1116,7 +1112,7 @@ class _KakaoMultiDropdownState extends State<KakaoMultiDropdown> {
     final style = KakaoOptionListStyle(
       text: rowText,
       rowMinHeight: 0,
-      rowPadding: _optionPadding,
+      rowPadding: st.optionPadding,
       rowRadius: st.optionRadius,
       gap: _optionGap,
       trailingGap: _optionGap,

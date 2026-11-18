@@ -9,10 +9,6 @@ import '../theme/kakao_values.dart';
 
 /// The settings block of `components/multi-dropdown/multi-dropdown.js` (`--kakao-multi-dropdown-*`), resolved
 /// against a theme's colours. Lengths are logical pixels.
-///
-/// Not generated (the widget handles these by hand):
-/// - `--kakao-multi-dropdown-option-padding`: list
-/// - `--kakao-multi-dropdown-padding`: list
 class KakaoMultiDropdownSettings {
   const KakaoMultiDropdownSettings._({
     required this.accent,
@@ -28,7 +24,9 @@ class KakaoMultiDropdownSettings {
     required this.hoverBg,
     required this.labelGap,
     required this.muted,
+    required this.optionPadding,
     required this.optionRadius,
+    required this.padding,
     required this.popupHeight,
     required this.popupOffset,
     required this.popupPadding,
@@ -53,7 +51,9 @@ class KakaoMultiDropdownSettings {
     final Color hoverBg = c.subtle;
     final double labelGap = 6.4;
     final Color muted = c.muted;
+    final EdgeInsets optionPadding = EdgeInsets.fromLTRB(9.6, 5.6, 9.6, 5.6);
     final double optionRadius = KakaoSharedTokens.radiusSm;
+    final EdgeInsets padding = EdgeInsets.fromLTRB(12.0, 7.2, 8.8, 7.2);
     final double popupHeight = 256.0;
     final double popupOffset = 7.2;
     final double popupPadding = 4.0;
@@ -76,7 +76,9 @@ class KakaoMultiDropdownSettings {
       hoverBg: hoverBg,
       labelGap: labelGap,
       muted: muted,
+      optionPadding: optionPadding,
       optionRadius: optionRadius,
+      padding: padding,
       popupHeight: popupHeight,
       popupOffset: popupOffset,
       popupPadding: popupPadding,
@@ -125,8 +127,14 @@ class KakaoMultiDropdownSettings {
   /// `--kakao-multi-dropdown-muted`
   final Color muted;
 
+  /// `--kakao-multi-dropdown-option-padding`
+  final EdgeInsets optionPadding;
+
   /// `--kakao-multi-dropdown-option-radius`
   final double optionRadius;
+
+  /// `--kakao-multi-dropdown-padding`
+  final EdgeInsets padding;
 
   /// `--kakao-multi-dropdown-popup-height`
   final double popupHeight;
@@ -161,7 +169,9 @@ class KakaoMultiDropdownSettings {
     'hover-bg': hoverBg,
     'label-gap': labelGap,
     'muted': muted,
+    'option-padding': optionPadding,
     'option-radius': optionRadius,
+    'padding': padding,
     'popup-height': popupHeight,
     'popup-offset': popupOffset,
     'popup-padding': popupPadding,

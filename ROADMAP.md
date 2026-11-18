@@ -2,7 +2,7 @@
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
 popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
-password-input (plus theme-switch settings for the cross-fade). The order below follows
+password-input, number-input (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -23,7 +23,8 @@ disabled and error), multi-dropdown (closed with every part set, its month list 
 disabled), command-palette (opened with all commands, opened while filtering by "fi", and the
 empty state), text-input (label and hint, search with icon and clear button, error, sizes,
 disabled and read only), textarea (label, counter, auto-growing, error, sizes), password-input (basic, hint and error, sizes,
-disabled / read only / no toggle, default requirements, own requirements).
+disabled / read only / no toggle, default requirements, own requirements), number-input (default,
+sm, the touch layout grouped right and left, split, plus only, disabled).
 
 ## 1. Anchored panel and option list (done)
 
@@ -78,7 +79,14 @@ disabled / read only / no toggle, default requirements, own requirements).
   in the field's tap region group); number-input's steppers can follow it. It is also the model
   for a field with content under its messages (the strength bar and requirement list, outside
   `KakaoField`, with the disabled opacity over all).
-- Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input`,
+  For number-input (done) nothing new in `kakao_field.dart`: its steppers are aria-hidden and
+  pointer only (no focus, no outline), so they are private to `KakaoNumberInput` and not built
+  on password-input's `_Toggle`; it uses `KakaoFieldBox` with `paddingX: 0` and its own padding
+  (the generated `input-padding`), the steppers in a Stack over the input, in the field's tap
+  region group so a press keeps focus. The generator now emits `EdgeInsets` for `*padding`
+  settings that hold 1-4 lengths (CSS shorthand order); textarea and multi-dropdown read theirs
+  from the settings now.
+- Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input` (done),
   `date-input` and `time-input` (date picker on the anchored panel),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
@@ -220,6 +228,22 @@ disabled / read only / no toggle, default requirements, own requirements).
   `obscureText`); the field's text selection colour is the focus colour at 25 %; labelled fields
   are 1 px shorter (line box rounding, see Text; look-alike check: 0.1-0.5 %, the error case 1.9 %
   from that 1 px shift).
+
+- Number input: no form participation (`name`, `required`, validity, reset); arrow keys step
+  with the steppers' rule (value + step, clamped, rounded to the step's decimals, input and
+  change at once) instead of the browser's `stepUp` (which snaps to the step base `min` and
+  treats an empty field differently); no wheel stepping over the focused input itself (only
+  over the steppers, as number-input.js does); typed text is only filtered to the characters
+  Chromium lets in, an invalid text reports null (the web's `""`); `readOnly` also stops the
+  steppers (number-input.js only checks `disabled`); while a stepper is held, leaving it with
+  the mouse stops the repeat per button in the touch layout (the web listens on the strip, so a
+  joined pair keeps repeating across both); the field reports increase / decrease actions in
+  semantics (the web's spinbutton role), the steppers stay hidden as on the web; `font-size:
+  inherit` reads the surrounding `DefaultTextStyle` (the look-alike fixtures set the demo
+  page's 16 px); the ▲ / ▼ glyphs come from a fallback font; `pointer: coarse` is the platform
+  (Android, iOS, Fuchsia), as in the menu, and does not follow a pointer change at runtime; the
+  field's text selection colour is the focus colour at 25 %; no `data-*` mirroring. Look-alike
+  check: 0.0-0.1 % different in light and dark, same heights (38, 35, 44).
 
 ## Seen on the web side
 

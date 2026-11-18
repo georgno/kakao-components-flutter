@@ -188,6 +188,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Multi dropdown', child: const _MultiDropdownExamples()),
+            _Section(title: 'Number input', child: const _NumberInputExamples()),
             _Section(title: 'Password input', child: const _PasswordInputExamples()),
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
@@ -766,6 +767,154 @@ class _TextInputExamplesState extends State<_TextInputExamples> {
         const SizedBox(height: 12),
         Text(
           _log.isEmpty ? 'Type in the email field to see its events.' : _log.join('\n'),
+          style: theme.text(size: 14, color: theme.colors.muted),
+        ),
+      ],
+    );
+  }
+}
+
+/// number-input/demo.html: the variants (default, small with step 0.5, the
+/// touch layout and its options, disabled) and the playground (size,
+/// disabled, the change log).
+class _NumberInputExamples extends StatefulWidget {
+  const _NumberInputExamples();
+
+  @override
+  State<_NumberInputExamples> createState() => _NumberInputExamplesState();
+}
+
+class _NumberInputExamplesState extends State<_NumberInputExamples> {
+  bool _small = false;
+  bool _disabled = false;
+  final _log = <String>[];
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget example(String caption, Widget child) => SizedBox(
+      width: 220,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(caption, style: theme.text(size: 14, weight: 600)),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example('Default', const KakaoNumberInput(value: 10, min: 0, max: 100, semanticLabel: 'Quantity')),
+            example(
+              'Small · step 0.5',
+              const KakaoNumberInput(
+                size: KakaoNumberInputSize.sm,
+                value: 2.5,
+                min: 0,
+                max: 10,
+                step: .5,
+                semanticLabel: 'Hours',
+              ),
+            ),
+            example(
+              'Touch layout · touchSteppers',
+              const KakaoNumberInput(
+                value: 10,
+                min: 0,
+                max: 100,
+                touchSteppers: true,
+                semanticLabel: 'Quantity (touch)',
+              ),
+            ),
+            example(
+              'Pair on the left · groupPosition: left',
+              const KakaoNumberInput(
+                value: 10,
+                min: 0,
+                max: 100,
+                touchSteppers: true,
+                groupPosition: KakaoStepperSide.left,
+                semanticLabel: 'Quantity, buttons on the left',
+              ),
+            ),
+            example(
+              'Split · grouped: false, plus: left',
+              const KakaoNumberInput(
+                value: 10,
+                min: 0,
+                max: 100,
+                touchSteppers: true,
+                grouped: false,
+                plus: KakaoStepperSide.left,
+                semanticLabel: 'Quantity, split buttons',
+              ),
+            ),
+            example(
+              'One button · minus: none',
+              const KakaoNumberInput(
+                value: 10,
+                min: 0,
+                max: 100,
+                touchSteppers: true,
+                minus: KakaoStepperSide.none,
+                semanticLabel: 'Quantity, plus only',
+              ),
+            ),
+            example('Disabled', const KakaoNumberInput(value: 42, disabled: true, semanticLabel: 'Locked')),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Playground', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 220,
+          child: KakaoNumberInput(
+            value: 10,
+            min: 0,
+            max: 100,
+            size: _small ? KakaoNumberInputSize.sm : KakaoNumberInputSize.md,
+            disabled: _disabled,
+            semanticLabel: 'Quantity',
+            onCommitted: (v) => _event('change · ${v == null ? '""' : KakaoNumberInput.format(v)}'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'size sm',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              toggle: true,
+              pressed: _small,
+              onPressed: () => setState(() => _small = !_small),
+            ),
+            KakaoButton(
+              label: 'disabled',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              toggle: true,
+              pressed: _disabled,
+              onPressed: () => setState(() => _disabled = !_disabled),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _log.isEmpty ? 'Step or type in the field to see its change events.' : _log.join('\n'),
           style: theme.text(size: 14, color: theme.colors.muted),
         ),
       ],

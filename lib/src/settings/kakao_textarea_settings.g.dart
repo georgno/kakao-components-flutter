@@ -9,9 +9,6 @@ import '../theme/kakao_values.dart';
 
 /// The settings block of `components/textarea/textarea.js` (`--kakao-textarea-*`), resolved
 /// against a theme's colours. Lengths are logical pixels.
-///
-/// Not generated (the widget handles these by hand):
-/// - `--kakao-textarea-padding`: list
 class KakaoTextareaSettings {
   const KakaoTextareaSettings._({
     required this.bg,
@@ -29,6 +26,7 @@ class KakaoTextareaSettings {
     required this.messageGap,
     required this.minHeight,
     required this.muted,
+    required this.padding,
     required this.radius,
     required this.text,
   });
@@ -51,6 +49,7 @@ class KakaoTextareaSettings {
     final double messageGap = 5.0;
     final double minHeight = 88.0;
     final Color muted = c.muted;
+    final EdgeInsets padding = EdgeInsets.fromLTRB(12.0, 10.0, 12.0, 10.0);
     final double radius = KakaoSharedTokens.radiusMd;
     final Color text = c.text;
     return KakaoTextareaSettings._(
@@ -69,6 +68,7 @@ class KakaoTextareaSettings {
       messageGap: messageGap,
       minHeight: minHeight,
       muted: muted,
+      padding: padding,
       radius: radius,
       text: text,
     );
@@ -119,6 +119,9 @@ class KakaoTextareaSettings {
   /// `--kakao-textarea-muted`
   final Color muted;
 
+  /// `--kakao-textarea-padding`
+  final EdgeInsets padding;
+
   /// `--kakao-textarea-radius`
   final double radius;
 
@@ -142,6 +145,7 @@ class KakaoTextareaSettings {
     'message-gap': messageGap,
     'min-height': minHeight,
     'muted': muted,
+    'padding': padding,
     'radius': radius,
     'text': text,
   };

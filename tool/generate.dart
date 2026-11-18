@@ -13,7 +13,8 @@
 // A settings class is built from each setting's `value` chain (not from the
 // pre-resolved table), so settings follow the theme live: colour roles come
 // from the KakaoColors passed in, `color-mix()` is computed at runtime, and a
-// setting that follows a sibling reads that sibling. Values a Dart type can't
+// setting that follows a sibling reads that sibling. A `*padding` setting
+// holding 1-4 lengths (the CSS shorthand) becomes EdgeInsets. Values a Dart type can't
 // hold (calc with runtime refs, keyword lists) are listed in the class's doc
 // comment as not generated; the widget handles those by hand.
 //
@@ -22,7 +23,24 @@ import 'dart:convert';
 import 'dart:io';
 
 /// Components with a Flutter twin: their settings classes are generated.
-const ported = ['button', 'card', 'combobox', 'command-palette', 'dialog', 'menu', 'multi-dropdown', 'password-input', 'popover', 'progress', 'select', 'text-input', 'textarea', 'theme-switch', 'tooltip'];
+const ported = [
+  'button',
+  'card',
+  'combobox',
+  'command-palette',
+  'dialog',
+  'menu',
+  'multi-dropdown',
+  'number-input',
+  'password-input',
+  'popover',
+  'progress',
+  'select',
+  'text-input',
+  'textarea',
+  'theme-switch',
+  'tooltip',
+];
 
 late Map<String, dynamic> tokens;
 
@@ -186,9 +204,23 @@ String? _dartType(Map<String, dynamic> resolved) {
       return 'KakaoViewportLength';
     case 'calc':
       return _calcNumeric(resolved['expr'] as Map<String, dynamic>) ? 'double' : null;
+    case 'list':
+      return _isPadding(resolved) ? 'EdgeInsets' : null;
     default:
       return null;
   }
+}
+
+/// A space-separated list of 1-4 lengths: the CSS padding shorthand (only
+/// for settings named `*padding`, see [_settings]).
+bool _isPadding(Map<String, dynamic> n) {
+  if (n['type'] != 'list' || n['separator'] != 'space') return false;
+  final items = (n['items'] as List).cast<Map<String, dynamic>>();
+  return items.isNotEmpty &&
+      items.length <= 4 &&
+      items.every(
+        (i) => i['type'] == 'length' || (i['type'] == 'calc' && _calcNumeric(i['expr'] as Map<String, dynamic>)),
+      );
 }
 
 bool _calcNumeric(Map<String, dynamic> n) {
@@ -259,6 +291,17 @@ String _expr(Map<String, dynamic> n, Map<String, String> types) {
         return 'BoxShadow(offset: Offset(${part('x')}, ${part('y')}), blurRadius: kakaoCssBlur(${part('blur')}), '
             'spreadRadius: ${part('spread')}, color: ${part('color')})';
       }).join(', ')}]';
+    case 'list':
+      // The padding shorthand: top, right, bottom, left; missing sides
+      // repeat their opposite (CSS order), as EdgeInsets.fromLTRB.
+      final items = (n['items'] as List).cast<Map<String, dynamic>>();
+      if (!_isPadding(n)) throw _Unsupported('a list that is not a padding shorthand');
+      final v = items.map((i) => _expr(i, types)).toList();
+      final top = v[0];
+      final right = v.length > 1 ? v[1] : top;
+      final bottom = v.length > 2 ? v[2] : top;
+      final left = v.length > 3 ? v[3] : right;
+      return 'EdgeInsets.fromLTRB($left, $top, $right, $bottom)';
     case 'font':
       final w = n['weight'] as Map<String, dynamic>?;
       return 'KakaoFontSpec(size: ${_expr(n['size'] as Map<String, dynamic>, types)}, '
@@ -319,7 +362,10 @@ String _settings(String component) {
   final types = <String, String>{};
   final skipped = <String, String>{};
   for (final MapEntry(key: k, value: s) in settings.entries) {
-    final t = _dartType(firstResolved(s));
+    var t = _dartType(firstResolved(s));
+    // Only a padding setting reads a list of lengths as EdgeInsets (a
+    // `margin` or `gap` list would need its own type).
+    if (t == 'EdgeInsets' && !k.endsWith('padding')) t = null;
     if (t == null) {
       skipped[k] = firstResolved(s)['type'] as String;
     } else {

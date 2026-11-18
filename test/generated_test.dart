@@ -73,6 +73,15 @@ void expectMatches(Object dart, Map<String, dynamic> web, String what) {
           reason: '$what blur',
         );
       }
+    case 'list':
+      // Only the padding shorthand is generated (EdgeInsets, CSS order).
+      final px = (web['items'] as List).map((i) => ((i as Map)['px'] as num).toDouble()).toList();
+      final top = px[0];
+      final right = px.length > 1 ? px[1] : top;
+      final bottom = px.length > 2 ? px[2] : top;
+      final left = px.length > 3 ? px[3] : right;
+      final e = dart as EdgeInsets;
+      expect([e.top, e.right, e.bottom, e.left], [top, right, bottom, left], reason: what);
     default:
       fail('$what: no comparison for ${web['type']}');
   }
@@ -82,6 +91,8 @@ final Map<String, Map<String, Object> Function(KakaoColors)> generated = {
   'button': (c) => KakaoButtonSettings.of(c).toMap(),
   'card': (c) => KakaoCardSettings.of(c).toMap(),
   'dialog': (c) => KakaoDialogSettings.of(c).toMap(),
+  'multi-dropdown': (c) => KakaoMultiDropdownSettings.of(c).toMap(),
+  'number-input': (c) => KakaoNumberInputSettings.of(c).toMap(),
   'password-input': (c) => KakaoPasswordInputSettings.of(c).toMap(),
   'progress': (c) => KakaoProgressSettings.of(c).toMap(),
   'text-input': (c) => KakaoTextInputSettings.of(c).toMap(),

@@ -43,6 +43,13 @@
     { "id": "password-input-sizes", "page": "components/password-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
     { "id": "password-input-states", "page": "components/password-input/demo.html", "selector": "kakao-card:has(kakao-password-input[hide-toggle]) > div" },
     { "id": "password-input-requirements", "page": "components/password-input/demo.html", "selector": "kakao-password-input#p1" },
-    { "id": "password-input-list-data", "page": "components/password-input/demo.html", "selector": "kakao-password-input[label='Passphrase']" }
+    { "id": "password-input-list-data", "page": "components/password-input/demo.html", "selector": "kakao-password-input[label='Passphrase']" },
+    { "id": "number-input-default", "page": "components/number-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Default')) kakao-number-input" },
+    { "id": "number-input-sm", "page": "components/number-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Small · step 0.5')) kakao-number-input" },
+    { "id": "number-input-touch", "page": "components/number-input/demo.html", "selector": "kakao-number-input[touch-steppers]:not([group-position]):not([grouped]):not([minus])" },
+    { "id": "number-input-touch-left", "page": "components/number-input/demo.html", "selector": "kakao-number-input[group-position='left']" },
+    { "id": "number-input-touch-split", "page": "components/number-input/demo.html", "selector": "kakao-number-input[grouped='false']" },
+    { "id": "number-input-touch-plus-only", "page": "components/number-input/demo.html", "selector": "kakao-number-input[minus='false']" },
+    { "id": "number-input-disabled", "page": "components/number-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled')) kakao-number-input" }
   ]
 }

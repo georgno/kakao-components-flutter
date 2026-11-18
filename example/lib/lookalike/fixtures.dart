@@ -202,6 +202,43 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       semanticLabel: 'Large text area',
     ),
   ]),
+  // number-input/demo.html "Variants": the kakao-number-input in each card,
+  // at the page's font-size (16px, inherited by the input).
+  'number-input-default': (_) =>
+      _page16(const KakaoNumberInput(value: 10, min: 0, max: 100, semanticLabel: 'Quantity')),
+  'number-input-sm': (_) => _page16(
+    const KakaoNumberInput(
+      size: KakaoNumberInputSize.sm,
+      value: 2.5,
+      min: 0,
+      max: 10,
+      step: .5,
+      semanticLabel: 'Hours',
+    ),
+  ),
+  'number-input-touch': (_) =>
+      _page16(const KakaoNumberInput(value: 10, min: 0, max: 100, touchSteppers: true, semanticLabel: 'Quantity')),
+  'number-input-touch-left': (_) => _page16(
+    const KakaoNumberInput(
+      value: 10,
+      touchSteppers: true,
+      groupPosition: KakaoStepperSide.left,
+      semanticLabel: 'Quantity',
+    ),
+  ),
+  'number-input-touch-split': (_) => _page16(
+    const KakaoNumberInput(
+      value: 10,
+      touchSteppers: true,
+      grouped: false,
+      plus: KakaoStepperSide.left,
+      semanticLabel: 'Quantity',
+    ),
+  ),
+  'number-input-touch-plus-only': (_) => _page16(
+    const KakaoNumberInput(value: 10, touchSteppers: true, minus: KakaoStepperSide.none, semanticLabel: 'Quantity'),
+  ),
+  'number-input-disabled': (_) => _page16(const KakaoNumberInput(value: 42, disabled: true, semanticLabel: 'Locked')),
   // password-input/demo.html "Basic · show / hide".
   'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
   // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·
@@ -234,6 +271,9 @@ Widget _fields(List<Widget> children) => Column(
     for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 9.6), children[i]],
   ],
 );
+
+/// The demo page's `font: 16px/1.5` (a number input's font-size inherits it).
+Widget _page16(Widget child) => DefaultTextStyle.merge(style: const TextStyle(fontSize: 16), child: child);
 
 void _noop() {}
 
