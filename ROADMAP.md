@@ -2,7 +2,7 @@
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
 popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea,
-password-input, number-input (plus theme-switch settings for the cross-fade). The order below follows
+password-input, number-input, date-input (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -24,7 +24,9 @@ disabled), command-palette (opened with all commands, opened while filtering by 
 empty state), text-input (label and hint, search with icon and clear button, error, sizes,
 disabled and read only), textarea (label, counter, auto-growing, error, sizes), password-input (basic, hint and error, sizes,
 disabled / read only / no toggle, default requirements, own requirements), number-input (default,
-sm, the touch layout grouped right and left, split, plus only, disabled).
+sm, the touch layout grouped right and left, split, plus only, disabled), date-input (date,
+time, datetime-local, month, week, the today tag, sizes, disabled / read only / error; the
+picker is the browser's own on the web, so it has no pair).
 
 ## 1. Anchored panel and option list (done)
 
@@ -86,8 +88,18 @@ sm, the touch layout grouped right and left, split, plus only, disabled).
   region group so a press keeps focus. The generator now emits `EdgeInsets` for `*padding`
   settings that hold 1-4 lengths (CSS shorthand order); textarea and multi-dropdown read theirs
   from the settings now.
+  For date-input (done) three new internal blocks, which time-input can take as they are:
+  `kakao_date_values.dart` (`KakaoDateKind`, `KakaoDateFields`, ISO parse / write, ISO weeks,
+  `kakaoTodayValues` / `kakaoInRange` from date-input.js, `KakaoDateFormat.forLocale`: the field's
+  part order, separators, 12 / 24 hours and placeholders, `kakaoPartStep` for minutes and
+  seconds); `kakao_segment_field.dart` (`KakaoSegmentField`: the browser's segmented field,
+  owner-held parts, `onCommit` at the native `change` point, Alt+Down / F4 / a touch tap open the
+  picker); `kakao_date_picker.dart` (`KakaoDatePicker` with `KakaoPickerStyle`: month calendar,
+  year of months, time columns; `kind: time` is the time picker alone). `KakaoDateInput` is the
+  model: the picker's chrome from the select's panel settings (the web has none: the browser
+  draws its picker), the today tag in `KakaoField`'s `counter` slot with `messageMinWidth: 0`.
 - Then: `text-input` (done), `textarea` (done), `password-input` (done), `number-input` (done),
-  `date-input` and `time-input` (date picker on the anchored panel),
+  `date-input` (done) and `time-input` (on the date blocks above),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
 ## 3. Toggles and ranges
@@ -244,6 +256,27 @@ sm, the touch layout grouped right and left, split, plus only, disabled).
   (Android, iOS, Fuchsia), as in the menu, and does not follow a pointer change at runtime; the
   field's text selection colour is the focus colour at 25 %; no `data-*` mirroring. Look-alike
   check: 0.0-0.1 % different in light and dark, same heights (38, 35, 44).
+
+- Date input: the web keeps the browser's own field and picker; here both are drawn: the field
+  after Chromium's (parts, keys, placeholders), the picker in the library's look (the select's
+  panel chrome, ink for the pick), not Chromium's popup: its layout (36 px cells, a year of
+  months one year at a time, time columns seven rows high, Clear and Today at the foot) is ours;
+  the picker's words are English (`KakaoDateInput.texts`) apart from the month names of the
+  field's format and the today label; the field's format comes from a built-in table of locales
+  (others get ISO order and 24 hours; month names only in English: other languages show the month
+  as a number; "Week" / "Woche" / "Semaine" / "Semana"), not from ICU; the today label is known for
+  en, de, fr, es, it (else English); no form participation (`name`, `required`, validity and its
+  messages, reset, state restore): the owner checks and sets `error`; no Firefox / Safari text
+  fallback (YYYY-MM) and no millisecond part (a value's milliseconds are dropped); the time
+  columns do not disable times outside `min` / `max`; typing goes through hardware keys only (no
+  soft keyboard: on touch platforms a tap opens the picker, as Chrome on Android opens its
+  dialog); a part counts digits as Chromium does, so each year digit reports a value (0002, 0020,
+  0202, 2026); the field is one node in semantics (its name, value and hint), not a spin button per
+  part; the disabled today tag's reason is a semantics hint, not a `title` tooltip, and the tag's
+  tap target is the drawn 20 px tag (the web widens it to 24 px); no `forced-colors` rules; no
+  `data-*` mirroring; the focused part is filled with the focus colour at 25 % (the browser's
+  `Highlight`); labelled fields are 1 px shorter (line box rounding, see Text; look-alike check:
+  0.1-0.4 %, the states case 1.4 % from that shift).
 
 ## Seen on the web side
 

@@ -239,6 +239,47 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     const KakaoNumberInput(value: 10, touchSteppers: true, minus: KakaoStepperSide.none, semanticLabel: 'Quantity'),
   ),
   'number-input-disabled': (_) => _page16(const KakaoNumberInput(value: 42, disabled: true, semanticLabel: 'Locked')),
+  // date-input/demo.html "Types" and "Today shortcut": the field in each
+  // card (Chromium draws it in en-US in the look-alike run).
+  'date-input-date': (_) => const KakaoDateInput(label: 'Start date', value: '2026-03-04', hint: 'Value 2026-03-04'),
+  'date-input-time': (_) => const KakaoDateInput(
+    type: KakaoDateInputType.time,
+    label: 'Start time',
+    value: '09:30',
+    step: 900,
+    hint: 'Picker in 15-minute steps (Chromium)',
+  ),
+  'date-input-datetime': (_) =>
+      const KakaoDateInput(type: KakaoDateInputType.dateTimeLocal, label: 'Meeting', value: '2026-03-04T14:30'),
+  'date-input-month': (_) => const KakaoDateInput(
+    type: KakaoDateInputType.month,
+    label: 'Billing month',
+    value: '2026-03',
+    hint: 'Firefox and desktop Safari have no month field: type YYYY-MM.',
+  ),
+  'date-input-week': (_) => const KakaoDateInput(
+    type: KakaoDateInputType.week,
+    label: 'Sprint week',
+    value: '2026-W10',
+    hint: 'Firefox and desktop Safari have no week field: type YYYY-Www.',
+  ),
+  'date-input-today': (_) => const KakaoDateInput(today: true, label: 'Entry date', hint: 'Today in one click'),
+  // date-input/demo.html "Sizes", "Disabled · read only · error": .stack, gap .6rem.
+  'date-input-sizes': (_) => _fields(const [
+    KakaoDateInput(size: KakaoDateInputSize.sm, label: 'Small', value: '2026-03-04'),
+    KakaoDateInput(label: 'Medium', value: '2026-03-04'),
+    KakaoDateInput(size: KakaoDateInputSize.lg, label: 'Large', value: '2026-03-04'),
+  ]),
+  'date-input-states': (_) => _fields(const [
+    KakaoDateInput(disabled: true, label: 'Disabled', value: '2026-03-04'),
+    KakaoDateInput(readOnly: true, label: 'Read only', value: '2026-03-04'),
+    KakaoDateInput(
+      type: KakaoDateInputType.time,
+      label: 'Check-in',
+      error: 'Check-in starts at 15:00.',
+      value: '11:00',
+    ),
+  ]),
   // password-input/demo.html "Basic · show / hide".
   'password-input-basic': (_) => const KakaoPasswordInput(label: 'Password', placeholder: 'Your password'),
   // password-input/demo.html "Hint · error", "Sizes", "Disabled · readonly ·

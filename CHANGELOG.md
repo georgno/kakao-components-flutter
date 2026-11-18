@@ -71,6 +71,21 @@
   decrease in semantics.
 - The generator emits `EdgeInsets` for padding settings (1-4 lengths); `KakaoTextarea` and
   `KakaoMultiDropdown` read their padding from the generated settings instead of literals.
+- `KakaoDateInput` (`<kakao-date-input>`): a date, time, datetime-local, month or week field
+  with the browser's segmented editing (one part at a time: digits move on when no further
+  digit fits, Up / Down step with wrap and by `step` for minutes and seconds, Backspace
+  empties, Tab / Left / Right walk the parts, "a" / "p" for AM / PM), its format from the
+  locale (order, separators, 12 or 24 hours, placeholders; a built-in table), the ISO value;
+  label, hint, error, sizes 36 / 44 / 52, disabled, read only, focus border and outline; the
+  picker icon (calendar or clock, a tab stop) where the select's chevron sits; a picker on the
+  anchored panel in the select's panel chrome (month calendar with keyboard, week numbers and
+  the week as the pick, a year of months, time columns, Clear and Today; `min` / `max` / `step`
+  disable days, weeks and months); the `today` tag (locale label, `todayLabel`, disabled out of
+  range with the reason in semantics); `onChanged` (input) / `onCommitted` (change);
+  `KakaoDateInputController` (`showPicker()`), `KakaoDateInput.valueAsDate`. New internal
+  blocks for time-input: `kakao_date_values.dart` (ISO values, ISO weeks, formats per locale,
+  the today rules), `kakao_segment_field.dart` (`KakaoSegmentField`) and
+  `kakao_date_picker.dart` (`KakaoDatePicker`: calendar, year of months, time columns).
 
 - Themes generated from kakao-components v0.9.0 (7 themes, more-contrast colours).
 - Shared tokens, Inter Tight variable font.

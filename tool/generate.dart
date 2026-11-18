@@ -28,6 +28,7 @@ const ported = [
   'card',
   'combobox',
   'command-palette',
+  'date-input',
   'dialog',
   'menu',
   'multi-dropdown',

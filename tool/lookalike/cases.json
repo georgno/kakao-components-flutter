@@ -50,6 +50,14 @@
     { "id": "number-input-touch-left", "page": "components/number-input/demo.html", "selector": "kakao-number-input[group-position='left']" },
     { "id": "number-input-touch-split", "page": "components/number-input/demo.html", "selector": "kakao-number-input[grouped='false']" },
     { "id": "number-input-touch-plus-only", "page": "components/number-input/demo.html", "selector": "kakao-number-input[minus='false']" },
-    { "id": "number-input-disabled", "page": "components/number-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled')) kakao-number-input" }
+    { "id": "number-input-disabled", "page": "components/number-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled')) kakao-number-input" },
+    { "id": "date-input-date", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Start date']" },
+    { "id": "date-input-time", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Start time']" },
+    { "id": "date-input-datetime", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Meeting']" },
+    { "id": "date-input-month", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Billing month'][value]" },
+    { "id": "date-input-week", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Sprint week'][value]" },
+    { "id": "date-input-today", "page": "components/date-input/demo.html", "selector": "kakao-date-input[label='Entry date']" },
+    { "id": "date-input-sizes", "page": "components/date-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "date-input-states", "page": "components/date-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · read only · error')) > div" }
   ]
 }

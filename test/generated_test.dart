@@ -90,6 +90,7 @@ void expectMatches(Object dart, Map<String, dynamic> web, String what) {
 final Map<String, Map<String, Object> Function(KakaoColors)> generated = {
   'button': (c) => KakaoButtonSettings.of(c).toMap(),
   'card': (c) => KakaoCardSettings.of(c).toMap(),
+  'date-input': (c) => KakaoDateInputSettings.of(c).toMap(),
   'dialog': (c) => KakaoDialogSettings.of(c).toMap(),
   'multi-dropdown': (c) => KakaoMultiDropdownSettings.of(c).toMap(),
   'number-input': (c) => KakaoNumberInputSettings.of(c).toMap(),

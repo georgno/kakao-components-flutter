@@ -185,6 +185,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             const _CardExamples(),
             _Section(title: 'Combobox', child: const _ComboboxExamples()),
             _Section(title: 'Command palette', child: const _CommandPaletteExamples()),
+            _Section(title: 'Date input', child: const _DateInputExamples()),
             _Section(title: 'Dialog', child: const _DialogExamples()),
             _Section(title: 'Menu', child: const _MenuExamples()),
             _Section(title: 'Multi dropdown', child: const _MultiDropdownExamples()),
@@ -925,6 +926,246 @@ class _NumberInputExamplesState extends State<_NumberInputExamples> {
 /// textarea/demo.html: label, counter, auto-growing, error, sizes and
 /// resize, required in a form (the owner sets the error), and the
 /// playground's script calls with the event log.
+/// date-input/demo.html: the types, min / max, the today tag (with an out
+/// of range tag, a locale and an own label), beside the select and
+/// combobox, sizes, states, and the playground (next type, showPicker,
+/// value, disabled, today; the event log).
+class _DateInputExamples extends StatefulWidget {
+  const _DateInputExamples();
+
+  @override
+  State<_DateInputExamples> createState() => _DateInputExamplesState();
+}
+
+class _DateInputExamplesState extends State<_DateInputExamples> {
+  final _picker = KakaoDateInputController();
+  var _type = KakaoDateInputType.date;
+  var _value = '2026-03-04';
+  bool _disabled = false;
+  bool _today = false;
+  final _log = <String>[];
+
+  /// A week from today: the out-of-range field's min.
+  final _nextWeek = () {
+    final d = DateTime.now().add(const Duration(days: 7));
+    return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  }();
+
+  @override
+  void dispose() {
+    _picker.dispose();
+    super.dispose();
+  }
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget example(String caption, Widget child) => SizedBox(
+      width: 280,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(caption, style: theme.text(size: 14, weight: 600)),
+          const SizedBox(height: 8),
+          child,
+        ],
+      ),
+    );
+    Widget stack(List<Widget> children) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+      ],
+    );
+    Widget button(String label, VoidCallback onPressed, {bool? pressed}) => KakaoButton(
+      label: label,
+      variant: KakaoButtonVariant.secondary,
+      size: KakaoButtonSize.sm,
+      toggle: pressed != null,
+      pressed: pressed ?? false,
+      onPressed: onPressed,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Date (default)',
+              const KakaoDateInput(label: 'Start date', value: '2026-03-04', hint: 'Value 2026-03-04'),
+            ),
+            example(
+              'Time · step 900',
+              const KakaoDateInput(
+                type: KakaoDateInputType.time,
+                label: 'Start time',
+                value: '09:30',
+                step: 900,
+                hint: 'Picker in 15-minute steps',
+              ),
+            ),
+            example(
+              'Date and time',
+              const KakaoDateInput(type: KakaoDateInputType.dateTimeLocal, label: 'Meeting', value: '2026-03-04T14:30'),
+            ),
+            example(
+              'Month',
+              const KakaoDateInput(type: KakaoDateInputType.month, label: 'Billing month', value: '2026-03'),
+            ),
+            example(
+              'Week',
+              const KakaoDateInput(type: KakaoDateInputType.week, label: 'Sprint week', value: '2026-W10'),
+            ),
+            example(
+              'Min · max',
+              const KakaoDateInput(
+                label: 'Delivery',
+                min: '2026-11-16',
+                max: '2026-11-27',
+                value: '2026-11-30',
+                hint: 'Weekdays from 16 to 27 November',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Today shortcut · today', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example('Date', const KakaoDateInput(today: true, label: 'Entry date', hint: 'Today in one click')),
+            example(
+              'Time · step 900',
+              const KakaoDateInput(
+                today: true,
+                type: KakaoDateInputType.time,
+                step: 900,
+                label: 'Started at',
+                hint: 'Now, to the nearest quarter hour',
+              ),
+            ),
+            example(
+              'Month · week',
+              stack(const [
+                KakaoDateInput(today: true, type: KakaoDateInputType.month, label: 'Billing month'),
+                KakaoDateInput(today: true, type: KakaoDateInputType.week, label: 'Sprint week'),
+              ]),
+            ),
+            example(
+              'Out of range · disabled tag',
+              KakaoDateInput(today: true, min: _nextWeek, label: 'Delivery', hint: 'Earliest date is next week'),
+            ),
+            example(
+              'Locale · today-label',
+              stack(const [
+                KakaoDateInput(today: true, locale: Locale('de', 'AT'), label: 'Datum'),
+                KakaoDateInput(today: true, todayLabel: 'Use today', label: 'Custom label'),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Wrap(
+          spacing: 24,
+          runSpacing: 20,
+          children: [
+            example(
+              'Beside the other fields',
+              stack(const [
+                KakaoSelect(
+                  label: 'Room',
+                  values: ['b'],
+                  options: [
+                    KakaoSelectOption('a', label: 'Room A'),
+                    KakaoSelectOption('b', label: 'Room B'),
+                  ],
+                ),
+                KakaoCombobox(
+                  label: 'Host',
+                  value: 'Ana',
+                  options: [KakaoComboboxOption('Ana'), KakaoComboboxOption('Ben'), KakaoComboboxOption('Chiara')],
+                ),
+                KakaoDateInput(label: 'Day', value: '2026-03-04'),
+                KakaoDateInput(type: KakaoDateInputType.time, label: 'Time', value: '14:30'),
+              ]),
+            ),
+            example(
+              'Sizes',
+              stack(const [
+                KakaoDateInput(size: KakaoDateInputSize.sm, label: 'Small', value: '2026-03-04'),
+                KakaoDateInput(label: 'Medium', value: '2026-03-04'),
+                KakaoDateInput(size: KakaoDateInputSize.lg, label: 'Large', value: '2026-03-04'),
+              ]),
+            ),
+            example(
+              'Disabled · read only · error',
+              stack(const [
+                KakaoDateInput(disabled: true, label: 'Disabled', value: '2026-03-04'),
+                KakaoDateInput(readOnly: true, label: 'Read only', value: '2026-03-04'),
+                KakaoDateInput(
+                  type: KakaoDateInputType.time,
+                  label: 'Check-in',
+                  error: 'Check-in starts at 15:00.',
+                  value: '11:00',
+                ),
+              ]),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text('Playground', style: theme.text(size: 14, weight: 600)),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 320,
+          child: KakaoDateInput(
+            label: 'Playground · ${_type.name}',
+            type: _type,
+            value: _value,
+            disabled: _disabled,
+            today: _today,
+            controller: _picker,
+            onChanged: (v) => _event('input · ${v.isEmpty ? '""' : v}'),
+            onCommitted: (v) => _event('change · ${v.isEmpty ? '""' : v}'),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            button('value = "2026-12-24"', () {
+              setState(() {
+                _type = KakaoDateInputType.date;
+                _value = '2026-12-24';
+              });
+            }),
+            button('showPicker()', _picker.open),
+            button('next type', () {
+              setState(() {
+                _type = KakaoDateInputType.values[(_type.index + 1) % KakaoDateInputType.values.length];
+                _value = '';
+              });
+            }),
+            button('disabled', () => setState(() => _disabled = !_disabled), pressed: _disabled),
+            button('today', () => setState(() => _today = !_today), pressed: _today),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final e in _log) Text(e, style: theme.text(size: 13, color: theme.colors.muted, tabular: true)),
+      ],
+    );
+  }
+}
+
 class _TextareaExamples extends StatefulWidget {
   const _TextareaExamples();
 
