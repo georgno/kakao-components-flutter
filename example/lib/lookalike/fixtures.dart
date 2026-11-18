@@ -183,6 +183,25 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
     KakaoTextInput(disabled: true, label: 'Disabled', value: 'Not now'),
     KakaoTextInput(readOnly: true, label: 'Read only', value: 'Copied elsewhere'),
   ]),
+  // textarea/demo.html "With label": #a1 (rows 4: Chromium sizes it by its
+  // content, so the 88 px min-height).
+  'textarea-basic': (_) => const KakaoTextarea(label: 'Message', placeholder: 'Write a message…'),
+  // textarea/demo.html "Counter", "Auto-growing", "Error".
+  'textarea-counter': (_) =>
+      const KakaoTextarea(label: 'Bio', maxLength: 140, counter: true, value: 'Design systems, mostly.'),
+  'textarea-autosize': (_) => const KakaoTextarea(label: 'Notes', autosize: true, hint: 'Grows with what you type.'),
+  'textarea-error': (_) =>
+      const KakaoTextarea(label: 'Reason', value: 'Too short', error: 'Please write at least 20 characters.'),
+  // textarea/demo.html "Sizes · resize": display grid, gap .6rem.
+  'textarea-sizes': (_) => _fields(const [
+    KakaoTextarea(size: KakaoTextareaSize.sm, value: 'Small', semanticLabel: 'Small text area'),
+    KakaoTextarea(
+      size: KakaoTextareaSize.lg,
+      resize: KakaoTextareaResize.none,
+      value: 'Large, no resize',
+      semanticLabel: 'Large text area',
+    ),
+  ]),
 };
 
 /// Fields in a column with the demo's `gap: .6rem`.

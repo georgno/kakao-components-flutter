@@ -84,6 +84,7 @@ final Map<String, Map<String, Object> Function(KakaoColors)> generated = {
   'dialog': (c) => KakaoDialogSettings.of(c).toMap(),
   'progress': (c) => KakaoProgressSettings.of(c).toMap(),
   'text-input': (c) => KakaoTextInputSettings.of(c).toMap(),
+  'textarea': (c) => KakaoTextareaSettings.of(c).toMap(),
   'theme-switch': (c) => KakaoThemeSwitchSettings.of(c).toMap(),
   'tooltip': (c) => KakaoTooltipSettings.of(c).toMap(),
 };

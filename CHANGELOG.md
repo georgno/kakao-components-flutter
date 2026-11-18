@@ -100,3 +100,11 @@
   `textInputAction`, `onSubmitted` and several lines (`maxLines`, `minLines`);
   `KakaoChangeTracker`, `KakaoFieldButton`. Settings generated for text-input, also checked
   against tokens.json.
+- `KakaoTextarea` (`<kakao-textarea>`): a multi-line field with label, hint, error (danger border
+  and outline, invalid in semantics), placeholder at the top, at least `min-height` and growing
+  with its text as Chromium's `field-sizing: content`; `autosize` up to `maxHeight` (default
+  `max-height`), then it scrolls; a resize grip that drags the height (`resize: none` hides it);
+  `counter` ("n / max" with `maxLength`, danger past it), `rows` as a least height, sizes sm / md
+  / lg (padding and font of textarea.js), `disabled`, `readOnly`; `onChanged` on every edit,
+  `onCommitted` on blur when the text changed, Enter a new line. `KakaoField.counter`. Settings
+  generated for textarea, also checked against tokens.json.

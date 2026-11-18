@@ -26,6 +26,8 @@ class KakaoField extends StatelessWidget {
     required this.disabledOpacity,
     required this.onLabelTap,
     required this.child,
+    this.counter,
+    this.counterGap = 0,
   });
 
   final String? label;
@@ -44,6 +46,13 @@ class KakaoField extends StatelessWidget {
   /// A tap on the label (`<label for>`: it focuses the field).
   final VoidCallback? onLabelTap;
   final Widget child;
+
+  /// Beside the message, at the end (textarea.js `.below`: a flex row with
+  /// `justify-content: space-between`, so without a message it sits at the
+  /// start), [counterGap] away from it, [messageGap] below the field. In
+  /// semantics as it is.
+  final Widget? counter;
+  final double counterGap;
 
   @override
   Widget build(BuildContext context) {
@@ -67,18 +76,34 @@ class KakaoField extends StatelessWidget {
             ),
           ),
         child,
-        if (message != null)
+        if (message != null || counter != null)
           Padding(
             padding: EdgeInsets.only(top: messageGap),
-            child: ExcludeSemantics(
-              child: Text(message, style: messageStyle.copyWith(color: messageColor)),
-            ),
+            child: _below(message, counter),
           ),
       ],
     );
     final o = disabledOpacity;
     if (o != null) field = Opacity(opacity: o, child: field);
     return field;
+  }
+
+  Widget _below(String? message, Widget? counter) {
+    final text = message == null
+        ? null
+        : ExcludeSemantics(
+            child: Text(message, style: messageStyle.copyWith(color: messageColor)),
+          );
+    if (counter == null) return text!;
+    if (text == null) return Align(alignment: AlignmentDirectional.centerStart, child: counter);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: text),
+        SizedBox(width: counterGap),
+        counter,
+      ],
+    );
   }
 }
 

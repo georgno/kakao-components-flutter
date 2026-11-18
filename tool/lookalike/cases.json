@@ -32,6 +32,11 @@
     { "id": "text-input-search", "page": "components/text-input/demo.html", "selector": "kakao-text-input#t2" },
     { "id": "text-input-error", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Error')) kakao-text-input" },
     { "id": "text-input-sizes", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
-    { "id": "text-input-states", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · readonly')) > div" }
+    { "id": "text-input-states", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · readonly')) > div" },
+    { "id": "textarea-basic", "page": "components/textarea/demo.html", "selector": "kakao-textarea#a1" },
+    { "id": "textarea-counter", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Bio']" },
+    { "id": "textarea-autosize", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Notes']" },
+    { "id": "textarea-error", "page": "components/textarea/demo.html", "selector": "kakao-textarea[label='Reason']" },
+    { "id": "textarea-sizes", "page": "components/textarea/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes · resize')) > div" }
   ]
 }

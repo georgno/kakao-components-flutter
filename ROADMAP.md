@@ -1,7 +1,7 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu, select, combobox, multi-dropdown, command-palette, text-input (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select, combobox, multi-dropdown, command-palette, text-input, textarea (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -21,7 +21,7 @@ popover and menu (opened first), select (closed, opened, disabled and error), co
 disabled and error), multi-dropdown (closed with every part set, its month list opened,
 disabled), command-palette (opened with all commands, opened while filtering by "fi", and the
 empty state), text-input (label and hint, search with icon and clear button, error, sizes,
-disabled and read only).
+disabled and read only), textarea (label, counter, auto-growing, error, sizes).
 
 ## 1. Anchored panel and option list (done)
 
@@ -62,7 +62,11 @@ disabled and read only).
   can use it or follow it). `KakaoTextInput` is the model for the family: `value` or a
   `controller`, `onChanged` (input) / `onCommitted` (change), the `sm` / `lg` literals, the icon
   slot (`IconTheme` in the muted colour), the 150 ms `ease` border fade.
-- Then: `text-input` (done), `textarea`, `password-input`, `number-input`,
+  For textarea (done) `KakaoField` took a `counter` (beside the message at the end, alone at the
+  start: the `.below` flex row); `KakaoTextarea` puts its own padding inside a `KakaoFieldBox`
+  with `paddingX: 0` (the textarea's padding scrolls with it on the web) and is the model for a
+  field that grows with its content.
+- Then: `text-input` (done), `textarea` (done), `password-input`, `number-input`,
   `date-input` and `time-input` (date picker on the anchored panel),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
@@ -173,6 +177,19 @@ disabled and read only).
   the label and hint sit about 1 px higher, so a field with a label is 1 px shorter (line box
   rounding, see Text; look-alike check); a size change also animates the height (the web
   only fades the border and background).
+- Textarea: no form participation (`name`, `required`, `minlength`, reset, validity and its
+  browser messages): the owner checks the value and sets `error`; `maxLength` only limits typing
+  (and counts as the counter does, UTF-16 units, while typing is limited by characters); the
+  height follows Chromium's `field-sizing: content` (content or `min-height`, `rows` set aside):
+  `rows` here is a least height, as in a browser without it; `resize` has no `both` /
+  `horizontal` (the textarea fills the field's width, so on the web they only add a grip);
+  the grip is drawn after Chromium's (look-alike check: close, not exact) and shows on
+  touch platforms too, but does nothing on a disabled field; the textarea's padding does not
+  scroll with the text (it clips at the padding); no scrollbar while it scrolls; a tap below
+  the text puts the caret at the end, not under the pointer; no `data-*` mirroring; the error is
+  not a live `alert` region; the field's text selection colour is the focus colour at 25 %; the
+  label and message lines round up, so a field with a label and a message is 1 px taller
+  (139.4 → 140, look-alike check; see Text).
 
 ## Seen on the web side
 

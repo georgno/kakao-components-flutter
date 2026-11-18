@@ -192,6 +192,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(title: 'Select', child: const _SelectExamples()),
             _Section(title: 'Text input', child: const _TextInputExamples()),
+            _Section(title: 'Textarea', child: const _TextareaExamples()),
             _Section(
               title: 'About this build',
               child: Column(
@@ -764,6 +765,145 @@ class _TextInputExamplesState extends State<_TextInputExamples> {
         const SizedBox(height: 12),
         Text(
           _log.isEmpty ? 'Type in the email field to see its events.' : _log.join('\n'),
+          style: theme.text(size: 14, color: theme.colors.muted),
+        ),
+      ],
+    );
+  }
+}
+
+/// textarea/demo.html: label, counter, auto-growing, error, sizes and
+/// resize, required in a form (the owner sets the error), and the
+/// playground's script calls with the event log.
+class _TextareaExamples extends StatefulWidget {
+  const _TextareaExamples();
+
+  @override
+  State<_TextareaExamples> createState() => _TextareaExamplesState();
+}
+
+class _TextareaExamplesState extends State<_TextareaExamples> {
+  final _a1 = TextEditingController();
+  final _a1Focus = FocusNode();
+  final _feedback = TextEditingController();
+  String? _feedbackError;
+  String _submitted = 'Submit to see the submitted value.';
+  final _log = <String>[];
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e.replaceAll('\n', '⏎'));
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  void dispose() {
+    _a1.dispose();
+    _a1Focus.dispose();
+    _feedback.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final v = _feedback.text;
+    setState(() {
+      // required: the owner checks (no form participation).
+      _feedbackError = v.trim().isEmpty ? 'Please fill out this field.' : null;
+      if (_feedbackError == null) _submitted = 'Submitted: feedback="${v.length > 40 ? v.substring(0, 40) : v}"';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget column(List<Widget> children) => SizedBox(
+      width: 320,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 16), children[i]],
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            column([
+              KakaoTextarea(
+                controller: _a1,
+                focusNode: _a1Focus,
+                label: 'Message',
+                rows: 4,
+                placeholder: 'Write a message…',
+                onChanged: (v) => _event('input · $v'),
+                onCommitted: (v) => _event('change · $v'),
+              ),
+              const KakaoTextarea(label: 'Bio', maxLength: 140, counter: true, value: 'Design systems, mostly.'),
+              const KakaoTextarea(label: 'Notes', autosize: true, rows: 2, hint: 'Grows with what you type.'),
+            ]),
+            column([
+              const KakaoTextarea(label: 'Reason', value: 'Too short', error: 'Please write at least 20 characters.'),
+              const KakaoTextarea(
+                size: KakaoTextareaSize.sm,
+                rows: 2,
+                value: 'Small',
+                semanticLabel: 'Small text area',
+              ),
+              const KakaoTextarea(
+                size: KakaoTextareaSize.lg,
+                rows: 2,
+                resize: KakaoTextareaResize.none,
+                value: 'Large, no resize',
+                semanticLabel: 'Large text area',
+              ),
+              const KakaoTextarea(label: 'Disabled', value: 'Not now', disabled: true),
+              KakaoTextarea(
+                controller: _feedback,
+                label: 'Feedback',
+                rows: 3,
+                error: _feedbackError,
+                onChanged: (_) {
+                  if (_feedbackError != null) setState(() => _feedbackError = null);
+                },
+              ),
+              Row(
+                children: [KakaoButton(label: 'Submit', onPressed: _submit)],
+              ),
+              Text(_submitted, style: theme.text(size: 13.6, color: theme.colors.muted)),
+            ]),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'focus()',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: _a1Focus.requestFocus,
+            ),
+            KakaoButton(
+              label: 'value = long text',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _a1.text = 'A longer piece of text\nwith two lines.',
+            ),
+            KakaoButton(
+              label: 'value = ""',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _a1.text = '',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _log.isEmpty ? 'Type in the message field to see its events.' : _log.join('\n'),
           style: theme.text(size: 14, color: theme.colors.muted),
         ),
       ],
