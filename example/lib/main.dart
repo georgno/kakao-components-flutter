@@ -191,6 +191,7 @@ class _ShowcaseHomeState extends State<ShowcaseHome> {
             _Section(title: 'Popover', child: const _PopoverExamples()),
             _Section(title: 'Progress', child: const _ProgressExamples()),
             _Section(title: 'Select', child: const _SelectExamples()),
+            _Section(title: 'Text input', child: const _TextInputExamples()),
             _Section(
               title: 'About this build',
               child: Column(
@@ -630,6 +631,141 @@ class _CommandPaletteExamplesState extends State<_CommandPaletteExamples> {
         ),
         const SizedBox(height: 12),
         Text(_log, style: theme.text(size: 14, color: theme.colors.muted)),
+      ],
+    );
+  }
+}
+
+/// text-input/demo.html: label and hint, search with icon and clear button,
+/// icons, error, sizes, disabled and read only, a password, and the
+/// playground's script calls with the event log.
+class _TextInputExamples extends StatefulWidget {
+  const _TextInputExamples();
+
+  @override
+  State<_TextInputExamples> createState() => _TextInputExamplesState();
+}
+
+class _TextInputExamplesState extends State<_TextInputExamples> {
+  final _t1 = TextEditingController();
+  final _t1Focus = FocusNode();
+  String? _t1Error;
+  final _log = <String>[];
+
+  void _event(String e) => setState(() {
+    _log.insert(0, e);
+    if (_log.length > 6) _log.removeLast();
+  });
+
+  @override
+  void dispose() {
+    _t1.dispose();
+    _t1Focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = KakaoTheme.of(context);
+    Widget column(List<Widget> children) => SizedBox(
+      width: 320,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 10), children[i]],
+        ],
+      ),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 24,
+          runSpacing: 24,
+          children: [
+            column([
+              KakaoTextInput(
+                controller: _t1,
+                focusNode: _t1Focus,
+                label: 'Email',
+                type: KakaoTextInputType.email,
+                placeholder: 'you@example.com',
+                hint: 'We only use it for receipts.',
+                error: _t1Error,
+                autofillHints: const [AutofillHints.email],
+                onChanged: (v) => _event('input · $v'),
+                onCommitted: (v) => _event('change · $v'),
+              ),
+              KakaoTextInput(
+                type: KakaoTextInputType.search,
+                label: 'Search',
+                clearable: true,
+                value: 'kakao',
+                placeholder: 'Search components',
+                icon: const SearchGlyph(),
+                onCleared: (e) => _event('text-input-clear · was ${e.previous}'),
+              ),
+              // fas fa-at / fa-globe on the web; the showcase has no Font Awesome.
+              const KakaoTextInput(
+                type: KakaoTextInputType.email,
+                label: 'Email · icon',
+                placeholder: 'you@example.com',
+                icon: Icon(Icons.alternate_email),
+              ),
+              const KakaoTextInput(
+                type: KakaoTextInputType.url,
+                label: 'Website · icon',
+                placeholder: 'example.com',
+                icon: Icon(Icons.language),
+              ),
+              const KakaoTextInput(label: 'Workspace', value: 'acme', error: 'That name is already taken.'),
+            ]),
+            column(const [
+              KakaoTextInput(size: KakaoTextInputSize.sm, label: 'Small', value: '36px'),
+              KakaoTextInput(label: 'Medium', value: '44px'),
+              KakaoTextInput(size: KakaoTextInputSize.lg, label: 'Large', value: '52px'),
+              KakaoTextInput(disabled: true, label: 'Disabled', value: 'Not now'),
+              KakaoTextInput(readOnly: true, label: 'Read only', value: 'Copied elsewhere'),
+              KakaoTextInput(type: KakaoTextInputType.password, label: 'Password', maxLength: 64),
+            ]),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            KakaoButton(
+              label: 'focus()',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: _t1Focus.requestFocus,
+            ),
+            KakaoButton(
+              label: 'value = "hello"',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _t1.text = 'hello',
+            ),
+            KakaoButton(
+              label: 'value = ""',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => _t1.text = '',
+            ),
+            KakaoButton(
+              label: 'toggle error',
+              variant: KakaoButtonVariant.secondary,
+              size: KakaoButtonSize.sm,
+              onPressed: () => setState(() => _t1Error = _t1Error == null ? 'Something is wrong.' : null),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          _log.isEmpty ? 'Type in the email field to see its events.' : _log.join('\n'),
+          style: theme.text(size: 14, color: theme.colors.muted),
+        ),
       ],
     );
   }

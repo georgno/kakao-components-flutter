@@ -27,6 +27,11 @@
     { "id": "multi-dropdown-disabled", "page": "components/multi-dropdown/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled')) kakao-multi-dropdown" },
     { "id": "select-closed", "page": "components/select/demo.html", "selector": "kakao-select#s1" },
     { "id": "select-open", "page": "components/select/demo.html", "open": "kakao-select#s1 .trigger", "selector": "kakao-select#s1 .panel" },
-    { "id": "select-states", "page": "components/select/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div" }
+    { "id": "select-states", "page": "components/select/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · error')) > div" },
+    { "id": "text-input-basic", "page": "components/text-input/demo.html", "selector": "kakao-text-input#t1" },
+    { "id": "text-input-search", "page": "components/text-input/demo.html", "selector": "kakao-text-input#t2" },
+    { "id": "text-input-error", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Error')) kakao-text-input" },
+    { "id": "text-input-sizes", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Sizes')) > div" },
+    { "id": "text-input-states", "page": "components/text-input/demo.html", "selector": "kakao-card:has(> h3:text-is('Disabled · readonly')) > div" }
   ]
 }

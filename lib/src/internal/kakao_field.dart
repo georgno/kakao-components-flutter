@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-// Field chrome shared by the field-like widgets (select, combobox; the text
-// input family next, ROADMAP step 2). Every value comes from the caller, out
+// Field chrome shared by the field-like widgets (select, combobox, command
+// palette, the text input family of ROADMAP step 2). Every value comes from the caller, out
 // of its own component's settings: the web components each draw this
 // themselves.
 
@@ -179,11 +179,17 @@ class KakaoRing extends StatelessWidget {
   }
 }
 
-/// A one-line text field without chrome (the `<input>` inside a field box):
-/// an [EditableText] with the platform's pointer gestures (tap to place the
-/// caret, drag and double tap to select), the [placeholder] in
-/// [placeholderColor] while empty, and [onTap] after a tap on it (the
+/// A text field without chrome (the `<input>` inside a field box; with
+/// [maxLines] other than 1, a `<textarea>`): an [EditableText] with the
+/// platform's pointer gestures (tap to place the caret, drag and double tap
+/// to select), the [placeholder] in [placeholderColor] while empty (centred
+/// on one line, at the top of several), and [onTap] after a tap on it (the
 /// input's `click`).
+///
+/// [readOnly] (`readonly`) keeps it focusable and selectable; [enabled]
+/// false (`disabled`) takes both away. [keyboardType], [obscureText] and
+/// [autofillHints] stand for the input's `type`, `inputmode` and
+/// `autocomplete`; [onSubmitted] is Enter on one line.
 ///
 /// [groupId] is its tap region group: a pointer down outside the group
 /// ends the editing (unfocuses it), as a pointer down elsewhere blurs an
@@ -199,8 +205,16 @@ class KakaoFieldText extends StatefulWidget {
     required this.cursorColor,
     required this.selectionColor,
     this.enabled = true,
+    this.readOnly = false,
+    this.keyboardType,
+    this.obscureText = false,
+    this.autofillHints,
+    this.maxLines = 1,
+    this.minLines,
+    this.textInputAction,
     this.inputFormatters,
     this.onChanged,
+    this.onSubmitted,
     this.onTap,
     this.groupId = EditableText,
     this.selectAllOnFocus,
@@ -216,8 +230,28 @@ class KakaoFieldText extends StatefulWidget {
 
   /// False: read only and not focusable (`disabled`).
   final bool enabled;
+
+  /// Focusable and selectable, but not editable (`readonly`).
+  final bool readOnly;
+
+  /// Null: text on one line, multiline on several.
+  final TextInputType? keyboardType;
+
+  /// Shown as dots (`type="password"`).
+  final bool obscureText;
+  final Iterable<String>? autofillHints;
+
+  /// 1: one line (an `<input>`); null: grows without limit.
+  final int? maxLines;
+  final int? minLines;
+
+  /// Null: done on one line, a new line on several.
+  final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String>? onChanged;
+
+  /// Enter on one line (the input's implicit `change`).
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onTap;
   final Object groupId;
 
@@ -277,27 +311,33 @@ class _KakaoFieldTextState extends State<KakaoFieldText> implements TextSelectio
   Widget build(BuildContext context) {
     _empty = widget.controller.text.isEmpty;
     final placeholder = widget.placeholder;
+    final oneLine = widget.maxLines == 1;
     final editable = EditableText(
       key: editableTextKey,
       controller: widget.controller,
       focusNode: widget.focusNode,
-      readOnly: !widget.enabled,
+      readOnly: !widget.enabled || widget.readOnly,
       style: widget.style,
       cursorColor: widget.cursorColor,
       cursorWidth: KakaoFieldText.caretWidth,
       backgroundCursorColor: widget.placeholderColor,
       selectionColor: widget.selectionColor,
-      maxLines: 1,
+      maxLines: widget.maxLines,
+      minLines: widget.minLines,
+      keyboardType: widget.keyboardType ?? (oneLine ? TextInputType.text : TextInputType.multiline),
+      obscureText: widget.obscureText,
+      autofillHints: widget.autofillHints,
       autocorrect: false,
       enableSuggestions: false,
       enableInteractiveSelection: widget.enabled,
       rendererIgnoresPointer: true,
-      textInputAction: TextInputAction.done,
+      textInputAction: widget.textInputAction ?? (oneLine ? TextInputAction.done : TextInputAction.newline),
       inputFormatters: widget.inputFormatters,
       groupId: widget.groupId,
       selectAllOnFocus: widget.selectAllOnFocus,
       onTapOutside: (_) => widget.focusNode.unfocus(),
       onChanged: widget.onChanged,
+      onSubmitted: widget.onSubmitted,
     );
     return MouseRegion(
       cursor: widget.enabled ? SystemMouseCursors.text : SystemMouseCursors.forbidden,
@@ -306,20 +346,116 @@ class _KakaoFieldTextState extends State<KakaoFieldText> implements TextSelectio
         child: _gestures.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: Stack(
-            alignment: AlignmentDirectional.centerStart,
+            alignment: oneLine ? AlignmentDirectional.centerStart : AlignmentDirectional.topStart,
             children: [
               if (_empty && placeholder != null && placeholder.isNotEmpty)
                 ExcludeSemantics(
                   child: Text(
                     placeholder,
-                    maxLines: 1,
-                    softWrap: false,
+                    maxLines: oneLine ? 1 : null,
+                    softWrap: !oneLine,
                     overflow: TextOverflow.clip,
                     style: widget.style.copyWith(color: widget.placeholderColor),
                   ),
                 ),
               editable,
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The `change` event of an `<input>` or `<textarea>`: [commit] when focus
+/// leaves (and on Enter in one line) is true when the text differs from
+/// the text at the last [reset] (focus gained, or the last change).
+class KakaoChangeTracker {
+  KakaoChangeTracker(this.controller) : _base = controller.text;
+
+  final TextEditingController controller;
+  String _base;
+
+  /// The text now is the one later commits compare with.
+  void reset() => _base = controller.text;
+
+  /// Whether the text changed since the last [reset] or commit; resets.
+  bool commit() {
+    final changed = controller.text != _base;
+    _base = controller.text;
+    return changed;
+  }
+}
+
+/// A small round button inside a field box (text-input.js `.clear`, the
+/// file upload's remove): [size] square, [background] always, the glyph in
+/// [color] and [hoverColor] under the pointer. Pointer only, as the web's
+/// `tabindex="-1"`: not in the focus order, but a labelled button in
+/// semantics. It belongs to the tap region [groupId], so a tap on it does
+/// not end the editing of the field it sits in.
+class KakaoFieldButton extends StatefulWidget {
+  const KakaoFieldButton({
+    super.key,
+    required this.size,
+    required this.background,
+    required this.color,
+    required this.hoverColor,
+    required this.semanticLabel,
+    required this.onTap,
+    required this.child,
+    this.groupId = EditableText,
+  });
+
+  final double size;
+  final Color background;
+  final Color color;
+  final Color hoverColor;
+  final String semanticLabel;
+
+  /// Null: shown, but does nothing.
+  final VoidCallback? onTap;
+
+  /// Drawn in an [IconTheme] and [DefaultTextStyle] of the current colour.
+  final Widget child;
+  final Object groupId;
+
+  @override
+  State<KakaoFieldButton> createState() => _KakaoFieldButtonState();
+}
+
+class _KakaoFieldButtonState extends State<KakaoFieldButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _hover ? widget.hoverColor : widget.color;
+    return TapRegion(
+      groupId: widget.groupId,
+      child: Semantics(
+        button: true,
+        label: widget.semanticLabel,
+        onTap: widget.onTap,
+        excludeSemantics: true,
+        child: MouseRegion(
+          cursor: widget.onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: Container(
+              width: widget.size,
+              height: widget.size,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: widget.background, shape: BoxShape.circle),
+              child: IconTheme.merge(
+                data: IconThemeData(color: color),
+                child: DefaultTextStyle.merge(
+                  style: TextStyle(color: color),
+                  child: widget.child,
+                ),
+              ),
+            ),
           ),
         ),
       ),

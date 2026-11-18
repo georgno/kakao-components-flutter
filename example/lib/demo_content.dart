@@ -357,3 +357,41 @@ const paletteInlineCommands = [
   KakaoCommand('Rename', id: 'rename', group: 'Edit', shortcut: 'F2'),
   KakaoCommand('Duplicate', id: 'duplicate', group: 'Edit', shortcut: 'Mod+D'),
 ];
+
+// text-input/demo.html icons.
+
+/// The demo's inline search icon (`<svg slot="icon" viewBox="0 0 24 24">`: a
+/// circle at 11,11, r 6, and `M20 20l-4.5-4.5`, stroke 2, round caps), 1em
+/// big in [IconTheme]'s colour, as the slotted SVG takes `currentColor`.
+class SearchGlyph extends StatelessWidget {
+  const SearchGlyph({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = IconTheme.of(context);
+    return CustomPaint(
+      size: Size.square(icon.size ?? 15),
+      painter: _SearchPainter(icon.color ?? const Color(0xFF000000)),
+    );
+  }
+}
+
+class _SearchPainter extends CustomPainter {
+  const _SearchPainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final k = size.width / 24;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2 * k
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(Offset(11 * k, 11 * k), 6 * k, paint);
+    canvas.drawLine(Offset(20 * k, 20 * k), Offset(15.5 * k, 15.5 * k), paint);
+  }
+
+  @override
+  bool shouldRepaint(_SearchPainter old) => old.color != color;
+}

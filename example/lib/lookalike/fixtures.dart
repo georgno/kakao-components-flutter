@@ -152,7 +152,47 @@ final Map<String, WidgetBuilder> lookalikeFixtures = {
       _Palette(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c), query: 'fi'),
   'command-palette-empty': (c) =>
       _Palette(open: LookalikeApp.isOpen(c), panelKey: LookalikeApp.subjectOf(c), query: 'xyz'),
+  // text-input/demo.html "With label and hint": #t1.
+  'text-input-basic': (_) => const KakaoTextInput(
+    label: 'Email',
+    type: KakaoTextInputType.email,
+    placeholder: 'you@example.com',
+    hint: 'We only use it for receipts.',
+  ),
+  // text-input/demo.html "Search · icon + clearable": #t2, its inline SVG
+  // drawn the same.
+  'text-input-search': (_) => const KakaoTextInput(
+    type: KakaoTextInputType.search,
+    label: 'Search',
+    clearable: true,
+    value: 'kakao',
+    placeholder: 'Search components',
+    icon: SearchGlyph(),
+  ),
+  // text-input/demo.html "Error".
+  'text-input-error': (_) =>
+      const KakaoTextInput(label: 'Workspace', value: 'acme', error: 'That name is already taken.'),
+  // text-input/demo.html "Sizes" and "Disabled · readonly": display grid,
+  // gap 0.6rem.
+  'text-input-sizes': (_) => _fields(const [
+    KakaoTextInput(size: KakaoTextInputSize.sm, label: 'Small', value: '36px'),
+    KakaoTextInput(label: 'Medium', value: '44px'),
+    KakaoTextInput(size: KakaoTextInputSize.lg, label: 'Large', value: '52px'),
+  ]),
+  'text-input-states': (_) => _fields(const [
+    KakaoTextInput(disabled: true, label: 'Disabled', value: 'Not now'),
+    KakaoTextInput(readOnly: true, label: 'Read only', value: 'Copied elsewhere'),
+  ]),
 };
+
+/// Fields in a column with the demo's `gap: .6rem`.
+Widget _fields(List<Widget> children) => Column(
+  mainAxisSize: MainAxisSize.min,
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: [
+    for (var i = 0; i < children.length; i++) ...[if (i > 0) const SizedBox(height: 9.6), children[i]],
+  ],
+);
 
 void _noop() {}
 

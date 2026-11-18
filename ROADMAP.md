@@ -1,7 +1,7 @@
 # Roadmap
 
 Ported: button (with its menu form and segmented group), tooltip, card, dialog, progress,
-popover, menu, select, combobox, multi-dropdown, command-palette (plus theme-switch settings for the cross-fade). The order below follows
+popover, menu, select, combobox, multi-dropdown, command-palette, text-input (plus theme-switch settings for the cross-fade). The order below follows
 shared building blocks: build a block once, then the components that use it follow quickly.
 
 The web components never share code ("components never reach into each
@@ -20,7 +20,8 @@ popover and menu (opened first), select (closed, opened, disabled and error), co
 (closed with a value, opened while filtering — the case types after its `open` click —,
 disabled and error), multi-dropdown (closed with every part set, its month list opened,
 disabled), command-palette (opened with all commands, opened while filtering by "fi", and the
-empty state).
+empty state), text-input (label and hint, search with icon and clear button, error, sizes,
+disabled and read only).
 
 ## 1. Anchored panel and option list (done)
 
@@ -52,7 +53,16 @@ empty state).
   `KakaoFieldBox` / `KakaoRing` (bordered box, outline), `KakaoFieldText` (a bare one-line
   text field: pointer gestures, placeholder, tap region group, unfocus on a tap outside),
   `KakaoChevronPainter`, `kakaoFold`. The text input family builds on them.
-- Then: `text-input`, `textarea`, `password-input`, `number-input`,
+  For text-input (done) `KakaoFieldText` took `readOnly`, `keyboardType`, `obscureText`,
+  `autofillHints`, `textInputAction`, `onSubmitted` and `maxLines` / `minLines` (several lines:
+  multiline keyboard, Enter is a new line, placeholder at the top: for `textarea`); new are
+  `KakaoChangeTracker` (the input's `change`: on blur or Enter, only when the text differs from
+  the text at focus) and `KakaoFieldButton` (a small round pointer-only button inside the box,
+  hover colour, own tap region group: the clear button; the password toggle and number steppers
+  can use it or follow it). `KakaoTextInput` is the model for the family: `value` or a
+  `controller`, `onChanged` (input) / `onCommitted` (change), the `sm` / `lg` literals, the icon
+  slot (`IconTheme` in the muted colour), the 150 ms `ease` border fade.
+- Then: `text-input` (done), `textarea`, `password-input`, `number-input`,
   `date-input` and `time-input` (date picker on the anchored panel),
   `tag-input`, `code-input`, `color-code`, `color-picker`, `file-upload`.
 
@@ -150,6 +160,19 @@ empty state).
   toggles it); the system back gesture closes it as a route (the web has none); scroll lock is
   the modal route's barrier; recent ids live as long as the widget's state; `pointer: coarse`
   is the platform (Android, iOS, Fuchsia), as in the menu.
+
+- Text input: no form participation (`name`, `required`, `pattern`, `minlength`, `min` /
+  `max` / `step`, reset, validity and its browser messages): the owner checks the value and
+  sets `error`; `maxLength` only limits typing; `type` only picks the keyboard (password: dots),
+  so email / url / number are not validated and number gets no spinner; no `icon` attribute
+  shortcut (an icon font class): the icon is a widget; no `data-*` mirroring; the clear button
+  shows on a disabled or read-only field but does nothing there (on the web it still clears);
+  no Escape-clears of the browser's `type="search"`; the error is not a live `alert` region;
+  the ✕ is drawn in a fallback font, so it is larger and thinner than the web's (look-alike
+  check, as in the popover); the field's text selection colour is the focus colour at 25 %;
+  the label and hint sit about 1 px higher, so a field with a label is 1 px shorter (line box
+  rounding, see Text; look-alike check); a size change also animates the height (the web
+  only fades the border and background).
 
 ## Seen on the web side
 

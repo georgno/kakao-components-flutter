@@ -89,3 +89,14 @@
   runs, Tab stays, Escape closes), pointer hover and tap; key hints row (not on touch);
   `inline` mode; `onSelect` after closing, `onOpen`, `onClose`. Option list: `labelSpans`,
   `groupGap`, `revealStart`; `KakaoFieldText.selectAllOnFocus`.
+- `KakaoTextInput` (`<kakao-text-input>`): a one-line field with label, hint, error (danger border
+  and outline, invalid in semantics), placeholder, a leading `icon` in the muted colour, a
+  `clearable` round ✕ button (empties, focuses, reports `onChanged`, `onCommitted`,
+  `onCleared`), sizes 36 / 44 / 52, `type` (password dots, the keyboard for email, url, tel,
+  number, search), `maxLength`, `autofillHints`, `disabled`, `readOnly`; `onChanged` on every
+  edit and `onCommitted` on blur or Enter when the text changed; `value` from the owner or a
+  `controller`; the border fades in 150 ms, at once with reduced motion. Field chrome:
+  `KakaoFieldText` takes `readOnly`, `keyboardType`, `obscureText`, `autofillHints`,
+  `textInputAction`, `onSubmitted` and several lines (`maxLines`, `minLines`);
+  `KakaoChangeTracker`, `KakaoFieldButton`. Settings generated for text-input, also checked
+  against tokens.json.
